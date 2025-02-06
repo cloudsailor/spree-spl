@@ -5,7 +5,6 @@ module Spree
     module Storefront
       module CartControllerDecorator
         def show
-          debugger
           apply_sparta_discount(spree_current_order, spree_current_user)
 
           super

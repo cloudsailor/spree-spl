@@ -4,8 +4,6 @@ module Spree
       require 'spree/core'
       engine_name 'spree-spl'
 
-      config.autoload_paths += %W[#{config.root}/lib]
-
       def self.activate
         Dir.glob(File.join(File.dirname(__FILE__), "../../app/**/*_decorator*.rb")) do |c|
           Rails.application.config.cache_classes ? require(c) : load(c)
