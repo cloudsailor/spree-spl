@@ -1,0 +1,44 @@
+class ApplySpartaDiscountService
+  def initialize(response, order)
+    @basket = response["response"]["basket"]
+    @line_items = order.line_items
+    @order = order
+    @response = response
+  end
+
+  def call
+    return unless response_valid?
+
+    line_items.each do |line_item|
+      sparta_item = basket.find{ |i| i["pos"] == line_item["id"] }
+      next if sparta_item["discounts"].nil?
+
+      label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.name}"
+      amount = -sparta_item&.fetch("discountGross") # Negative value for discount
+      create_sparta_adjustment(order, amount, label, line_item)
+    end
+  end
+
+  private
+
+  attr_accessor :basket, :line_items, :order, :response
+
+  def response_valid?
+    response["errorCode"] == "0" && response["response"].present? && response["response"]["basket"].present?
+  end
+
+  def create_sparta_adjustment(order, amount, label, line_item)
+    return if amount.zero? || line_item.adjustments.find_by(label: label).present?
+
+    line_item.adjustments.new(
+      adjustable: line_item,
+      amount: amount,
+      included: false,
+      label: label,
+      order: order
+    ).save
+
+    order.update_with_updater!
+  end
+
+end

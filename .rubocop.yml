@@ -1,8 +1,19 @@
 AllCops:
   TargetRubyVersion: 3.1
+  SuggestExtensions: false
+  Exclude:
+    - bin/*
+    - app/services/sparta_loyalty_service.rb
+    - lib/**/*
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
+
+Lint/IneffectiveAccessModifier:
+  Enabled: false
