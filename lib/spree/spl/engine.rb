@@ -1,16 +1,7 @@
 module Spree
   module Spl
     class Engine < Rails::Engine
-      require 'spree/core'
-      engine_name 'spree-spl'
-
-      def self.activate
-        Dir.glob(File.join(File.dirname(__FILE__), "../../app/**/*_decorator*.rb")) do |c|
-          Rails.application.config.cache_classes ? require(c) : load(c)
-        end
-      end
-
-      config.to_prepare &method(:activate).to_proc
+      isolate_namespace Spree::Spl
     end
   end
 end
