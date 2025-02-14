@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.email = ["support@cloudsailor.com"]
 
   # Specify which files should be added to the gem when it is released.
-  spec.files = Dir["CHANGELOG", "README.md", "LICENSE", "lib/**/*", "app/**/*"]
+  spec.files = Dir["CHANGELOG", "README.md", "LICENSE", "lib/**/*", "app/**/*", "config/**/*"]
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
@@ -31,10 +31,12 @@ Gem::Specification.new do |spec|
 
   spree_version = ">= 4.6.0", "< 5.0"
   spec.add_dependency "bigdecimal"
+  spec.add_dependency "rails", "~> 7.0"
+  spec.add_dependency "spree"
   spec.add_dependency "spree_auth_devise"
-  spec.add_dependency "spree_backend", spree_version
+  # spec.add_dependency "spree_backend", spree_version
   spec.add_dependency "spree_core", spree_version
-
+  spec.add_dependency "spree_api", spree_version
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
 end
