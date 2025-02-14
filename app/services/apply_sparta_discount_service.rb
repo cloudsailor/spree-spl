@@ -13,7 +13,7 @@ class ApplySpartaDiscountService
       sparta_item = basket.find{ |i| i["pos"] == line_item["id"] }
       next if sparta_item["discounts"].nil?
 
-      label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.name}"
+      label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.id}"
       amount = -sparta_item&.fetch("discountGross") # Negative value for discount
       create_sparta_adjustment(order, amount, label, line_item)
     end

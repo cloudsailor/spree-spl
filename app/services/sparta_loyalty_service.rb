@@ -10,7 +10,7 @@ class SpartaLoyaltyService
 
     request = Net::HTTP::Post.new(url)
     request["Content-Type"] = "application/json"
-    request.body = prepare_request_body(order_number, card_number, line_items, date, products)
+    request.body = prepare_request_body(order_number, card_number, line_items, date, products, check_only)
 
     response = http.request(request)
     response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
@@ -26,7 +26,7 @@ class SpartaLoyaltyService
 
   private
 
-  def self.prepare_request_body(order_number, card_number, line_items, date, products)
+  def self.prepare_request_body(order_number, card_number, line_items, date, products, check_only)
     if check_only
       prepare_check_basket_body(order_number, card_number, line_items, date, products).to_json
     else
@@ -98,7 +98,7 @@ class SpartaLoyaltyService
         pos: item.id,
         quantity: item.quantity,
         productCode: item.sku,
-        amountGross: item.price.to_f,
+        amountGross: item.price.to_f / 100.0,
         notPromoted: not_promoted,
       }
     end

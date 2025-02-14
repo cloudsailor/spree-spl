@@ -11,12 +11,10 @@ module Spree
           total_adjustment_amount = sparta_adjustments.sum(&:amount)
           attributes[:adjustment_total] = total_adjustment_amount
           attributes[:promo_total] = total_adjustment_amount
+          attributes[:updated_at] = Time.current
+          @adjustable.update_columns(totals)
         end
       end
     end
   end
-end
-
-if ::Spree::Adjustable::AdjustmentsUpdater.included_modules.exclude?(Spree::Adjustable::AdjustmentsUpdaterDecorator)
-  ::Spree::Adjustable::AdjustmentsUpdater.prepend Spree::Adjustable::AdjustmentsUpdaterDecorator
 end
