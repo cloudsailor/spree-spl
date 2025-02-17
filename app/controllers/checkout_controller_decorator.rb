@@ -11,7 +11,7 @@ module CheckoutControllerDecorator
       request_env: request.headers.env
     )
 
-    apply_sparta_discount(result, spree_current_user)
+    apply_sparta_discount(result.value, spree_current_user)
 
     render_order(result)
   end
