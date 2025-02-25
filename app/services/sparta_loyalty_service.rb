@@ -16,10 +16,10 @@ class SpartaLoyaltyService
     response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
 
     if response_body.present? && response_body["errorCode"] == "0"
-      puts response.body.inspect
+      Rails.logger.debug response.body.inspect
       return response_body
     else
-      puts response.body.inspect
+      Rails.logger.debug response.body.inspect
       return nil
     end
   end
@@ -110,7 +110,7 @@ class SpartaLoyaltyService
   def self.signature(order_number, date, card_number = '', check_only = '')
     # data= "YES_CZECOMM1388574855000123456719004762922649"
     data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{check_only}#{card_number}"
-    puts data.inspect
+    Rails.logger.debug data.inspect
     signature_base = Digest::SHA256.hexdigest(data)
     Digest::SHA256.hexdigest(signature_base+ENV["SPL_POS_KEY"])
   end

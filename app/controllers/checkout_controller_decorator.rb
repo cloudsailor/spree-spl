@@ -29,6 +29,7 @@ module CheckoutControllerDecorator
   private
 
   def apply_sparta_discount(order, user, check_only)
+    return if spree_current_order.promotions.present?
     return unless order.line_items.any? && user.present?
     return unless user.public_metadata["spl_no_card"].present?
 
@@ -39,10 +40,7 @@ module CheckoutControllerDecorator
                                                      order.products,
                                                      check_only)
 
-    if spl_response.present?
-      spree_current_order.promotions.delete_all if spree_current_order.promotions.any?
-      create_sparta_adjustments(spl_response, order)
-    end
+    create_sparta_adjustments(spl_response, order) if spl_response.present?
   end
 
   def create_sparta_adjustments(spl_response, order)

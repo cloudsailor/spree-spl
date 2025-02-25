@@ -59,20 +59,41 @@ module CartControllerDecorator
   end
 
   def apply_coupon_code
-    remove_sparta_discount(spree_current_order)
+    spree_authorize! :update, spree_current_order, order_token
 
-    super
+    spree_current_order.coupon_code = params[:coupon_code]
+
+    result = coupon_handler.new(spree_current_order).apply
+
+    if result.error.blank?
+      remove_sparta_discount(spree_current_order)
+      render_serialized_payload { serialized_current_order }
+    else
+      render_error_payload(result.error)
+    end
   end
 
   def remove_coupon_code
-    apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+    spree_authorize! :update, spree_current_order, order_token
 
-    super
+    coupon_codes = select_coupon_codes
+
+    return render_error_payload(I18n.t('spree.api.v2.cart.no_coupon_code')) if coupon_codes.empty?
+
+    result_errors = coupon_codes.count > 1 ? select_errors(coupon_codes) : select_error(coupon_codes)
+
+    if result_errors.blank?
+      apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+      render_serialized_payload { serialized_current_order }
+    else
+      render_error_payload(result_errors)
+    end
   end
 
   private
 
   def apply_sparta_discount(order, user, check_only)
+    return if spree_current_order.promotions.present?
     return unless order.line_items.any? && user.present?
     return unless user.public_metadata["spl_no_card"].present?
 
@@ -83,10 +104,7 @@ module CartControllerDecorator
                                                      order.products,
                                                      check_only)
 
-    if spl_response.present?
-      spree_current_order.promotions.delete_all if spree_current_order.promotions.any?
-      create_sparta_adjustments(spl_response, order)
-    end
+    create_sparta_adjustments(spl_response, order) if spl_response.present?
   end
 
   def create_sparta_adjustments(spl_response, order)

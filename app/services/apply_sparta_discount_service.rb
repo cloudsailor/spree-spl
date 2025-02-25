@@ -28,9 +28,11 @@ class ApplySpartaDiscountService
   end
 
   def create_sparta_adjustment(order, amount, label, line_item)
+    return if order.promotions.present?
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
     line_item.adjustments.new(
+      source_type: "SPL",
       adjustable: line_item,
       amount: amount,
       included: false,
