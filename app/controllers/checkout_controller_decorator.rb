@@ -11,7 +11,7 @@ module CheckoutControllerDecorator
       request_env: request.headers.env
     )
 
-    apply_sparta_discount(result.value, spree_current_user, check_only = true)
+    promotion_switcher(result.value, spree_current_user, check_only = true)
 
     render_order(result)
   end
@@ -21,33 +21,14 @@ module CheckoutControllerDecorator
 
     result = complete_service.call(order: spree_current_order)
 
-    apply_sparta_discount(result.value, spree_current_user, check_only = false)
+    promotion_switcher(result.value, spree_current_user, check_only = false)
 
     render_order(result)
   end
 
   private
 
-  def apply_sparta_discount(order, user, check_only)
-    return if spree_current_order.promotions.present?
-    return unless order.line_items.any? && user.present?
-    return unless user.public_metadata["spl_no_card"].present?
-
-    spl_response = SpartaLoyaltyService.send_request(order.number,
-                                                     user.public_metadata["spl_no_card"],
-                                                     order.line_items,
-                                                     DateTime.current,
-                                                     order.products,
-                                                     check_only)
-
-    create_sparta_adjustments(spl_response, order) if spl_response.present?
-  end
-
-  def create_sparta_adjustments(spl_response, order)
-    ApplySpartaDiscountService.new(spl_response, order).call
-  end
-
-  def remove_sparta_discount(order)
-    RemoveSpartaDiscountService.new(order).call
+  def promotion_switcher(order, user, check_only)
+    PromotionSwitcher.new(order, user, check_only).call
   end
 end

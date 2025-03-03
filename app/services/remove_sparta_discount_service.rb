@@ -6,8 +6,7 @@ class RemoveSpartaDiscountService
 
   def call
     line_items.each do |line_item|
-      debugger
-      next unless line_item.adjustments.any? { |adj| adj.label&.start_with?("SPARTA") }
+      next unless line_item.adjustments.any? { |adj| adj.source_type == "SPL" }
 
       remove_sparta_adjustment(line_item)
     end

@@ -28,7 +28,7 @@ class ApplySpartaDiscountService
   end
 
   def create_sparta_adjustment(order, amount, label, line_item)
-    return if order.promotions.present?
+    # return if order.promotions.present?
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
     line_item.adjustments.new(
@@ -40,7 +40,7 @@ class ApplySpartaDiscountService
       order: order
     ).save
 
-    order.update_with_updater!
+    ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
   end
 
 end

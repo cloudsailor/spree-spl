@@ -3,14 +3,15 @@ require "net/http"
 require "json"
 
 class SpartaLoyaltyService
-  def self.send_request(order_number, card_number, line_items, date, products, check_only = true)
+  def self.send_request(order_number, order_id, card_number, line_items, date, products, check_only)
     url = URI.parse(ENV["SPL_SALE_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(url)
     request["Content-Type"] = "application/json"
-    request.body = prepare_request_body(order_number, card_number, line_items, date, products, check_only)
+
+    request.body = prepare_basket_body(order_number, card_number, line_items, date, products, check_only).to_json
 
     response = http.request(request)
     response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
@@ -26,16 +27,9 @@ class SpartaLoyaltyService
 
   private
 
-  def self.prepare_request_body(order_number, card_number, line_items, date, products, check_only)
-    if check_only
-      prepare_check_basket_body(order_number, card_number, line_items, date, products).to_json
-    else
-      prepare_basket_body(order_number, card_number, line_items, date, products).to_json
-    end
-  end
-
-  def self.prepare_check_basket_body(order_number, card_number, line_items, date, products)
+  def self.prepare_basket_body(order_number, card_number, line_items, date, products, check_only)
     date_in_ms = date.to_i * 1000
+
     {
       ver: 4,
       apiUser: ENV["SPL_API_USER"],
@@ -48,31 +42,10 @@ class SpartaLoyaltyService
       orderNo: order_number,
       reverse: false,
       pending: true,
-      checkOnly: true,
+      checkOnly: check_only,
       cardNo: card_number,
       basket: prepare_basket(line_items, products),
       signature: signature(order_number, date_in_ms, card_number, 1)
-    }
-  end
-
-  def self.prepare_basket_body(order_number, card_number, line_items, date, products)
-    date_in_ms = date.to_i * 1000
-    {
-      ver: 4,
-      apiUser: ENV["SPL_API_USER"],
-      apiToken: ENV["SPL_API_TOKEN"],
-      partnerCode: ENV["SPL_PARTNER_CODE"],
-      placeCode: ENV["SPL_PLACE_CODE"],
-      mode: ENV["SPL_MODE"],
-      date: date_in_ms,
-      no: order_number,
-      orderNo: order_number,
-      reverse: false,
-      pending: true,
-      checkOnly: false,
-      cardNo: card_number,
-      basket: prepare_basket(line_items, products),
-      signature: signature(order_number, date_in_ms, card_number)
     }
   end
 

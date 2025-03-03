@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
 module CartControllerDecorator
+  def create
+    add_spl_discount_params_to_order(spree_current_user)
+
+    super
+  end
+
   def show
-    apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
 
     super
   end
@@ -19,7 +25,8 @@ module CartControllerDecorator
       private_metadata: add_item_params[:private_metadata],
       options: add_item_params[:options]
     )
-    apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+
+    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
     spree_current_order.reload
 
     render_order(result)
@@ -31,7 +38,8 @@ module CartControllerDecorator
     spree_authorize! :update, spree_current_order, order_token
 
     result = set_item_quantity_service.call(order: spree_current_order, line_item: line_item, quantity: params[:quantity])
-    apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
+    spree_current_order.reload
 
     render_order(result)
   end
@@ -50,7 +58,8 @@ module CartControllerDecorator
     result = associate_service.call(guest_order: guest_order, user: spree_current_user)
 
     if result.success?
-      apply_sparta_discount(guest_order, spree_current_user, check_only = true)
+      assign_spl_active_param(guest_order, spree_current_user)
+      promotion_switcher(guest_order, spree_current_user, check_only = true)
       guest_order.reload
       render_serialized_payload { serialize_resource(guest_order) }
     else
@@ -62,13 +71,13 @@ module CartControllerDecorator
     spree_authorize! :update, spree_current_order, order_token
 
     spree_current_order.coupon_code = params[:coupon_code]
-
+    switch_spl_active_param(spree_current_order, spree_current_user, check_only = true)
     result = coupon_handler.new(spree_current_order).apply
 
     if result.error.blank?
-      remove_sparta_discount(spree_current_order)
       render_serialized_payload { serialized_current_order }
     else
+      maintain_spl_adjustments(spree_current_order, spree_current_user) unless [:coupon_code_already_applied].include?(result.status_code)
       render_error_payload(result.error)
     end
   end
@@ -83,35 +92,63 @@ module CartControllerDecorator
     result_errors = coupon_codes.count > 1 ? select_errors(coupon_codes) : select_error(coupon_codes)
 
     if result_errors.blank?
-      apply_sparta_discount(spree_current_order, spree_current_user, check_only = true)
+      switch_spl_active_param(spree_current_order, spree_current_user, check_only = true)
+      spree_current_order.reload
       render_serialized_payload { serialized_current_order }
     else
       render_error_payload(result_errors)
     end
   end
 
+  def update_spl_card_activate
+    active_param = ActiveModel::Type::Boolean.new.cast(params.dig("public_metadata", "spl_card_active"))
+    spree_current_order.update(public_metadata: spree_current_order.public_metadata.merge("spl_card_active" => active_param)) # rubocop:disable Layout/LineLength
+    spree_current_order.reload
+    promotion_switcher(spree_current_order, spree_current_user, chack_only = true)
+
+    render_serialized_payload { serialized_current_order }
+  end
+
   private
 
-  def apply_sparta_discount(order, user, check_only)
-    return if spree_current_order.promotions.present?
-    return unless order.line_items.any? && user.present?
-    return unless user.public_metadata["spl_no_card"].present?
-
-    spl_response = SpartaLoyaltyService.send_request(order.number,
-                                                     user.public_metadata["spl_no_card"],
-                                                     order.line_items,
-                                                     DateTime.current,
-                                                     order.products,
-                                                     check_only)
-
-    create_sparta_adjustments(spl_response, order) if spl_response.present?
+  def promotion_switcher(order, user, check_only)
+    PromotionSwitcher.new(order, user, check_only).call
   end
 
-  def create_sparta_adjustments(spl_response, order)
-    ApplySpartaDiscountService.new(spl_response, order).call
+  def add_spl_discount_params_to_order(user)
+    return unless user.present?
+
+    if user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
+      spl_card_active = ActiveModel::Type::Boolean.new.cast(user.public_metadata["spl_card_active"])
+      params[:public_metadata].merge!("spl_card_active": spl_card_active,
+                                      "spl_no_card": user.public_metadata["spl_no_card"])
+    end
   end
 
-  def remove_sparta_discount(order)
-    RemoveSpartaDiscountService.new(order).call
+  def switch_spl_active_param(order, user, check_only)
+    return unless order.public_metadata.key?(:spl_card_active)
+
+    if order.public_metadata[:spl_card_active] == true
+      order.update(public_metadata: order.public_metadata.merge("spl_card_active": false))
+    else
+      order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
+    end
+
+    promotion_switcher(order, user, check_only)
+  end
+
+  def assign_spl_active_param(order, user)
+    return unless user.public_metadata.key?(:spl_card_active)
+
+    active_param = ActiveModel::Type::Boolean.new.cast(user.public_metadata[:spl_card_active])
+    spl_card = user.public_metadata[:spl_no_card]
+    order.update(public_metadata: order.public_metadata.merge("spl_card_active": active_param, "spl_no_card": spl_card))
+  end
+
+  def maintain_spl_adjustments(order, user)
+    return unless order.public_metadata.key?(:spl_card_active)
+
+    order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
+    promotion_switcher(order, user, check_only = true)
   end
 end
