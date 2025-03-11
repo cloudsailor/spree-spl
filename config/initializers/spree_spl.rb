@@ -5,4 +5,5 @@ Rails.application.config.after_initialize do
   ::Spree::Api::V2::Storefront::CartController.prepend CartControllerDecorator
   ::Spree::Api::V2::Storefront::CheckoutController.prepend CheckoutControllerDecorator
   ::Spree::Adjustable::AdjustmentsUpdater.prepend Spree::Adjustable::AdjustmentsUpdaterDecorator
+  ::Spree::OrderUpdater.prepend OrderUpdaterDecorator
 end
