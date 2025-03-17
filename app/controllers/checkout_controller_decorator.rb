@@ -11,7 +11,7 @@ module CheckoutControllerDecorator
       request_env: request.headers.env
     )
 
-    promotion_switcher(result.value, spree_current_user, check_only = true)
+    promotion_switcher(result.value, spree_current_user, true)
 
     render_order(result)
   end
@@ -21,7 +21,7 @@ module CheckoutControllerDecorator
 
     result = complete_service.call(order: spree_current_order)
 
-    promotion_switcher(result.value, spree_current_user, check_only = false)
+    promotion_switcher(result.value, spree_current_user, false)
 
     render_order(result)
   end

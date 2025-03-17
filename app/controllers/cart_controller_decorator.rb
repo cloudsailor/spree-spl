@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CartControllerDecorator
+module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
   def create
     add_spl_discount_params_to_order(spree_current_user)
 
@@ -8,12 +8,12 @@ module CartControllerDecorator
   end
 
   def show
-    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
+    promotion_switcher(spree_current_order, spree_current_user, true)
 
     super
   end
 
-  def add_item
+  def add_item # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     spree_authorize! :update, spree_current_order, order_token
     spree_authorize! :show, @variant
 
@@ -26,19 +26,21 @@ module CartControllerDecorator
       options: add_item_params[:options]
     )
 
-    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
+    promotion_switcher(spree_current_order, spree_current_user, true)
     spree_current_order.reload
 
     render_order(result)
   end
 
-  def set_quantity
+  def set_quantity # rubocop:disable Metrics/AbcSize
     return render_error_item_quantity unless params[:quantity].to_i > 0
 
     spree_authorize! :update, spree_current_order, order_token
 
-    result = set_item_quantity_service.call(order: spree_current_order, line_item: line_item, quantity: params[:quantity])
-    promotion_switcher(spree_current_order, spree_current_user, check_only = true)
+    result = set_item_quantity_service.call(order: spree_current_order,
+                                            line_item: line_item,
+                                            quantity: params[:quantity])
+    promotion_switcher(spree_current_order, spree_current_user, true)
     spree_current_order.reload
 
     render_order(result)
@@ -59,7 +61,7 @@ module CartControllerDecorator
 
     if result.success?
       assign_spl_active_param(guest_order, spree_current_user)
-      promotion_switcher(guest_order, spree_current_user, check_only = true)
+      promotion_switcher(guest_order, spree_current_user, true)
       guest_order.reload
       render_serialized_payload { serialize_resource(guest_order) }
     else
@@ -67,32 +69,34 @@ module CartControllerDecorator
     end
   end
 
-  def apply_coupon_code
+  def apply_coupon_code # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     spree_authorize! :update, spree_current_order, order_token
 
     spree_current_order.coupon_code = params[:coupon_code]
-    switch_spl_active_param(spree_current_order, spree_current_user, check_only = true)
+    switch_spl_active_param(spree_current_order, spree_current_user, true)
     result = coupon_handler.new(spree_current_order).apply
 
     if result.error.blank?
       render_serialized_payload { serialized_current_order }
     else
-      maintain_spl_adjustments(spree_current_order, spree_current_user) unless [:coupon_code_already_applied].include?(result.status_code)
+      unless [:coupon_code_already_applied].include?(result.status_code)
+        maintain_spl_adjustments(spree_current_order, spree_current_user)
+      end
       render_error_payload(result.error)
     end
   end
 
-  def remove_coupon_code
+  def remove_coupon_code # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     spree_authorize! :update, spree_current_order, order_token
 
     coupon_codes = select_coupon_codes
 
-    return render_error_payload(I18n.t('spree.api.v2.cart.no_coupon_code')) if coupon_codes.empty?
+    return render_error_payload(I18n.t("spree.api.v2.cart.no_coupon_code")) if coupon_codes.empty?
 
     result_errors = coupon_codes.count > 1 ? select_errors(coupon_codes) : select_error(coupon_codes)
 
     if result_errors.blank?
-      switch_spl_active_param(spree_current_order, spree_current_user, check_only = true)
+      switch_spl_active_param(spree_current_order, spree_current_user, true)
       spree_current_order.reload
       render_serialized_payload { serialized_current_order }
     else
@@ -104,7 +108,7 @@ module CartControllerDecorator
     active_param = ActiveModel::Type::Boolean.new.cast(params.dig("public_metadata", "spl_card_active"))
     spree_current_order.update(public_metadata: spree_current_order.public_metadata.merge("spl_card_active" => active_param)) # rubocop:disable Layout/LineLength
     spree_current_order.reload
-    promotion_switcher(spree_current_order, spree_current_user, chack_only = true)
+    promotion_switcher(spree_current_order, spree_current_user, true)
 
     render_serialized_payload { serialized_current_order }
   end
@@ -118,11 +122,11 @@ module CartControllerDecorator
   def add_spl_discount_params_to_order(user)
     return unless user.present?
 
-    if user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
-      spl_card_active = ActiveModel::Type::Boolean.new.cast(user.public_metadata["spl_card_active"])
-      params[:public_metadata].merge!("spl_card_active": spl_card_active,
-                                      "spl_no_card": user.public_metadata["spl_no_card"])
-    end
+    return unless user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
+
+    spl_card_active = ActiveModel::Type::Boolean.new.cast(user.public_metadata["spl_card_active"])
+    params[:public_metadata].merge!("spl_card_active": spl_card_active,
+                                    "spl_no_card": user.public_metadata["spl_no_card"])
   end
 
   def switch_spl_active_param(order, user, check_only)
@@ -149,6 +153,6 @@ module CartControllerDecorator
     return unless order.public_metadata.key?(:spl_card_active)
 
     order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
-    promotion_switcher(order, user, check_only = true)
+    promotion_switcher(order, user, true)
   end
 end

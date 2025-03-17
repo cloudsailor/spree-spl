@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RemoveSpartaDiscountService
   def initialize(order)
     @line_items = order.line_items

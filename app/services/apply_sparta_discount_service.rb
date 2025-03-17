@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplySpartaDiscountService
   def initialize(response, order)
     @basket = response["response"]["basket"]
@@ -6,11 +8,11 @@ class ApplySpartaDiscountService
     @response = response
   end
 
-  def call
+  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity
     return unless response_valid?
 
     line_items.each do |line_item|
-      sparta_item = basket.find{ |i| i["pos"] == line_item["id"] }
+      sparta_item = basket.find { |i| i["pos"] == line_item["id"] }
       next if sparta_item["discounts"].nil?
 
       label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.id}"
@@ -28,7 +30,6 @@ class ApplySpartaDiscountService
   end
 
   def create_sparta_adjustment(order, amount, label, line_item)
-    # return if order.promotions.present?
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
     line_item.adjustments.new(
@@ -42,5 +43,4 @@ class ApplySpartaDiscountService
 
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
   end
-
 end

@@ -6,20 +6,24 @@ module Spree
       def persist_totals(totals)
         attributes = totals
 
-        if @adjustable.is_a?(::Spree::Order) && @adjustable.public_metadata.key?(:spl_card_active)
-          if @adjustable.public_metadata[:spl_card_active] == true
-            @adjustable.adjustments.update_all(eligible: false)
-          else
-            @adjustable.adjustments.update_all(eligible: true)
-            
-            super
-          end
-        end
+        set_adjustments if @adjustable.is_a?(::Spree::Order) && @adjustable.public_metadata.key?(:spl_card_active)
 
-        recalculate_spl_adjustments(attributes, totals) if @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == "SPL" }
+        if @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == "SPL" }
+          recalculate_spl_adjustments(attributes, totals)
+        end
       end
 
       private
+
+      def set_adjustments
+        if @adjustable.public_metadata[:spl_card_active] == true
+          @adjustable.adjustments.update_all(eligible: false)
+        else
+          @adjustable.adjustments.update_all(eligible: true)
+
+          super
+        end
+      end
 
       def recalculate_spl_adjustments(attributes, totals)
         sparta_adjustments = @adjustable.adjustments.select { |adj| adj.source_type == "SPL" && adj.eligible? }
