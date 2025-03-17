@@ -3,12 +3,8 @@
 module OrderUpdaterDecorator
   def update
     super
-
-    case order.payment_state
-    when 'paid'
-      Spl::UpdateSpartaStateService.new(order.token, 'D', order.number).call
-    when 'cancelled'
-      Spl::UpdateSpartaStateService.new(order.token, 'C', order.number).call
-    end
+    debugger
+    UpdateSpartaStateJob.perform_later(order.token, 'D', order.number) if order.payment_state == 'paid'
+    UpdateSpartaStateJob.perform_later(order.token, 'C', order.number) if order.state == 'canceled'
   end
 end
