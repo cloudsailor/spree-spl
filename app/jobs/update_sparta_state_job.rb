@@ -135,10 +135,10 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     new_number = SecureRandom.uuid
     {
       ver: 3,
-      prgCode: "yescz",
+      prgCode: ENV["SPL_PRG_CODE"],
       apiUser: ENV["SPL_API_USER"],
       apiToken: ENV["SPL_API_TOKEN"],
-      mode: "NGD",
+      mode: ENV["SPL_MODE"],
       partnerCode: ENV["SPL_PARTNER_CODE"],
       placeCode: ENV["SPL_PLACE_CODE"],
       relPartnerCode: ENV["SPL_PARTNER_CODE"],
