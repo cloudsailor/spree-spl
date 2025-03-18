@@ -87,7 +87,7 @@ module Spl
     def assign_card_to_user
       return if @user.public_metadata["spl_no_card"] == @card_number
 
-      @user.public_metadata["spl_no_card"] = @card_number
+      @user.update(public_metadata: @user.public_metadata.merge({ "spl_no_card" => @card_number}))
       @user.save
     end
   end
