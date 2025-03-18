@@ -52,15 +52,14 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
       apiToken: ENV["SPL_API_TOKEN"],
       partnerCode: ENV["SPL_PARTNER_CODE"],
       placeCode: ENV["SPL_PLACE_CODE"],
-      mode: "STEP2_KEEP_DISCOUNTS",
+      mode: ENV["SPL_UPDATE_STATUS_MODE"],
       pending: false,
       date: date_in_ms,
       no: order_token,
       cardNo: card_number,
       documentNo: order_number,
       basket: basket,
-      signature: signature(order_token, date_in_ms, card_number, order_number),
-      debugSignatureExplain: true
+      signature: signature(order_token, date_in_ms, card_number, order_number)
     }
   end
 
@@ -98,7 +97,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
       placeCode: ENV["SPL_PLACE_CODE"],
       requestDate: date_in_ms,
       no: order_token,
-      prgCode: "yescz",
+      prgCode: ENV["SPL_PRG_CODE"],
       orderNo: order_token,
       signature: signature("", date_in_ms)
     }
