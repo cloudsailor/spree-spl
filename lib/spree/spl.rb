@@ -3,7 +3,7 @@
 require "spree/spl/version"
 require "spree/spl/engine"
 
-ENGINE_PATH = File.expand_path("../lib/spree/spl/engine", __dir__)
+# ENGINE_PATH = File.expand_path("../lib/spree/spl/engine", __dir__)
 
 require "rails/all"
 require "spree_core"
