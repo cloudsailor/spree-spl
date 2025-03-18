@@ -6,7 +6,7 @@ require "json"
 
 module Spl
   class SpartaLoyaltyService
-    def self.send_request(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists
+    def self.send_request(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists,Metrics/AbcSize,Metrics/MethodLength
       url = URI.parse(ENV["SPL_SALE_URL"])
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
@@ -19,8 +19,8 @@ module Spl
       response = http.request(request)
       response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
 
+      Rails.logger.debug response.body.inspect
       if response_body.present? && response_body["errorCode"] == "0"
-        Rails.logger.debug response.body.inspect
         response_body
       else
         Rails.logger.debug response.body.inspect
@@ -28,7 +28,7 @@ module Spl
       end
     end
 
-    def self.prepare_basket_body(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists
+    def self.prepare_basket_body(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists,Metrics/MethodLength
       date_in_ms = date.to_i * 1000
       signature = if check_only
                     signature(order_token, date_in_ms, card_number, 1)
@@ -56,7 +56,7 @@ module Spl
       }
     end
 
-    def self.prepare_basket(line_items, products)
+    def self.prepare_basket(line_items, products) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       basket = line_items.map do |item|
         not_promoted = false
         products.each do |product|

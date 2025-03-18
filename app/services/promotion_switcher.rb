@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PromotionSwitcher
   def initialize(order, user, check_only)
     @check_only = check_only

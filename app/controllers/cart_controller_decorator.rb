@@ -33,7 +33,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
   end
 
   def set_quantity # rubocop:disable Metrics/AbcSize
-    return render_error_item_quantity unless params[:quantity].to_i > 0
+    return render_error_item_quantity unless params[:quantity].to_i > 0 # rubocop:disable Style/NumericPredicate
 
     spree_authorize! :update, spree_current_order, order_token
 

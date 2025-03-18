@@ -5,7 +5,7 @@ require "net/http"
 require "json"
 
 class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLength
-  def perform(order_token, state, order_number)
+  def perform(order_token, state, order_number) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     return if order_token.blank? || !%w[C D].include?(state&.upcase)
 
     transaction = find_transaction(order_token)
@@ -24,7 +24,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
 
   private
 
-  def update_order_status(order_token, state, basket, date, card_number, order_number = "") # rubocop:disable Metrics/ParameterLists
+  def update_order_status(order_token, state, basket, date, card_number, order_number = "") # rubocop:disable Metrics/ParameterLists,Metrics/AbcSize,Metrics/MethodLength
     url = URI.parse(ENV["SPL_SALE_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
@@ -64,7 +64,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     }
   end
 
-  def find_transaction(order_token)
+  def find_transaction(order_token) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     url = URI.parse(ENV["SPL_ORDER_FIND_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
@@ -104,7 +104,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     }
   end
 
-  def signature(order_number, date = "", card_number = "", check_only = "", order_name = "")
+  def signature(order_number, date = "", card_number = "", check_only = "", order_name = "") # rubocop:disable Metrics/ParameterLists
     # data= "SHOPECOMM1388574855000123456719004762922649"
     data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
     Rails.logger.debug data.inspect
@@ -112,7 +112,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
   end
 
-  def refund(order_token, state, basket, date, card_number)
+  def refund(order_token, state, basket, date, card_number) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     url = URI.parse(ENV["SPL_REFUND_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
