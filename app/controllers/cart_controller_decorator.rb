@@ -33,7 +33,7 @@ module CartControllerDecorator
   end
 
   def set_quantity
-    return render_error_item_quantity unless params[:quantity].to_i > 0 # rubocop:disable Style/NumericPredicate
+    return render_error_item_quantity unless params[:quantity].to_i.positive?
 
     spree_authorize! :update, spree_current_order, order_token
 
@@ -106,7 +106,9 @@ module CartControllerDecorator
 
   def update_spl_card_activate
     active_param = ActiveModel::Type::Boolean.new.cast(params.dig("public_metadata", "spl_card_active"))
-    spree_current_order.update(public_metadata: spree_current_order.public_metadata.merge("spl_card_active" => active_param)) # rubocop:disable Layout/LineLength
+    spree_current_order.update(
+      public_metadata: spree_current_order.public_metadata.merge("spl_card_active" => active_param)
+    )
     spree_current_order.reload
     promotion_switcher(spree_current_order, spree_current_user, true)
 
