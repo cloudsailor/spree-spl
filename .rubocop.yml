@@ -18,15 +18,18 @@ Metrics/AbcSize:
   Exclude:
     - app/controllers/cart_controller_decorator.rb
     - app/jobs/update_sparta_state_job.rb
+    - app/services/spl/sparta_loyalty_service.rb
 
 Metrics/MethodLength:
   Exclude:
     - app/controllers/cart_controller_decorator.rb
     - app/jobs/update_sparta_state_job.rb
+    - app/services/spl/sparta_loyalty_service.rb
 
 Metrics/ClassLength:
   Exclude:
     - app/jobs/update_sparta_state_job.rb
+    - app/services/spl/sparta_loyalty_service.rb
 
 Metrics/ParameterLists:
   Max: 8
