@@ -10,9 +10,9 @@ module CheckoutControllerDecorator
       permitted_attributes: permitted_checkout_attributes,
       request_env: request.headers.env
     )
-
+    # LOYALTY PROGRAM START - Do not remove or modify
     promotion_switcher(result.value, spree_current_user, true)
-
+    # LOYALTY PROGRAM END
     render_order(result)
   end
 
@@ -20,9 +20,9 @@ module CheckoutControllerDecorator
     spree_authorize! :update, spree_current_order, order_token
 
     result = complete_service.call(order: spree_current_order)
-
+    # LOYALTY PROGRAM START - Do not remove or modify
     promotion_switcher(result.value, spree_current_user, false)
-
+    # LOYALTY PROGRAM END
     render_order(result)
   end
 

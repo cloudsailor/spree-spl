@@ -25,10 +25,10 @@ module CartControllerDecorator
       private_metadata: add_item_params[:private_metadata],
       options: add_item_params[:options]
     )
-
+    # LOYALTY PROGRAM START - Do not remove or modify
     promotion_switcher(spree_current_order, spree_current_user, true)
     spree_current_order.reload
-
+    # LOYALTY PROGRAM END
     render_order(result)
   end
 
@@ -40,9 +40,10 @@ module CartControllerDecorator
     result = set_item_quantity_service.call(order: spree_current_order,
                                             line_item: line_item,
                                             quantity: params[:quantity])
+    # LOYALTY PROGRAM START - Do not remove or modify
     promotion_switcher(spree_current_order, spree_current_user, true)
     spree_current_order.reload
-
+    # LOYALTY PROGRAM END
     render_order(result)
   end
 
@@ -60,9 +61,11 @@ module CartControllerDecorator
     result = associate_service.call(guest_order: guest_order, user: spree_current_user)
 
     if result.success?
+      # LOYALTY PROGRAM START - Do not remove or modify
       assign_spl_active_param(guest_order, spree_current_user)
       promotion_switcher(guest_order, spree_current_user, true)
       guest_order.reload
+      # LOYALTY PROGRAM END
       render_serialized_payload { serialize_resource(guest_order) }
     else
       render_error_payload(result.error)
@@ -73,15 +76,19 @@ module CartControllerDecorator
     spree_authorize! :update, spree_current_order, order_token
 
     spree_current_order.coupon_code = params[:coupon_code]
+    # LOYALTY PROGRAM START - Do not remove or modify
     switch_spl_active_param(spree_current_order, spree_current_user, true)
+    # LOYALTY PROGRAM END
     result = coupon_handler.new(spree_current_order).apply
 
     if result.error.blank?
       render_serialized_payload { serialized_current_order }
     else
+      # LOYALTY PROGRAM START - Do not remove or modify
       unless [:coupon_code_already_applied].include?(result.status_code)
         maintain_spl_adjustments(spree_current_order, spree_current_user)
       end
+      # LOYALTY PROGRAM END
       render_error_payload(result.error)
     end
   end
@@ -96,14 +103,17 @@ module CartControllerDecorator
     result_errors = coupon_codes.count > 1 ? select_errors(coupon_codes) : select_error(coupon_codes)
 
     if result_errors.blank?
+      # LOYALTY PROGRAM START - Do not remove or modify
       switch_spl_active_param(spree_current_order, spree_current_user, true)
       spree_current_order.reload
+      # LOYALTY PROGRAM END
       render_serialized_payload { serialized_current_order }
     else
       render_error_payload(result_errors)
     end
   end
 
+  # LOYALTY PROGRAM START - Do not remove or modify
   def update_spl_card_activate
     active_param = ActiveModel::Type::Boolean.new.cast(params.dig("public_metadata", "spl_card_active"))
     spree_current_order.update(
@@ -114,6 +124,7 @@ module CartControllerDecorator
 
     render_serialized_payload { serialized_current_order }
   end
+  # LOYALTY PROGRAM END
 
   private
 
