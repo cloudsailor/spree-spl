@@ -4,8 +4,8 @@ require "digest"
 require "net/http"
 require "json"
 
-class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLength
-  def perform(order_token, state, order_number) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+class UpdateSpartaStateJob < ActiveJob::Base
+  def perform(order_token, state, order_number)
     return if order_token.blank? || !%w[C D].include?(state&.upcase)
 
     transaction = find_transaction(order_token)
@@ -24,7 +24,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
 
   private
 
-  def update_order_status(order_token, state, basket, date, card_number, order_number = "") # rubocop:disable Metrics/ParameterLists,Metrics/AbcSize,Metrics/MethodLength
+  def update_order_status(order_token, state, basket, date, card_number, order_number = "")
     url = URI.parse(ENV["SPL_SALE_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
@@ -43,7 +43,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     response_body
   end
 
-  def body(order_token, _state, basket, date, card_number, order_number) # rubocop:disable Metrics/ParameterLists,Metrics/MethodLength
+  def body(order_token, _state, basket, date, card_number, order_number)
     # state is "C" order cancelled, "D" order confirmed.
     date_in_ms = date.to_i * 1000
     {
@@ -63,7 +63,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     }
   end
 
-  def find_transaction(order_token) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def find_transaction(order_token)
     url = URI.parse(ENV["SPL_ORDER_FIND_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
@@ -87,7 +87,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     error_codes.include?(response_body["errorCode"])
   end
 
-  def find_transaction_body(order_token) # rubocop:disable Metrics/MethodLength
+  def find_transaction_body(order_token)
     date_in_ms = DateTime.current.to_i * 1000
     {
       ver: 3,
@@ -111,7 +111,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
   end
 
-  def refund(order_token, state, basket, date, card_number) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def refund(order_token, state, basket, date, card_number)
     url = URI.parse(ENV["SPL_REFUND_URL"])
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
@@ -129,7 +129,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     response_body
   end
 
-  def refund_body(order_token, _state, basket, date, card_number) # rubocop:disable Metrics/MethodLength
+  def refund_body(order_token, _state, basket, date, card_number)
     # state is "C" order cancelled, "D" order confirmed.
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid

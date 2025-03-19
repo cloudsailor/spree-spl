@@ -9,3 +9,24 @@ Style/StringLiteralsInInterpolation:
 
 Style/Documentation:
   Enabled: false
+
+Metrics/ModuleLength:
+  Exclude:
+    - app/controllers/cart_controller_decorator.rb
+
+Metrics/AbcSize:
+  Exclude:
+    - app/controllers/cart_controller_decorator.rb
+    - app/jobs/update_sparta_state_job.rb
+
+Metrics/MethodLength:
+  Exclude:
+    - app/controllers/cart_controller_decorator.rb
+    - app/jobs/update_sparta_state_job.rb
+
+Metrics/ClassLength:
+  Exclude:
+    - app/jobs/update_sparta_state_job.rb
+
+Metrics/ParameterLists:
+  Max: 8

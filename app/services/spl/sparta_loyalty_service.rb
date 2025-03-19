@@ -6,7 +6,7 @@ require "json"
 
 module Spl
   class SpartaLoyaltyService
-    def self.send_request(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists,Metrics/AbcSize,Metrics/MethodLength
+    def self.send_request(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
       url = URI.parse(ENV["SPL_SALE_URL"])
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
@@ -28,7 +28,7 @@ module Spl
       end
     end
 
-    def self.prepare_basket_body(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/ParameterLists,Metrics/MethodLength
+    def self.prepare_basket_body(order_token, card_number, line_items, date, products, check_only) # rubocop:disable Metrics/MethodLength
       date_in_ms = date.to_i * 1000
       signature = if check_only
                     signature(order_token, date_in_ms, card_number, 1)

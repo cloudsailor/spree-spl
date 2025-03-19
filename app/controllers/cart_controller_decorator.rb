@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
+module CartControllerDecorator
   def create
     add_spl_discount_params_to_order(spree_current_user)
 
@@ -13,7 +13,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
     super
   end
 
-  def add_item # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def add_item
     spree_authorize! :update, spree_current_order, order_token
     spree_authorize! :show, @variant
 
@@ -32,7 +32,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
     render_order(result)
   end
 
-  def set_quantity # rubocop:disable Metrics/AbcSize
+  def set_quantity
     return render_error_item_quantity unless params[:quantity].to_i > 0 # rubocop:disable Style/NumericPredicate
 
     spree_authorize! :update, spree_current_order, order_token
@@ -46,7 +46,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
     render_order(result)
   end
 
-  def associate # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def associate
     guest_order_token = params[:guest_order_token]
     guest_order = ::Spree::Api::Dependencies.storefront_current_order_finder.constantize.new.execute(
       store: current_store,
@@ -69,7 +69,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def apply_coupon_code # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def apply_coupon_code
     spree_authorize! :update, spree_current_order, order_token
 
     spree_current_order.coupon_code = params[:coupon_code]
@@ -86,7 +86,7 @@ module CartControllerDecorator # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def remove_coupon_code # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def remove_coupon_code
     spree_authorize! :update, spree_current_order, order_token
 
     coupon_codes = select_coupon_codes
