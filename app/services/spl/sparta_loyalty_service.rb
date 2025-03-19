@@ -60,7 +60,7 @@ module Spl
       basket = line_items.map do |item|
         not_promoted = false
         products.each do |product|
-          if product.variants.empty?
+          if product.variants.any?
             product.variants.each do |var|
               if (var.id == item["variant_id"]) && (var.price != var.compare_at_price) && var.compare_at_price.to_i.positive? # rubocop:disable Layout/LineLength
                 not_promoted = true
