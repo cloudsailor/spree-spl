@@ -1,12 +1,78 @@
-Spree SpartaLoyalty
-====================
+# Spree SPL (SpartaLoyalty)
 
-=======
-Add to your Gemfile:
+**Spree-spl** is a plugin that provides a promotion switcher for Spree, enabling enhanced loyalty program functionality.
 
-    gem 'spree-spl'
+## Installation
 
-and run
+Add spree-spl to your Gemfile and run bundle install:
 
-    bundle install
-========
+```sh
+gem 'spree-seo'
+```
+
+_______
+_______
+_______
+
+After installation, add the following methods to `CartControllerDecorator`:
+
+```sh
+promotion_switcher(spree_current_order, spree_current_user, check_only)
+spree_current_order.reload
+```
+
+These methods must be manually added to your repository in the Storefront endpoints:
+
+* `add_item`
+* `set_quantity`
+
+_______
+
+Additionally, the following methods must be manually added to your repository in the Storefront endpoint `associate`:
+
+```sh
+promotion_switcher(spree_current_order, spree_current_user, check_only)
+spree_current_order.reload
+```
+
+_______
+
+For the Storefront endpoint `apply_coupon_code`, add the following method before the `coupon_handler` method: 
+
+```sh
+switch_spl_active_param(spree_current_order, spree_current_user, check_only)
+```
+
+Then, before `render_error_payload`, include:
+
+```sh
+unless [:coupon_code_already_applied].include?(result.status_code)
+    maintain_spl_adjustments(spree_current_order, spree_current_user)
+end
+```
+
+_______
+
+Finally, for the Storefront endpoint `remove_coupon_code`, manually add the following methods to your repository:
+
+```sh
+switch_spl_active_param(spree_current_order, spree_current_user, check_only)
+spree_current_order.reload
+```
+
+_______
+_______
+_______
+
+Next, add the following methods to `CheckoutControllerDecorator`:
+
+```sh
+promotion_switcher(result.value, spree_current_user, check_only)
+```
+
+These methods must be manually added to your repository in the Storefront endpoints before `render_order`:
+
+* `update`
+* `complete`
+
+#### Add these methods to any other endpoints involved in processing an order in your repository.
