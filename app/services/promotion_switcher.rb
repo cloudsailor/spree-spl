@@ -11,8 +11,8 @@ class PromotionSwitcher
   def call # rubocop:disable Metrics/AbcSize
     return unless order.public_metadata.key?(:spl_card_active)
 
-    apply_sparta_discount(order, user, check_only) if order.public_metadata[:spl_card_active] == true
-    remove_sparta_discount(order) if order.public_metadata[:spl_card_active] == false
+    apply_sparta_discount(order, user, check_only) if order.public_metadata[:spl_card_active]
+    remove_sparta_discount(order) unless order.public_metadata[:spl_card_active]
     order.reload
   end
 
