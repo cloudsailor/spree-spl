@@ -24,12 +24,12 @@ class PromotionSwitcher
     return unless order.line_items.any? && user.present?
     return unless user.public_metadata["spl_no_card"].present?
 
-    spl_response = Spl::SpartaLoyaltyService.send_request(order.token,
-                                                          user.public_metadata["spl_no_card"],
-                                                          order.line_items,
-                                                          DateTime.current,
-                                                          order.products,
-                                                          check_only)
+    spl_response = Spl::SpartaLoyaltyService.new(order.token,
+                                                 user.public_metadata["spl_no_card"],
+                                                 order.line_items,
+                                                 DateTime.current,
+                                                 order.products,
+                                                 check_only).call
 
     create_sparta_adjustments(spl_response, order) if spl_response.present?
   end
