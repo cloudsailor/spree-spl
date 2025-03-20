@@ -69,7 +69,7 @@ module Spl
           amountGross: item.price.to_f,
           notPromoted: not_promoted
         }
-      end.tap { |basket| Rails.logger.debug basket.inspect }
+      end
     end
 
     def product_not_promoted?(variant_id)
