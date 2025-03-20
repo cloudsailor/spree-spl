@@ -5,49 +5,66 @@ require "net/http"
 require "json"
 
 class UpdateSpartaStateJob < ActiveJob::Base
+  ORDER_STATES = %w[C D].freeze
+  ERROR_CODES = %w[ORDER_NOT_FOUND REQUEST_ALREADY_PROCESSED].freeze
+
   def perform(order_token, state, order_number)
-    return if order_token.blank? || !%w[C D].include?(state&.upcase)
+    return if order_token.blank? || !ORDER_STATES.include?(state&.upcase)
 
     transaction = find_transaction(order_token)
     return if transaction.blank?
 
     Rails.logger.debug transaction.inspect
 
-    case state
-    when "D"
-      update_order_status(order_token, state, transaction["basket"], DateTime.parse(transaction["date"]),
-                          transaction["cardNo"], order_number)
-    when "C"
-      refund(order_token, state, transaction["basket"], DateTime.parse(transaction["date"]), transaction["cardNo"])
+    date = DateTime.parse(transaction["date"])
+    card_number = transaction["cardNo"]
+    basket = transaction["basket"]
+
+    if state == "D"
+      update_order_status(order_token, basket, date, card_number, order_number)
+    else
+      refund(order_token, basket, date, card_number)
     end
   end
 
   private
 
-  def update_order_status(order_token, state, basket, date, card_number, order_number = "")
-    url = URI.parse(ENV["SPL_SALE_URL"])
-    http = Net::HTTP.new(url.host, url.port)
+  def send_request(url, body)
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
-    request = Net::HTTP::Post.new(url)
+    request = Net::HTTP::Post.new(uri)
     request["Content-Type"] = "application/json"
-    request.body = body(order_token, state, basket, date, card_number, order_number).to_json
+    request.body = body.to_json
     Rails.logger.debug request.body
 
     response = http.request(request)
-    response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
-    return if response_body.present? && error_code_matches?(response_body)
-    raise StandardError, response.body.inspect unless response_body.present? && response_body["errorCode"] == "0"
-
-    Rails.logger.debug response_body.inspect
-    response_body
+    JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
   end
 
-  def body(order_token, _state, basket, date, card_number, order_number)
-    # state is "C" order cancelled, "D" order confirmed.
+  def update_order_status(order_token, basket, date, card_number, order_number = "")
+    body = build_body(order_token, basket, date, card_number, order_number)
+    response_body = send_request(ENV["SPL_SALE_URL"], body)
+    handle_response(response_body)
+  end
+
+  def find_transaction(order_token)
+    body = build_find_transaction_body(order_token)
+    response_body = send_request(ENV["SPL_ORDER_FIND_URL"], body)
+    response_body&.dig("response", 0) if response_body && response_body["errorCode"] == "0"
+  end
+
+  def refund(order_token, basket, date, card_number)
+    body = build_refund_body(order_token, basket, date, card_number)
+    response_body = send_request(ENV["SPL_REFUND_URL"], body)
+    handle_response(response_body)
+  end
+
+  def build_body(order_token, basket, date, card_number, order_number)
     date_in_ms = date.to_i * 1000
     {
-      ver: 3,
+      ver: 4,
       apiUser: ENV["SPL_API_USER"],
       apiToken: ENV["SPL_API_TOKEN"],
       partnerCode: ENV["SPL_PARTNER_CODE"],
@@ -59,35 +76,11 @@ class UpdateSpartaStateJob < ActiveJob::Base
       cardNo: card_number,
       documentNo: order_number,
       basket: basket,
-      signature: signature(order_token, date_in_ms, card_number, order_number)
+      signature: generate_signature(order_token, date_in_ms, card_number, order_number)
     }
   end
 
-  def find_transaction(order_token)
-    url = URI.parse(ENV["SPL_ORDER_FIND_URL"])
-    http = Net::HTTP.new(url.host, url.port)
-    http.use_ssl = true
-
-    request = Net::HTTP::Post.new(url)
-    request["Content-Type"] = "application/json"
-    request.body = find_transaction_body(order_token).to_json
-    Rails.logger.debug request.body
-
-    response = http.request(request)
-    response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
-    return response_body["response"]&.first if response_body.present? && response_body["errorCode"] == "0"
-
-    return nil if response_body.present? && error_code_matches?(response_body)
-
-    raise StandardError, response.body.inspect
-  end
-
-  def error_code_matches?(response_body)
-    error_codes = %w[ORDER_NOT_FOUND REQUEST_ALREADY_PROCESSED]
-    error_codes.include?(response_body["errorCode"])
-  end
-
-  def find_transaction_body(order_token)
+  def build_find_transaction_body(order_token)
     date_in_ms = DateTime.current.to_i * 1000
     {
       ver: 3,
@@ -99,38 +92,11 @@ class UpdateSpartaStateJob < ActiveJob::Base
       no: order_token,
       prgCode: ENV["SPL_PRG_CODE"],
       orderNo: order_token,
-      signature: signature("", date_in_ms)
+      signature: generate_signature("", date_in_ms)
     }
   end
 
-  def signature(order_number, date = "", card_number = "", check_only = "", order_name = "") # rubocop:disable Metrics/ParameterLists
-    # data= "SHOPECOMM1388574855000123456719004762922649"
-    data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
-    Rails.logger.debug data.inspect
-    signature_base = Digest::SHA256.hexdigest(data)
-    Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
-  end
-
-  def refund(order_token, state, basket, date, card_number)
-    url = URI.parse(ENV["SPL_REFUND_URL"])
-    http = Net::HTTP.new(url.host, url.port)
-    http.use_ssl = true
-
-    request = Net::HTTP::Post.new(url)
-    request["Content-Type"] = "application/json"
-    request.body = refund_body(order_token, state, basket, date, card_number).to_json
-    Rails.logger.debug request.body
-
-    response = http.request(request)
-    response_body = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
-    raise StandardError, response.body.inspect unless response_body.present? && response_body["errorCode"] == "0"
-
-    Rails.logger.debug response_body.inspect
-    response_body
-  end
-
-  def refund_body(order_token, _state, basket, date, card_number)
-    # state is "C" order cancelled, "D" order confirmed.
+  def build_refund_body(order_token, basket, date, card_number)
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid
     {
@@ -150,7 +116,21 @@ class UpdateSpartaStateJob < ActiveJob::Base
       no: new_number,
       cardNo: card_number,
       basket: basket,
-      signature: signature(new_number, date_in_ms, card_number)
+      signature: generate_signature(new_number, date_in_ms, card_number)
     }
+  end
+
+  def generate_signature(order_number, date = "", card_number = "", check_only = "", order_name = "") # rubocop:disable Metrics/ParameterLists
+    data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{order_name}#{check_only}#{card_number}"
+    Rails.logger.debug data.inspect
+    signature_base = Digest::SHA256.hexdigest(data)
+    Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
+  end
+
+  def handle_response(response_body)
+    return if response_body.present? && ERROR_CODES.include?(response_body["errorCode"])
+    raise StandardError, response_body.inspect unless response_body.present? && response_body["errorCode"] == "0"
+
+    Rails.logger.debug response_body.inspect
   end
 end
