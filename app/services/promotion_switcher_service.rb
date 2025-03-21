@@ -13,6 +13,7 @@ class PromotionSwitcherService
 
     apply_sparta_discount(order, user, check_only) if order.public_metadata[:spl_card_active]
     remove_sparta_discount(order) unless order.public_metadata[:spl_card_active]
+  ensure
     order.reload
   end
 
@@ -23,7 +24,7 @@ class PromotionSwitcherService
   def apply_sparta_discount(order, user, check_only)
     return unless order.line_items.any? && user.present?
     return unless user.public_metadata['spl_no_card'].present?
-    return unless Spl::ValidateCardService.new(user.public_metadata["spl_no_card"], user).call
+    Spl::ValidateCardService.new(user.public_metadata["spl_no_card"], user).call
 
     spl_response = Spl::SpartaLoyaltyService.new(order.token,
                                                  user.public_metadata['spl_no_card'],
@@ -34,6 +35,9 @@ class PromotionSwitcherService
     return unless spl_response
 
     create_sparta_adjustments(spl_response, order)
+  rescue SplCardValidationError
+    order.public_metadata[:spl_card_active] = false
+    raise
   end
 
   def create_sparta_adjustments(spl_response, order)

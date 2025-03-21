@@ -14,25 +14,33 @@ module Spl
       @user = user
     end
 
-    def call # rubocop: disable Metrics/MethodLength
-      response_body = JSON.parse(verify_card_request)
+    def call
+      @user.public_metadata["spl_card_active"] = false
 
+      response_body = JSON.parse(verify_card_request)
+      check_for_errors(response_body)
+      assign_card_to_user
+      true
+    rescue StandardError
+      @user.save
+      raise
+    end
+
+    private
+
+    def check_for_errors(response_body)
       raise SplCardValidationError, response_body if response_body["errorCode"] != "0"
 
       card_assignment = cards_assigned_user(@card_number)
 
       if card_assigned_to_different_user(card_assignment)
-        raise SplCardValidationError,
-              "Card assigned to a different user"
+        raise SplCardValidationError, t("spl.card_validation.errors.wrong_owner")
       end
-      raise SplCardValidationError, "Card doesnt match user's card number" if user_have_different_card
-      raise SplCardValidationError, "Card is not active" if response_body.dig("response", "card", "status") != "A"
-
-      assign_card_to_user
-      true
+      raise SplCardValidationError, t("spl.card_validation.errors.card_not_match") if user_have_different_card
+      raise SplCardValidationError, t("spl.card_validation.errors.card_not_active") if response_body
+                                                                                       .dig("response",
+                                                                                            "card", "status") != "A"
     end
-
-    private
 
     def verify_card_request
       url = URI.parse(ENV["SPL_CHECK_CARD_URL"])
@@ -59,7 +67,7 @@ module Spl
         partnerCode: ENV["SPL_PARTNER_CODE"],
         placeCode: ENV["SPL_PLACE_CODE"],
         "date": date_in_ms,
-        "cardNo": card_number, # "8006683868175"
+        "cardNo": card_number,
         "signature": signature(date_in_ms, card_number),
         "extendedPersonalInfo": true
       }
@@ -85,10 +93,16 @@ module Spl
     end
 
     def assign_card_to_user
-      return if @user.public_metadata["spl_no_card"] == @card_number
+      if @user.public_metadata["spl_no_card"] == @card_number && @user.public_metadata["spl_card_active"].present?
+        return
+      end
 
-      @user.update(public_metadata: @user.public_metadata.merge({ "spl_no_card" => @card_number}))
-      @user.save
+      @user.public_metadata = @user.public_metadata.merge(
+        {
+          "spl_no_card" => @card_number,
+          "spl_card_active" => true
+        }
+      )
     end
   end
 end

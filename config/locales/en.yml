@@ -1,3 +1,9 @@
 en:
   order:
     loyalty_card_missing: There is no loyalty card assigned to order
+  spl:
+    card_validation:
+      errors:
+        card_not_active: "Card is not active"
+        card_not_match: "Card doesnt match user's card number"
+        wrong_owner: "Card assigned to a different user"
