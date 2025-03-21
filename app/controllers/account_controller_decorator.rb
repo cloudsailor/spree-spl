@@ -12,5 +12,7 @@ module AccountControllerDecorator
     return unless user_update_params[:public_metadata][:spl_no_card].present?
 
     Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card], spree_current_user).call
+  rescue Spl::ValidateCardService::SplCardValidationError => e
+    render json: { error: e.message }, status: :bad_request
   end
 end

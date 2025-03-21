@@ -29,15 +29,15 @@ module Spl
     private
 
     def check_for_errors(response_body)
-      raise SplCardValidationError, response_body if response_body["errorCode"] != "0"
+      raise SplCardValidationError, response_body.dig('msg') if response_body["errorCode"] != "0"
 
       card_assignment = cards_assigned_user(@card_number)
 
       if card_assigned_to_different_user(card_assignment)
-        raise SplCardValidationError, t("spl.card_validation.errors.wrong_owner")
+        raise SplCardValidationError, I18n.t("spl.card_validation.errors.wrong_owner")
       end
-      raise SplCardValidationError, t("spl.card_validation.errors.card_not_match") if user_have_different_card
-      raise SplCardValidationError, t("spl.card_validation.errors.card_not_active") if response_body
+      raise SplCardValidationError, I18n.t("spl.card_validation.errors.card_not_match") if user_have_different_card
+      raise SplCardValidationError, I18n.t("spl.card_validation.errors.card_not_active") if response_body
                                                                                        .dig("response",
                                                                                             "card", "status") != "A"
     end
@@ -60,16 +60,16 @@ module Spl
       date_in_ms = date.to_i * 1000
       uuid = SecureRandom.uuid
       {
-        "ver": 4,
-        "requestId": uuid,
+        ver: 4,
+        requestId: uuid,
         apiUser: ENV["SPL_API_USER"],
         apiToken: ENV["SPL_API_TOKEN"],
         partnerCode: ENV["SPL_PARTNER_CODE"],
         placeCode: ENV["SPL_PLACE_CODE"],
-        "date": date_in_ms,
-        "cardNo": card_number,
-        "signature": signature(date_in_ms, card_number),
-        "extendedPersonalInfo": true
+        date: date_in_ms,
+        cardNo: card_number,
+        signature: signature(date_in_ms, card_number),
+        extendedPersonalInfo: true
       }
     end
 
@@ -103,6 +103,9 @@ module Spl
           "spl_card_active" => true
         }
       )
+      current_order = @user.orders.last
+      current_order.public_metadata[:spl_card_active] = true
+      current_order.save
     end
   end
 end
