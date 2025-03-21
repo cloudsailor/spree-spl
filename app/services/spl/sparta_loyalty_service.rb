@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require "digest"
-require "net/http"
-require "json"
+require 'digest'
+require 'net/http'
+require 'json'
 
 module Spl
   class SpartaLoyaltyService
@@ -13,7 +13,7 @@ module Spl
       @date = date.to_i * 1000
       @products = products
       @check_only = check_only
-      @url = URI.parse(ENV["SPL_SALE_URL"])
+      @url = URI.parse(ENV['SPL_SALE_URL'])
     end
 
     def call
@@ -22,7 +22,7 @@ module Spl
 
       response_body = JSON.parse(response.body)
       Rails.logger.debug response.body.inspect
-      response_body if response_body.present? && response_body["errorCode"] == "0"
+      response_body if response_body.present? && response_body['errorCode'] == '0'
     end
 
     private
@@ -32,7 +32,7 @@ module Spl
       http.use_ssl = true
 
       request = Net::HTTP::Post.new(@url)
-      request["Content-Type"] = "application/json"
+      request['Content-Type'] = 'application/json'
       request.body = prepare_basket_body.to_json
 
       http.request(request)
@@ -41,11 +41,11 @@ module Spl
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {
         ver: 4,
-        apiUser: ENV["SPL_API_USER"],
-        apiToken: ENV["SPL_API_TOKEN"],
-        partnerCode: ENV["SPL_PARTNER_CODE"],
-        placeCode: ENV["SPL_PLACE_CODE"],
-        mode: ENV["SPL_MODE"],
+        apiUser: ENV['SPL_API_USER'],
+        apiToken: ENV['SPL_API_TOKEN'],
+        partnerCode: ENV['SPL_PARTNER_CODE'],
+        placeCode: ENV['SPL_PLACE_CODE'],
+        mode: ENV['SPL_MODE'],
         date: @date,
         no: @order_token,
         orderNo: @order_token,
@@ -60,7 +60,7 @@ module Spl
 
     def prepare_basket
       @line_items.map do |item|
-        not_promoted = product_not_promoted?(item["variant_id"])
+        not_promoted = product_not_promoted?(item['variant_id'])
 
         {
           pos: item.id,
@@ -81,11 +81,11 @@ module Spl
     end
 
     def generate_signature
-      check_only = @check_only ? 1 : ""
+      check_only = @check_only ? 1 : ''
       data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{@date}#{@order_token}#{check_only}#{@card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
+      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
     end
   end
 end

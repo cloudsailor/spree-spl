@@ -32,11 +32,11 @@ module Spree
       end
 
       def line_item_with_spl_adjustments?
-        @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == "SPL" }
+        @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == 'SPL' }
       end
 
       def recalculate_spl_adjustments(attributes, totals)
-        sparta_adjustments = @adjustable.adjustments.select { |adj| adj.source_type == "SPL" && adj.eligible? }
+        sparta_adjustments = @adjustable.adjustments.select { |adj| adj.source_type == 'SPL' && adj.eligible? }
         total_adjustment_amount = sparta_adjustments.sum(&:amount)
         assign_spl_totals(attributes, total_adjustment_amount, Time.current)
         @adjustable.update_columns(totals)

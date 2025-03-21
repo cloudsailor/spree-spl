@@ -4,6 +4,6 @@ module CheckoutControllerDecorator
   private
 
   def promotion_switcher(order, user, check_only)
-    PromotionSwitcher.new(order, user, check_only).call
+    PromotionSwitcherService.new(order, user, check_only).call
   end
 end
