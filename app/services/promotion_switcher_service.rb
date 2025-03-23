@@ -30,8 +30,9 @@ class PromotionSwitcherService
                                                  DateTime.current,
                                                  order.products,
                                                  check_only).call
+    return unless spl_response
 
-    create_sparta_adjustments(spl_response, order) if spl_response.present?
+    create_sparta_adjustments(spl_response, order)
   end
 
   def create_sparta_adjustments(spl_response, order)
