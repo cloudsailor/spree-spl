@@ -75,4 +75,17 @@ These methods must be manually added to your repository in the Storefront endpoi
 * `update`
 * `complete`
 
+_______
+_______
+_______
+
+Also, add the following methods manually to `AdjustmentUpdaterDecorator` to method `persist_totals`:
+
+```sh
+set_spree_adjustments if shipment_with_adjustments? || order_with_adjustments?
+recalculate_spl_adjustments(attributes, totals) if line_item_with_spl_adjustments?
+```
+
+_______
+
 #### Add these methods to any other endpoints involved in processing an order in your repository.
