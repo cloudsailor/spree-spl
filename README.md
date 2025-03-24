@@ -28,6 +28,24 @@ These methods must be manually added to your repository in the Storefront endpoi
 
 _______
 
+Add the following method to `AccountControllerDecorator`:
+```sh
+module AccountControllerDecorator
+  def user_update_params
+    return super if super.dig('public_metadata', 'spl_no_card').nil?
+    
+    params = super
+    params[:public_metadata] = params[:public_metadata].merge({ "spl_card_active" => true })
+    params
+  end
+end
+if ::Spree::Api::V2::Storefront::AccountController.included_modules
+                                                   .exclude?(AccountControllerDecorator)
+  ::Spree::Api::V2::Storefront::AccountController.prepend AccountControllerDecorator
+end
+```
+_______
+
 Additionally, the following methods must be manually added to your repository in the Storefront endpoint `associate`:
 
 ```sh

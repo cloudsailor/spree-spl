@@ -4,6 +4,6 @@ en:
   spl:
     card_validation:
       errors:
-        card_not_active: "Card is not active"
-        card_not_match: "Card doesnt match user's card number"
-        wrong_owner: "Card assigned to a different user"
+        card_not_active: Card is not active
+        card_not_match: Card doesnt match user's card number
+        wrong_owner: Card assigned to a different user

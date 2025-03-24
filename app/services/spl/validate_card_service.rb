@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require "digest"
-require "net/http"
-require "json"
+require 'digest'
+require 'net/http'
+require 'json'
 
 module Spl
   # Validates SPL card number
@@ -15,7 +15,7 @@ module Spl
     end
 
     def call
-      @user.public_metadata["spl_card_active"] = false
+      @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
       check_for_errors(response_body)
@@ -29,26 +29,27 @@ module Spl
     private
 
     def check_for_errors(response_body)
-      raise SplCardValidationError, response_body.dig('msg') if response_body["errorCode"] != "0"
+      raise SplCardValidationError, response_body['msg'] if response_body['errorCode'] != '0'
 
       card_assignment = cards_assigned_user(@card_number)
 
       if card_assigned_to_different_user(card_assignment)
-        raise SplCardValidationError, I18n.t("spl.card_validation.errors.wrong_owner")
+        raise SplCardValidationError, I18n.t('spl.card_validation.errors.wrong_owner')
       end
-      raise SplCardValidationError, I18n.t("spl.card_validation.errors.card_not_match") if user_have_different_card
-      raise SplCardValidationError, I18n.t("spl.card_validation.errors.card_not_active") if response_body
-                                                                                       .dig("response",
-                                                                                            "card", "status") != "A"
+      raise SplCardValidationError, I18n.t('spl.card_validation.errors.card_not_match') if user_have_different_card
+      raise SplCardValidationError, I18n.t('spl.card_validation.errors.card_not_active') if response_body
+                                                                                            .dig('response',
+                                                                                                 'card',
+                                                                                                 'status') != 'A'
     end
 
     def verify_card_request
-      url = URI.parse(ENV["SPL_CHECK_CARD_URL"])
+      url = URI.parse(ENV['SPL_CHECK_CARD_URL'])
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 
       request = Net::HTTP::Post.new(url)
-      request["Content-Type"] = "application/json"
+      request['Content-Type'] = 'application/json'
 
       request.body = body(@card_number, DateTime.current).to_json
 
@@ -62,10 +63,10 @@ module Spl
       {
         ver: 4,
         requestId: uuid,
-        apiUser: ENV["SPL_API_USER"],
-        apiToken: ENV["SPL_API_TOKEN"],
-        partnerCode: ENV["SPL_PARTNER_CODE"],
-        placeCode: ENV["SPL_PLACE_CODE"],
+        apiUser: ENV['SPL_API_USER'],
+        apiToken: ENV['SPL_API_TOKEN'],
+        partnerCode: ENV['SPL_PARTNER_CODE'],
+        placeCode: ENV['SPL_PLACE_CODE'],
         date: date_in_ms,
         cardNo: card_number,
         signature: signature(date_in_ms, card_number),
@@ -77,11 +78,11 @@ module Spl
       data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV["SPL_POS_KEY"])
+      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
     end
 
     def cards_assigned_user(card_number)
-      Spree::User.find { |u| u.public_metadata["spl_no_card"] == card_number }
+      Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }
     end
 
     def card_assigned_to_different_user(card_assignment)
@@ -89,23 +90,30 @@ module Spl
     end
 
     def user_have_different_card
-      @user.public_metadata["spl_no_card"] && @user.public_metadata["spl_no_card"] != @card_number
+      @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
     end
 
     def assign_card_to_user
-      if @user.public_metadata["spl_no_card"] == @card_number && @user.public_metadata["spl_card_active"].present?
-        return
-      end
+      return if already_assigned
 
-      @user.public_metadata = @user.public_metadata.merge(
-        {
-          "spl_no_card" => @card_number,
-          "spl_card_active" => true
-        }
-      )
+      @user.public_metadata = @user.public_metadata.merge(verified_card_params)
       current_order = @user.orders.last
-      current_order.public_metadata[:spl_card_active] = true
-      current_order.save
+      return unless %w[cart address delivery payment].include?(current_order.state)
+
+      current_order.update(
+        public_metadata: current_order.public_metadata.merge(verified_card_params)
+      )
+    end
+
+    def verified_card_params
+      {
+        'spl_no_card' => @card_number,
+        'spl_card_active' => true
+      }
+    end
+
+    def already_assigned
+      @user.public_metadata['spl_no_card'] == @card_number && @user.public_metadata['spl_card_active'].present?
     end
   end
 end
