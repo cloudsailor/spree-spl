@@ -32,16 +32,20 @@ Add the following method to `AccountControllerDecorator`:
 ```sh
 module AccountControllerDecorator
   def user_update_params
-    return super if super.dig('public_metadata', 'spl_no_card').nil?
-    
+    public_metadata = super['public_metadata']
+
     params = super
-    params[:public_metadata] = params[:public_metadata].merge({ "spl_card_active" => true })
-    params
+    if public_metadata['spl_no_card'].present? && public_metadata['spl_card_active'].nil?
+      update_order(spl_card: public_metadata['spl_no_card'], active: true)
+      params[:public_metadata] = params[:public_metadata].merge({ 'spl_card_active' => true })
+    elsif public_metadata['spl_no_card'].present?
+      update_order(spl_card: public_metadata['spl_no_card'], active: public_metadata['spl_card_active'])
+    else
+      update_order(spl_card: public_metadata['spl_no_card'])
+    end
+
+    public_metadata['spl_no_card'].present? ? params : super
   end
-end
-if ::Spree::Api::V2::Storefront::AccountController.included_modules
-                                                   .exclude?(AccountControllerDecorator)
-  ::Spree::Api::V2::Storefront::AccountController.prepend AccountControllerDecorator
 end
 ```
 _______
