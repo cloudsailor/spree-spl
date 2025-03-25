@@ -19,7 +19,6 @@ module Spl
 
       response_body = JSON.parse(verify_card_request)
       check_for_errors(response_body)
-      assign_card_to_user
       true
     rescue StandardError
       @user.save
@@ -91,29 +90,6 @@ module Spl
 
     def user_have_different_card
       @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
-    end
-
-    def assign_card_to_user
-      return if already_assigned
-
-      @user.public_metadata = @user.public_metadata.merge(verified_card_params)
-      current_order = @user.orders.last
-      return unless %w[cart address delivery payment].include?(current_order.state)
-
-      current_order.update(
-        public_metadata: current_order.public_metadata.merge(verified_card_params)
-      )
-    end
-
-    def verified_card_params
-      {
-        'spl_no_card' => @card_number,
-        'spl_card_active' => true
-      }
-    end
-
-    def already_assigned
-      @user.public_metadata['spl_no_card'] == @card_number && @user.public_metadata['spl_card_active'].present?
     end
   end
 end
