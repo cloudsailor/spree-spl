@@ -28,6 +28,28 @@ These methods must be manually added to your repository in the Storefront endpoi
 
 _______
 
+Add the following method to `AccountControllerDecorator`:
+```sh
+module AccountControllerDecorator
+  def user_update_params
+    public_metadata = super['public_metadata']
+
+    params = super
+    if public_metadata['spl_no_card'].present? && public_metadata['spl_card_active'].nil?
+      update_order(spl_card: public_metadata['spl_no_card'], active: true)
+      params[:public_metadata] = params[:public_metadata].merge({ 'spl_card_active' => true })
+    elsif public_metadata['spl_no_card'].present?
+      update_order(spl_card: public_metadata['spl_no_card'], active: public_metadata['spl_card_active'])
+    else
+      update_order(spl_card: public_metadata['spl_no_card'])
+    end
+
+    public_metadata['spl_no_card'].present? ? params : super
+  end
+end
+```
+_______
+
 Additionally, the following methods must be manually added to your repository in the Storefront endpoint `associate`:
 
 ```sh
