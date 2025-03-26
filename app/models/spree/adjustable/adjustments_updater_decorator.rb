@@ -14,7 +14,7 @@ module Spree
         else
           @adjustable.adjustments.update_all(eligible: true)
 
-          super
+          persist_totals
         end
       end
 
