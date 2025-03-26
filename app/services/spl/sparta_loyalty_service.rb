@@ -21,6 +21,7 @@ module Spl
       return unless response.is_a?(Net::HTTPSuccess)
 
       response_body = JSON.parse(response.body)
+      Rails.logger.debug 'SPL LOYALTY SERVICE RESPONSE'
       Rails.logger.debug response.body.inspect
       response_body if response_body.present? && response_body['errorCode'] == '0'
     end
