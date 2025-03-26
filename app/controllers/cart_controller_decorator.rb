@@ -31,7 +31,7 @@ module CartControllerDecorator
   private
 
   def promotion_switcher(order, user, check_only)
-    Rails.logger.debug "Promotion Switcher Service START #{user.email}, #{user.public_metadata}"
+    Rails.logger.debug user if user.present?
     PromotionSwitcherService.new(order, user, check_only).call
   end
 
