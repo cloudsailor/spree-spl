@@ -5,16 +5,15 @@ module Spree
     module AdjustmentsUpdaterDecorator
       private
 
-      def set_spree_adjustments
+      def set_spree_adjustments(attributes, totals)
         adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
         if adjustable.public_metadata[:spl_card_active] == true
           @adjustable.adjustments.update_all(eligible: false)
-
-          return # rubocop:disable Style/RedundantReturn
+          update_shipment_adjustment(attributes, totals)
         else
           @adjustable.adjustments.update_all(eligible: true)
-
-          persist_totals
+          update_adjustment_totals(attributes, totals)
+          @adjustable.update_columns(totals)
         end
       end
 
@@ -28,6 +27,13 @@ module Spree
 
       def line_item_with_spl_adjustments?
         @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == 'SPL' }
+      end
+
+      def update_shipment_adjustment(attributes, totals)
+        return unless @adjustable.is_a?(::Spree::Shipment)
+
+        assign_spl_totals(attributes, 0.0, Time.current)
+        @adjustable.update_columns(totals)
       end
 
       def recalculate_spl_adjustments(attributes, totals)
