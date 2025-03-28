@@ -6,6 +6,8 @@ require 'json'
 
 module Spl
   class SpartaLoyaltyService
+    class SplSendRequestError < StandardError; end
+
     def initialize(order_token, card_number, line_items, date, products, check_only)
       @order_token = order_token
       @card_number = card_number
@@ -24,7 +26,9 @@ module Spl
       response_body = JSON.parse(response.body)
       Rails.logger.debug 'SPL LOYALTY SERVICE RESPONSE'
       Rails.logger.debug response.body.inspect
-      response_body if response_body.present? && response_body['errorCode'] == '0'
+      raise SplSendRequestError, response_body unless response_body.present? && response_body['errorCode'] == '0'
+
+      response_body
     end
 
     private
@@ -88,7 +92,7 @@ module Spl
       data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{@date}#{@order_token}#{check_only}#{@card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
+      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'] + '1')
     end
   end
 end
