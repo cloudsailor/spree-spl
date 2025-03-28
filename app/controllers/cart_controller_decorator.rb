@@ -8,8 +8,7 @@ module CartControllerDecorator
   end
 
   def show
-    Rails.logger.debug spree_current_user.email if spree_current_user.present?
-    promotion_switcher(spree_current_order, spree_current_user, true)
+    promotion_switcher(spree_current_order, true)
 
     super
   end
@@ -23,7 +22,7 @@ module CartControllerDecorator
       public_metadata = spree_current_order.public_metadata
       spree_current_order.update(public_metadata: public_metadata.merge('spl_card_active' => active_param))
       spree_current_order.reload
-      promotion_switcher(spree_current_order, spree_current_user, true)
+      promotion_switcher(spree_current_order, true)
 
       render_serialized_payload { serialized_current_order }
     end
@@ -31,9 +30,8 @@ module CartControllerDecorator
 
   private
 
-  def promotion_switcher(order, user, check_only)
-    Rails.logger.debug order.public_metadata[:spl_no_card] if order.public_metadata.key?(:spl_no_card)
-    PromotionSwitcherService.new(order, user, check_only).call
+  def promotion_switcher(order, check_only)
+    PromotionSwitcherService.new(order, check_only).call
   end
 
   def add_spl_discount_params_to_order(user)
@@ -45,7 +43,7 @@ module CartControllerDecorator
                                     "spl_no_card": user.public_metadata['spl_no_card'])
   end
 
-  def switch_spl_active_param(order, user, check_only)
+  def switch_spl_active_param(order, check_only)
     return unless order.public_metadata.key?(:spl_card_active)
 
     if order.public_metadata[:spl_card_active] == true
@@ -54,7 +52,7 @@ module CartControllerDecorator
       order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
     end
 
-    promotion_switcher(order, user, check_only)
+    promotion_switcher(order, check_only)
   end
 
   def assign_spl_active_param(order, user)
@@ -65,11 +63,11 @@ module CartControllerDecorator
     order.update(public_metadata: order.public_metadata.merge("spl_card_active": active_param, "spl_no_card": spl_card))
   end
 
-  def maintain_spl_adjustments(order, user)
+  def maintain_spl_adjustments(order)
     return unless order.public_metadata.key?(:spl_card_active)
 
     order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
-    promotion_switcher(order, user, true)
+    promotion_switcher(order, true)
   end
 
   def cast_boolean(value)

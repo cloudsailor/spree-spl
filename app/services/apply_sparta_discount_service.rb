@@ -29,7 +29,7 @@ class ApplySpartaDiscountService
     response['errorCode'] == '0' && response['response'].present? && response['response']['basket'].present?
   end
 
-  def create_sparta_adjustment(order, amount, label, line_item) # rubocop:disable Metrics/MethodLength
+  def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
     line_item.adjustments.new(
@@ -40,8 +40,7 @@ class ApplySpartaDiscountService
       label: label,
       order: order
     ).save
-    Rails.logger.debug 'SPL adjustments'
-    Rails.logger.debug line_item.adjustments
+
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
   end
 end
