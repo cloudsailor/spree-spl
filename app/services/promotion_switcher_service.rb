@@ -24,8 +24,6 @@ class PromotionSwitcherService
   def apply_sparta_discount(order, user, check_only) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     return unless order.line_items.any? && order.public_metadata['spl_no_card'].present?
 
-    Spl::ValidateCardService.new(user.public_metadata['spl_no_card'], user).call
-
     spl_response = Spl::SpartaLoyaltyService.new(order.token,
                                                  order.public_metadata['spl_no_card'],
                                                  order.line_items,
