@@ -29,7 +29,7 @@ class ApplySpartaDiscountService
     response['errorCode'] == '0' && response['response'].present? && response['response']['basket'].present?
   end
 
-  def create_sparta_adjustment(order, amount, label, line_item)
+  def create_sparta_adjustment(order, amount, label, line_item) # rubocop:disable Metrics/MethodLength
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
     line_item.adjustments.new(
