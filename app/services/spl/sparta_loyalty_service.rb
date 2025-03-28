@@ -17,6 +17,7 @@ module Spl
     end
 
     def call
+      Rails.logger.debug 'SPL LOYALTY SERVICE START'
       response = send_request
       return unless response.is_a?(Net::HTTPSuccess)
 
@@ -35,7 +36,8 @@ module Spl
       request = Net::HTTP::Post.new(@url)
       request['Content-Type'] = 'application/json'
       request.body = prepare_basket_body.to_json
-
+      Rails.logger.debug 'SPL LOYALTY SERVICE REQUEST BODY'
+      Rails.logger.debug request.body.inspect
       http.request(request)
     end
 

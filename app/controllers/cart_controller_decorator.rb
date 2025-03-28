@@ -8,6 +8,7 @@ module CartControllerDecorator
   end
 
   def show
+    Rails.logger.debug spree_current_user.email if spree_current_user.present?
     promotion_switcher(spree_current_order, spree_current_user, true)
 
     super
@@ -31,7 +32,7 @@ module CartControllerDecorator
   private
 
   def promotion_switcher(order, user, check_only)
-    Rails.logger.debug user if user.present?
+    Rails.logger.debug user.email if user.present?
     PromotionSwitcherService.new(order, user, check_only).call
   end
 
