@@ -10,6 +10,8 @@ module Spree
         if adjustable.public_metadata[:spl_card_active] == true
           @adjustable.adjustments.update_all(eligible: false)
           update_shipment_adjustment(attributes, totals)
+
+          return # rubocop:disable Style/RedundantReturn
         else
           @adjustable.adjustments.update_all(eligible: true)
           update_adjustment_totals(attributes, totals)
