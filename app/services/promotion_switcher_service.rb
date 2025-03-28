@@ -36,9 +36,11 @@ class PromotionSwitcherService
     return unless spl_response
 
     create_sparta_adjustments(spl_response, order)
+    Rails.logger.debug spl_response
   end
 
   def create_sparta_adjustments(spl_response, order)
+    Rails.logger.debug 'Apply sparta discount'
     ApplySpartaDiscountService.new(spl_response, order).call
   end
 

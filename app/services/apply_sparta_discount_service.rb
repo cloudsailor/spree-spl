@@ -40,7 +40,8 @@ class ApplySpartaDiscountService
       label: label,
       order: order
     ).save
-
+    Rails.logger.debug 'SPL adjustments'
+    Rails.logger.debug line_item.adjustments
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
   end
 end
