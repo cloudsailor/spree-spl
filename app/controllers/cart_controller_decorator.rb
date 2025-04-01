@@ -14,6 +14,8 @@ module CartControllerDecorator
   end
 
   def update_spl_card_activate # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+    spree_authorize! :update, spree_current_order, order_token
+
     if params.dig('public_metadata', 'spl_card_active').nil?
       spree_current_order.errors.add(:base, I18n.t('order.loyalty_card_missing'))
       render_error_payload(spree_current_order.errors)
