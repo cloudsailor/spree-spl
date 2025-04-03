@@ -2,7 +2,7 @@
 
 module Spree
   module Spl
-    class Engine < Rails::Engine
+    class Engine < ::Rails::Engine
       isolate_namespace Spree::Spl
     end
   end
