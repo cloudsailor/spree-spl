@@ -1,0 +1,9 @@
+sk:
+  order:
+    loyalty_card_missing: K objednávke nie je priradená žiadna vernostná karta
+  spl:
+    card_validation:
+      errors:
+        card_not_active: Karta nie je aktívna
+        card_not_match: Karta nezodpovedá číslu karty používateľa
+        wrong_owner: Karta je priradená inému používateľovi

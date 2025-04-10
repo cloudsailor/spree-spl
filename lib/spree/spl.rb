@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
-require_relative "spl/version"
+require 'spree/spl/version'
+require 'spree/spl/engine'
+
+require 'rails/all'
+require 'spree_core'
+require 'spree_api'
+
+require_relative 'spl/version'
 
 module Spree
   module Spl
-    class Error < StandardError; end
-    # Your code goes here...
   end
 end
