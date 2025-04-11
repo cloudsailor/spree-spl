@@ -58,7 +58,7 @@ class ApplySpartaDiscountService
   def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
-    line_item.adjustments.create!(
+    line_item.adjustments.create(
       source_type: 'SPL',
       adjustable: line_item,
       amount: amount,
