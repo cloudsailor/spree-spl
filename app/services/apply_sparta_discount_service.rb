@@ -18,7 +18,7 @@ class ApplySpartaDiscountService
 
       label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.id}"
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
-      discounts_present?(sparta_item, line_item, label)
+      discounts_present?(line_item, label)
       create_sparta_adjustment(order, amount, label, line_item)
     end
   end
@@ -32,9 +32,10 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    if sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present? # rubocop:disable Style/GuardClause
-      RemoveSpartaDiscountService.new(order).call
-    end
+    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present?
+
+    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    destroy_inactive_adjustments(adjustments, order, line_item)
   end
 
   def discounts_present?(line_item, label)
@@ -42,25 +43,29 @@ class ApplySpartaDiscountService
     return if adjustments.blank?
 
     existing_labels = adjustments.pluck(:label)
-    unless existing_labels.include?(label) # rubocop:disable Style/GuardClause
-      adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
-      line_item.reload
-      ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
-      adjustments.destroy_all
-    end
+    return if existing_labels.include?(label)
+
+    destroy_inactive_adjustments(adjustments, order, line_item)
+  end
+
+  def destroy_inactive_adjustments(adjustments, order, line_item)
+    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
+    line_item.reload
+    ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
+    adjustments.destroy_all
   end
 
   def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label).present?
 
-    line_item.adjustments.new(
+    line_item.adjustments.create!(
       source_type: 'SPL',
       adjustable: line_item,
       amount: amount,
       included: false,
       label: label,
       order: order
-    ).save
+    )
 
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
   end
