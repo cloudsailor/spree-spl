@@ -35,7 +35,7 @@ class ApplySpartaDiscountService
     return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present?
 
     adjustments = line_item.adjustments.where(source_type: 'SPL')
-    destroy_inactive_adjustments(adjustments, order, line_item)
+    RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def discounts_present?(line_item, label)
@@ -45,14 +45,7 @@ class ApplySpartaDiscountService
     existing_labels = adjustments.pluck(:label)
     return if existing_labels.include?(label)
 
-    destroy_inactive_adjustments(adjustments, order, line_item)
-  end
-
-  def destroy_inactive_adjustments(adjustments, order, line_item)
-    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
-    line_item.reload
-    ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
-    adjustments.destroy_all
+    RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def create_sparta_adjustment(order, amount, label, line_item)
