@@ -10,8 +10,6 @@ module Spree
         if adjustable.public_metadata[:spl_card_active] == true
           @adjustable.adjustments.update_all(eligible: false)
           update_shipment_adjustment(attributes, totals)
-
-          return # rubocop:disable Style/RedundantReturn
         else
           @adjustable.adjustments.update_all(eligible: true)
           update_adjustment_totals(attributes, totals)
@@ -43,8 +41,6 @@ module Spree
         total_adjustment_amount = sparta_adjustments.sum(&:amount)
         assign_spl_totals(attributes, total_adjustment_amount, Time.current)
         @adjustable.update_columns(totals)
-
-        return # rubocop:disable Style/RedundantReturn
       end
 
       def assign_spl_totals(attributes, total_amount, time)

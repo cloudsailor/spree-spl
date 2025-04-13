@@ -21,6 +21,10 @@ Rails.application.config.to_prepare do
     Spree::Adjustable::AdjustmentsUpdaterDecorator
   )
 
+  ::Spree::Checkout::GetShippingRates.prepend(
+    Spree::Checkout::GetShippingRatesDecorator
+  )
+
   ::Spree::OrderUpdater.prepend(
     OrderUpdaterDecorator
   )
