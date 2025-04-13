@@ -39,6 +39,6 @@ class PromotionSwitcherService
   end
 
   def remove_sparta_discount(order)
-    RemoveSpartaDiscountService.new(order).call
+    RemoveSpartaDiscountService.destroy_all_sparta_adjustments(order)
   end
 end
