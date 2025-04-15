@@ -18,7 +18,7 @@ class PromotionSwitcherService
 
   private
 
-  attr_accessor :check_only, :line_items, :order, :user
+  attr_accessor :check_only, :line_items, :order
 
   def apply_sparta_discount(order, check_only)
     return unless order.line_items.any? && order.public_metadata['spl_no_card'].present?

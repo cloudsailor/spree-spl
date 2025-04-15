@@ -7,14 +7,8 @@ module Spree
 
       def set_spree_adjustments(attributes, totals)
         adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
-        if adjustable.public_metadata[:spl_card_active] == true
-          @adjustable.adjustments.update_all(eligible: false)
-          update_shipment_adjustment(attributes, totals)
-        else
-          @adjustable.adjustments.update_all(eligible: true)
-          update_adjustment_totals(attributes, totals)
-          @adjustable.update_columns(totals)
-        end
+
+        @adjustable.adjustments.destroy_all if adjustable.public_metadata[:spl_card_active]
       end
 
       def shipment_with_adjustments?
