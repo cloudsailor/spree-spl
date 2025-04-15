@@ -9,6 +9,7 @@ module AccountControllerDecorator
   private
 
   def validate_spl_no_card
+    return unless user_update_params[:public_metadata].present?
     return if disactivated_card
     return unless user_update_params[:public_metadata][:spl_no_card].present?
 
