@@ -24,7 +24,6 @@ module CartControllerDecorator
       public_metadata = spree_current_order.public_metadata
       update_spl_card_active_param(spree_current_order, active_param, public_metadata)
       spree_current_order.reload
-      spree_current_order.promotions.destroy_all if card_active?
       promotion_switcher(spree_current_order, true)
 
       render_serialized_payload { serialized_current_order }
@@ -40,10 +39,6 @@ module CartControllerDecorator
   def update_spl_card_active_param(order, active_param, public_metadata)
     order.update(public_metadata: public_metadata.merge('spl_card_active' => active_param))
     order.promotions.destroy_all if order.promotions.any?
-  end
-
-  def card_active?
-    spree_current_order.promotions.any? && spree_current_order.public_metadata['spl_card_active']
   end
 
   def add_spl_discount_params_to_order(user)
