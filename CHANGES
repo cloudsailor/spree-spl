@@ -1,0 +1,73 @@
+Version 0.1.0
+ - Add bump-version file
+ - Merge pull request #7 from cloudsailor/EK-295
+ - Delete unnecessary shipping rates decorator
+ - Handle adjustments created for spree promotions
+ - Add check if spl card is active
+ - Fix switching between spree and spl promotions
+ - Add promotion check to checkout controller decorator
+ - Handle spree promotions with spl
+ - Add update amount for existing sparta adjustments
+ - Merge pull request #8 from cloudsailor/ek-345
+ - Add safe check for user update
+ - Add get shipping rates decorator
+ - Merge pull request #6 from cloudsailor/EK-335
+ - Improve remove sparta discount service
+ - Fix create_sparta_adjustment method
+ - Changes after code review
+ - Fix rubocop offenses
+ - Fix switching sparta adjustments
+ - Merge pull request #2 from cloudsailor/EK-19
+ - Fix routes
+ - Changes in routes.rb
+ - Add authorization for update_spl_cart_activate
+ - Fix adjustments updater decorator
+ - Refactor promotion methods throughout the app
+ - Remove card validation from pormotion switcher
+ - Fix rubocop offenses
+ - Fix promotion switcher service
+ - Add rails loggers troughout the app
+ - Add logger to services
+ - Fix promotion switching throughout the app
+ - Fix superclass error
+ - Change logger in promotion switcher method
+ - Add logger notes throughout the app
+ - Add missing translations
+ - Merge pull request #4 from cloudsailor/ek-126
+ - Update README.md
+ - Update order update logic
+ - Review changes
+ - Review changes
+ - Add AccountController decorator and refactor
+ - Correct public_metadata[:spl_card_no] update for card verification
+ - Add card validation
+ - Remove persist_totals overwrite and add indtruction to call methods in app repo
+ - Improve promotion switcher service
+ - Changes after code review
+ - Fix rubocop offenses
+ - Remove endpoints overwritten completely
+ - Improve promotion_switcher.rb
+ - Improve update_sparta_state_job.rb
+ - Improve adjustments_updater_decorator.rb
+ - Improve sparta_loyalty_service.rb
+ - Changes after code review
+ - Fix prepare basket method in sparta loyalty service
+ - Changes after code review
+ - Add files to exclude to rubocop.yml
+ - Changes after cr
+ - Fix engine_path error
+ - Change mode and prg code to env throughout the app
+ - Move pgr codes to env
+ - Fix rubocop offenses
+ - Fix rubocop offenses
+ - Add rspec to gemfile
+ - Move update sparta service to background job
+ - add update sparta state service
+ - Add endpoint to activate/deactivate sparta discounts
+ - Enable switching between spree and spl promotions
+ - set checkout_only troughout the app
+ - fix update method in checkout controller decorator
+ - Add decorators, serializers and initializer
+ - Set up configuration
+ - Init commit
+
