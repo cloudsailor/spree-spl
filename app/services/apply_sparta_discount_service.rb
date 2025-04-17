@@ -8,7 +8,7 @@ class ApplySpartaDiscountService
     @response = response
   end
 
-  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity
+  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength
     return unless response_valid?
 
     line_items.each do |line_item|
@@ -49,7 +49,7 @@ class ApplySpartaDiscountService
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
-  def create_sparta_adjustment(order, amount, label, line_item)
+  def create_sparta_adjustment(order, amount, label, line_item) # rubocop:disable Metrics/MethodLength
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
 
     remove_spree_promotions_adjustments(line_item)

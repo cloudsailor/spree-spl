@@ -5,7 +5,7 @@ module Spree
     module AdjustmentsUpdaterDecorator
       private
 
-      def set_spree_adjustments(attributes, totals)
+      def set_spree_adjustments
         adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
 
         @adjustable.adjustments.destroy_all if adjustable.public_metadata[:spl_card_active]
@@ -21,13 +21,6 @@ module Spree
 
       def line_item_with_spl_adjustments?
         @adjustable.is_a?(::Spree::LineItem) && @adjustable.adjustments.any? { |adj| adj.source_type == 'SPL' }
-      end
-
-      def update_shipment_adjustment(attributes, totals)
-        return unless @adjustable.is_a?(::Spree::Shipment)
-
-        assign_spl_totals(attributes, 0.0, Time.current)
-        @adjustable.update_columns(totals)
       end
 
       def recalculate_spl_adjustments(attributes, totals)
