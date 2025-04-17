@@ -21,6 +21,14 @@ Rails.application.config.to_prepare do
     Spree::Adjustable::AdjustmentsUpdaterDecorator
   )
 
+  ::Spree::Cart::Recalculate.prepend(
+    Spree::Cart::RecalculateDecorator
+  )
+
+  ::Spree::PromotionHandler::Cart.prepend(
+    CartDecorator
+  )
+
   ::Spree::OrderUpdater.prepend(
     OrderUpdaterDecorator
   )

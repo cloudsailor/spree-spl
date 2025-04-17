@@ -8,7 +8,7 @@ class ApplySpartaDiscountService
     @response = response
   end
 
-  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity
+  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength
     return unless response_valid?
 
     line_items.each do |line_item|
@@ -19,6 +19,7 @@ class ApplySpartaDiscountService
       label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.id}"
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
       discounts_present?(line_item, label)
+      update_sparta_adjustment(line_item, label, amount)
       create_sparta_adjustment(order, amount, label, line_item)
     end
   end
@@ -48,9 +49,10 @@ class ApplySpartaDiscountService
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
-  def create_sparta_adjustment(order, amount, label, line_item)
-    return if amount.zero? || line_item.adjustments.find_by(label: label).present?
+  def create_sparta_adjustment(order, amount, label, line_item) # rubocop:disable Metrics/MethodLength
+    return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
 
+    remove_spree_promotions_adjustments(line_item)
     line_item.adjustments.create(
       source_type: 'SPL',
       adjustable: line_item,
@@ -61,5 +63,20 @@ class ApplySpartaDiscountService
     )
 
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
+  end
+
+  def update_sparta_adjustment(line_item, label, amount)
+    adjustments = line_item.adjustments
+    return if amount.zero? || adjustments.find_by(label: label).nil?
+    return if adjustments.find_by(label: label, amount: amount).present?
+
+    remove_spree_promotions_adjustments(line_item)
+    adjustments.find_by(label: label).update(amount: amount)
+  end
+
+  def remove_spree_promotions_adjustments(line_item)
+    return unless line_item.adjustments.where.not(source_type: 'SPL').any?
+
+    line_item.adjustments.where.not(source_type: 'SPL').destroy_all
   end
 end

@@ -22,7 +22,7 @@ module CartControllerDecorator
     else
       active_param = cast_boolean(params.dig('public_metadata', 'spl_card_active'))
       public_metadata = spree_current_order.public_metadata
-      spree_current_order.update(public_metadata: public_metadata.merge('spl_card_active' => active_param))
+      update_spl_card_active_param(spree_current_order, active_param, public_metadata)
       spree_current_order.reload
       promotion_switcher(spree_current_order, true)
 
@@ -34,6 +34,11 @@ module CartControllerDecorator
 
   def promotion_switcher(order, check_only)
     PromotionSwitcherService.new(order, check_only).call
+  end
+
+  def update_spl_card_active_param(order, active_param, public_metadata)
+    order.update(public_metadata: public_metadata.merge('spl_card_active' => active_param))
+    order.promotions.destroy_all if order.promotions.any?
   end
 
   def add_spl_discount_params_to_order(user)
