@@ -7,11 +7,11 @@ class PromotionSwitcherService
     @order = order
   end
 
-  def call
+  def call # rubocop:disable Metrics/AbcSize
     return unless order.public_metadata.key?(:spl_card_active)
 
-    apply_sparta_discount(order, check_only) if order.public_metadata[:spl_card_active]
-    remove_sparta_discount(order) unless order.public_metadata[:spl_card_active]
+    apply_sparta_discount(order, check_only) if cast_boolean(order.public_metadata[:spl_card_active])
+    remove_sparta_discount(order) unless cast_boolean(order.public_metadata[:spl_card_active])
   ensure
     order.reload
   end
@@ -40,5 +40,9 @@ class PromotionSwitcherService
 
   def remove_sparta_discount(order)
     RemoveSpartaDiscountService.destroy_all_sparta_adjustments(order)
+  end
+
+  def cast_boolean(value)
+    ActiveModel::Type::Boolean.new.cast(value)
   end
 end
