@@ -32,4 +32,8 @@ Rails.application.config.to_prepare do
   ::Spree::OrderUpdater.prepend(
     OrderUpdaterDecorator
   )
+
+  ::Spree::Payment.prepend(
+    PaymentDecorator
+  )
 end
