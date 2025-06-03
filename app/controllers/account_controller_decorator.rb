@@ -6,9 +6,13 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
+  def registration_code
+    Spl::SendSmsCodeService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
+  end
+
   private
 
-  def validate_spl_no_card
+  def validate_spl_no_card # rubocop:disable Metrics/AbcSize
     return unless user_update_params[:public_metadata].present?
     return if disactivated_card
     return unless user_update_params[:public_metadata][:spl_no_card].present?

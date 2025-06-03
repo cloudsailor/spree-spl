@@ -7,6 +7,9 @@ Spree::Core::Engine.add_routes do
         resource :cart, controller: :cart, only: %i[show create destroy] do
           patch :update_spl_card_activate, to: 'cart#update_spl_card_activate'
         end
+        resource :account, controller: :account, only: %i[show create update] do
+          patch :registration_code, to: 'account#registration_code'
+        end
       end
     end
   end
