@@ -6,8 +6,13 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
+  def register_loyalty_account
+    spree_authorize! :update, spree_current_user
+    Spl::RegisterAccountService.new(DateTime.current, spree_current_user, params).call
+  end
+
   def registration_code
-    Spl::SendSmsCodeService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
+    Spl::SendOneTimePasswordCodeService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
   end
 
   private

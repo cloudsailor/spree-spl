@@ -17,8 +17,8 @@ module Spl
 
     def call
       oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
-
       access_token = oauth_response_body.dig('response', 'accessToken')
+
       request_otp_body = prepare_sms_request_otp_body(access_token)
       request_otp_response = send_request(@request_otp_url, request_otp_body)
       request_otp_response_body = JSON.parse(request_otp_response.body)
@@ -38,16 +38,6 @@ module Spl
       request.body = body.to_json
       Rails.logger.debug request.body.inspect
       http.request(request)
-    end
-
-    def prepare_token_body_with_signature
-      {
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
-        signature: generate_signature,
-        date: @date,
-        grantType: 'signature'
-      }
     end
 
     def prepare_sms_request_otp_body(acccess_token)

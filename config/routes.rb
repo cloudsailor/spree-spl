@@ -9,6 +9,7 @@ Spree::Core::Engine.add_routes do
         end
         resource :account, controller: :account, only: %i[show create update] do
           patch :registration_code, to: 'account#registration_code'
+          post :register_loyalty_account, to: 'account#register_loyalty_account'
         end
       end
     end

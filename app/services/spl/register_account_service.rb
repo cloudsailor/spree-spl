@@ -8,16 +8,23 @@ module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
 
-    def initialize(date, mobile_country, phone_number)
+    def initialize(date, user, params)
       @date = date.to_i * 1000
-      @token_url = URI.parse(ENV['SPL_CLIENT_OAUTH_TOKEN'])
-      @request_otp_url = URI.parse(ENV['SPL_CLIENT_REQUEST_OTP'])
-      @mobile_country = mobile_country
-      @phone_number = phone_number
+      @register_url = URI.parse(ENV['SPL_CLIENT_REGISTER'])
+      @user = user
+      @params = params
     end
 
     def call
       oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
+      access_token = oauth_response_body.dig('response', 'accessToken')
+
+      register_body = prepare_registration_body(access_token)
+      register_response = send_request(@register_url, register_body)
+      register_response_body = JSON.parse(register_response.body)
+      raise SplRegisterAccountError, register_response_body if register_response_body['errorCode'] != '0'
+
+      register_response_body
     end
 
     private
@@ -33,8 +40,27 @@ module Spl
       http.request(request)
     end
 
-    def generate_signature
-      Spl::ClientSignatureService.new(@date).call
+    def prepare_registration_body(acccess_token) # rubocop:disable Metrics/MethodLength
+      {
+        context: {
+          oauthToken: acccess_token
+        },
+        person: {
+          firstName: @user[:first_name],
+          lastName: @user[:first_name],
+          email: @user[:email],
+          pass: @user[:encrypted_password],
+          mobileCountry: @params.dig('user', 'public_metadata', 'mobileCountry'),
+          mobile: @params.dig('user', 'public_metadata', 'phone_number'),
+          permissions: {
+            processData: @params.dig('user', 'public_metadata', 'splProcessData'),
+            operationalSms: @params.dig('user', 'public_metadata', 'operationalSms')
+          }
+        },
+        authCode: @params.dig('user', 'public_metadata', 'splAuthCode'),
+        partnerCode: ENV['SPL_PARTNER_CODE'],
+        placeCode: ENV['SPL_PLACE_CODE']
+      }
     end
   end
 end
