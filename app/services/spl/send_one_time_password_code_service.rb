@@ -5,28 +5,24 @@ require 'net/http'
 require 'json'
 
 module Spl
-  class SendSmsCodeService
-    class SplSendSmsCodeError < StandardError; end
+  class SendOneTimePasswordCodeService
+    class SplSendOtpCodeError < StandardError; end
 
     def initialize(date, mobile_country, phone_number)
       @date = date.to_i * 1000
-      @token_url = URI.parse(ENV['SPL_CLIENT_OAUTH_TOKEN'])
       @request_otp_url = URI.parse(ENV['SPL_CLIENT_REQUEST_OTP'])
       @mobile_country = mobile_country
       @phone_number = phone_number
     end
 
     def call
-      oauth_body = prepare_token_body_with_signature
-      oauth_response = send_request(@token_url, oauth_body)
-      oauth_response_body = JSON.parse(oauth_response.body)
-      raise SplSendSmsCodeError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
 
       access_token = oauth_response_body.dig('response', 'accessToken')
-      request_otp_body = prepare_request_otp_body(access_token)
+      request_otp_body = prepare_sms_request_otp_body(access_token)
       request_otp_response = send_request(@request_otp_url, request_otp_body)
       request_otp_response_body = JSON.parse(request_otp_response.body)
-      raise SplSendSmsCodeError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
+      raise SplSendOtpCodeError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
 
       request_otp_response_body
     end
@@ -54,16 +50,27 @@ module Spl
       }
     end
 
-    def prepare_request_otp_body(acccess_token)
+    def prepare_sms_request_otp_body(acccess_token)
       {
         context: {
           oauthToken: acccess_token
         },
-        channel: 'S', #S = SMS
+        channel: 'S', # S = SMS
         mobileCountry: @mobile_country,
         mobile: @phone_number
       }
     end
+
+    # below method allows sent one time password on email
+    # def prepare_email_request_otp_body(acccess_token)
+    #   {
+    #     context: {
+    #       oauthToken: acccess_token
+    #     },
+    #     channel: 'E', # E = email
+    #     email: @email
+    #   }
+    # end
 
     def generate_signature
       data = "#{ENV["SPL_API_TOKEN"]}#{ENV["SPL_SIGNATURE_SEED"]}#{@date}"
