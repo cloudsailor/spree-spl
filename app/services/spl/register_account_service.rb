@@ -17,11 +17,7 @@ module Spl
     end
 
     def call
-      oauth_body = prepare_token_body_with_signature
-      oauth_response = send_request(@token_url, oauth_body)
-      oauth_response_body = JSON.parse(oauth_response.body)
-      raise SplRegisterAccountError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
-
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
     end
 
     private
@@ -37,20 +33,8 @@ module Spl
       http.request(request)
     end
 
-    def prepare_token_body_with_signature
-      {
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
-        signature: generate_signature,
-        date: @date,
-        grantType: 'signature'
-      }
-    end
-
     def generate_signature
-      data = "#{ENV["SPL_API_TOKEN"]}#{ENV["SPL_SIGNATURE_SEED"]}#{@date}"
-      Rails.logger.debug data.inspect
-      Digest::SHA256.hexdigest(data)
+      Spl::ClientSignatureService.new(@date).call
     end
   end
 end

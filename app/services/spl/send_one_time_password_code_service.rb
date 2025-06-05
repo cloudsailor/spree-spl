@@ -73,9 +73,7 @@ module Spl
     # end
 
     def generate_signature
-      data = "#{ENV["SPL_API_TOKEN"]}#{ENV["SPL_SIGNATURE_SEED"]}#{@date}"
-      Rails.logger.debug data.inspect
-      Digest::SHA256.hexdigest(data)
+      Spl::ClientSignatureService.new(@date).call
     end
   end
 end
