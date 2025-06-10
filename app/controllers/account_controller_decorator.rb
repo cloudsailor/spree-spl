@@ -9,10 +9,17 @@ module AccountControllerDecorator
   def register_loyalty_account
     spree_authorize! :update, spree_current_user
     Spl::RegisterAccountService.new(DateTime.current, spree_current_user, params).call
+    spree_current_user.reload
+    render_serialized_payload { serialize_resource(spree_current_user) }
+  rescue Spl::RegisterAccountService::SplRegisterAccountError => e
+    render json: { error: e }, status: :bad_request
   end
 
   def registration_code
     Spl::SendOneTimePasswordCodeService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
+    head 204
+  rescue Spl::SendOneTimePasswordCodeService::SplSendOtpCodeError => e
+    render json: { error: e }, status: :bad_request
   end
 
   private

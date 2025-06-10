@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'digest'
-require 'net/http'
 require 'json'
 
 module Spl
@@ -22,28 +20,24 @@ module Spl
       register_body = prepare_registration_body(access_token)
       register_response = send_request(@register_url, register_body)
       register_response_body = JSON.parse(register_response.body)
+
       raise SplRegisterAccountError, register_response_body if register_response_body['errorCode'] != '0'
 
-      register_response_body
+      spl_card = register_response_body.dig('response', 'cardNo')
+      update_account(spl_card, @params)
     end
 
     private
 
     def send_request(url, body)
-      http = Net::HTTP.new(url.host, url.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(url)
-      request['Content-Type'] = 'application/json'
-      request.body = body.to_json
-      Rails.logger.debug request.body.inspect
-      http.request(request)
+      Spl::SendRequestService.new(url, body).call
     end
 
-    def prepare_registration_body(acccess_token) # rubocop:disable Metrics/MethodLength
+    def prepare_registration_body(access_token) # rubocop:disable Metrics/MethodLength
       {
         context: {
-          oauthToken: acccess_token
+          oauthToken: access_token,
+          prgCode: ENV['SPL_PRG_CODE']
         },
         person: {
           firstName: @user[:first_name],
@@ -61,6 +55,15 @@ module Spl
         partnerCode: ENV['SPL_PARTNER_CODE'],
         placeCode: ENV['SPL_PLACE_CODE']
       }
+    end
+
+    def update_account(card_number, params)
+      mobile_country = params.dig('user', 'public_metadata', 'mobileCountry')
+      mobile_phone = params.dig('user', 'public_metadata', 'phone_number')
+      @user.update(public_metadata: @user.public_metadata.merge('spl_no_card': card_number,
+                                                                'spl_card_active': true,
+                                                                'mobile_country': mobile_country,
+                                                                'phone_number': mobile_phone))
     end
   end
 end

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'digest'
-require 'net/http'
-require 'json'
 
 module Spl
   class ClientSignatureService

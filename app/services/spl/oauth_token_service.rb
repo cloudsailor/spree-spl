@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'digest'
-require 'net/http'
 require 'json'
 
 module Spl
@@ -17,6 +15,7 @@ module Spl
       oauth_body = prepare_oauth_token_body_with_signature
       oauth_response = send_request(@token_url, oauth_body)
       oauth_response_body = JSON.parse(oauth_response.body)
+
       raise OauthTokenError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
 
       oauth_response_body
@@ -25,18 +24,14 @@ module Spl
     private
 
     def send_request(url, body)
-      http = Net::HTTP.new(url.host, url.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(url)
-      request['Content-Type'] = 'application/json'
-      request.body = body.to_json
-      Rails.logger.debug request.body.inspect
-      http.request(request)
+      Spl::SendRequestService.new(url, body).call
     end
 
     def prepare_oauth_token_body_with_signature
       {
+        context: {
+          prgCode: ENV['SPL_PRG_CODE']
+        },
         apiUser: ENV['SPL_API_USER'],
         apiToken: ENV['SPL_API_TOKEN'],
         signature: generate_signature,

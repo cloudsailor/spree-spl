@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'digest'
-require 'net/http'
 require 'json'
 
 module Spl
@@ -30,20 +28,14 @@ module Spl
     private
 
     def send_request(url, body)
-      http = Net::HTTP.new(url.host, url.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(url)
-      request['Content-Type'] = 'application/json'
-      request.body = body.to_json
-      Rails.logger.debug request.body.inspect
-      http.request(request)
+      Spl::SendRequestService.new(url, body).call
     end
 
-    def prepare_sms_request_otp_body(acccess_token)
+    def prepare_sms_request_otp_body(access_token)
       {
         context: {
-          oauthToken: acccess_token
+          oauthToken: access_token,
+          prgCode: ENV['SPL_PRG_CODE']
         },
         channel: 'S', # S = SMS
         mobileCountry: @mobile_country,
@@ -52,10 +44,11 @@ module Spl
     end
 
     # below method allows sent one time password on email
-    # def prepare_email_request_otp_body(acccess_token)
+    # def prepare_email_request_otp_body(access_token)
     #   {
     #     context: {
-    #       oauthToken: acccess_token
+    #       oauthToken: access_token,
+    #       prgCode: ENV['SPL_PRG_CODE']
     #     },
     #     channel: 'E', # E = email
     #     email: @email
