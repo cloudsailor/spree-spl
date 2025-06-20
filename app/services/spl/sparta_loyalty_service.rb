@@ -15,7 +15,7 @@ module Spl
       @date = date.to_i * 1000
       @products = products
       @check_only = check_only
-      @url = URI.parse(ENV['SPL_SALE_URL'])
+      @url = URI.parse("#{ENV['SPL_URL']}/api/tx/sale")
     end
 
     def call

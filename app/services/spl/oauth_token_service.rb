@@ -8,7 +8,7 @@ module Spl
 
     def initialize(date)
       @date = date.to_i * 1000
-      @token_url = URI.parse(ENV['SPL_CLIENT_OAUTH_TOKEN'])
+      @token_url = URI.parse("#{ENV['SPL_URL']}/api/oauth/token")
     end
 
     def call

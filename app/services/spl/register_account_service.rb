@@ -8,7 +8,7 @@ module Spl
 
     def initialize(date, user, params)
       @date = date.to_i * 1000
-      @register_url = URI.parse(ENV['SPL_CLIENT_REGISTER'])
+      @register_url = URI.parse("#{ENV['SPL_URL']}/api/cwp/customer/register")
       @user = user
       @params = params
     end
