@@ -6,9 +6,8 @@ module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
 
-    def initialize(date, user, params)
-      @date = date.to_i * 1000
-      @register_url = URI.parse("#{ENV['SPL_URL']}/api/cwp/customer/register")
+    def initialize(user, params)
+      @register_url = URI.parse("#{ENV["SPL_URL"]}/api/cwp/customer/register")
       @user = user
       @params = params
     end
