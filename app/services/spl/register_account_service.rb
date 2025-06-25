@@ -42,7 +42,6 @@ module Spl
           firstName: @user[:first_name],
           lastName: @user[:first_name],
           email: @user[:email],
-          pass: @user[:encrypted_password],
           mobileCountry: @params.dig('user', 'public_metadata', 'mobileCountry'),
           mobile: @params.dig('user', 'public_metadata', 'phone_number'),
           permissions: {
