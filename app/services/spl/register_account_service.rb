@@ -7,7 +7,7 @@ module Spl
     class SplRegisterAccountError < StandardError; end
 
     def initialize(user, params)
-      @register_url = URI.parse("#{ENV["SPL_URL"]}/api/cwp/customer/register")
+      @register_url = URI.parse("#{ENV['SPL_URL']}/api/cwp/customer/register")
       @user = user
       @params = params
     end
