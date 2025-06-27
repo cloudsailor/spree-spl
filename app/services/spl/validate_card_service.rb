@@ -43,7 +43,7 @@ module Spl
     end
 
     def verify_card_request
-      url = URI.parse(ENV['SPL_CHECK_CARD_URL'])
+      url = URI.parse(ENV.fetch('SPL_CHECK_CARD_URL'))
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 
@@ -62,10 +62,10 @@ module Spl
       {
         ver: 4,
         requestId: uuid,
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
-        partnerCode: ENV['SPL_PARTNER_CODE'],
-        placeCode: ENV['SPL_PLACE_CODE'],
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
+        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+        placeCode: ENV.fetch('SPL_PLACE_CODE'),
         date: date_in_ms,
         cardNo: card_number,
         signature: signature(date_in_ms, card_number),
@@ -74,10 +74,10 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{date}#{card_number}"
+      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
+      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
     end
 
     def cards_assigned_user(card_number)
