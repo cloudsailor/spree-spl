@@ -122,7 +122,7 @@ class UpdateSpartaStateJob < ActiveJob::Base
   end
 
   def generate_signature(order_number, date = '', card_number = '', check_only = '', order_name = '') # rubocop:disable Metrics/ParameterLists
-    data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
+    data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
     Rails.logger.debug data.inspect
     signature_base = Digest::SHA256.hexdigest(data)
     Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])

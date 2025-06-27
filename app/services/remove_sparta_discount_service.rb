@@ -9,10 +9,6 @@ class RemoveSpartaDiscountService
 
       adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
       destroy_adjustments(adjustments, line_item, order)
-      # adjustments.update_all(eligible: false, state: 'close')
-
-      # line_item.reload
-      # ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
 
       adjustments.where(source_type: SPL_SOURCE_TYPE).destroy_all
     end

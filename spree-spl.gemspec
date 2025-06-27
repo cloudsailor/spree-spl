@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Extension for Spree to allow to integrate with SpartaLoyalty'
   spec.description = 'Extension for Spree to allow to integrate with SpartaLoyalty'
   spec.homepage = 'https://github.com/cloudsailor/spree-spl'
-  spec.required_ruby_version = '>= 3.1.0'
+  spec.required_ruby_version = '>= 3.3.0'
   spec.license = 'MIT'
 
   spec.metadata['homepage_uri'] = spec.homepage
