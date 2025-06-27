@@ -9,5 +9,6 @@ gem 'rake', '~> 13.0'
 
 group :development, :test do
   gem 'brakeman'
-  gem 'rubocop', '~> 1.21'
+  gem 'rubocop', require: false
+  gem 'rubocop-rails', require: false
 end
