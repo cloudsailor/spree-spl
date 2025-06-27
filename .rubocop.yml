@@ -1,25 +1,11 @@
 AllCops:
-  TargetRubyVersion: 3.3
+  NewCops: enable
+  Exclude:
+    - bin/**
+    - config/**/*
 
 Style/Documentation:
   Enabled: false
-
-Metrics/AbcSize:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
-
-Metrics/MethodLength:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
-
-Metrics/ClassLength:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
-
-Metrics/BlockLength:
-  Exclude:
-    - config/initializers/spree_spl.rb
-    - spree-spl.gemspec
 
 Metrics/ParameterLists:
   Max: 8
