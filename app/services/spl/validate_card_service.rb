@@ -43,7 +43,7 @@ module Spl
     end
 
     def verify_card_request
-      url = URI.parse("#{ENV['SPL_URL']}/api/tx/checkCard")
+      url = URI.parse(Spl::UrlCreatorService.new.check_card)
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 

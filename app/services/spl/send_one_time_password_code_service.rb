@@ -8,7 +8,7 @@ module Spl
 
     def initialize(date, params)
       @date = date.to_i * 1000
-      @request_otp_url = URI.parse("#{ENV['SPL_URL']}/api/cwp/customer/requestOTP")
+      @request_otp_url = URI.parse(Spl::UrlCreatorService.new.request_otp)
       @mobile_country = params[:mobile_country]
       @phone_number = params[:phone_number]
       @email = params[:email]

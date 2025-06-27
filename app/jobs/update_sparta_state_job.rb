@@ -45,21 +45,21 @@ class UpdateSpartaStateJob < ActiveJob::Base
 
   def update_order_status(order_token, basket, date, card_number, order_number = '')
     body = build_body(order_token, basket, date, card_number, order_number)
-    sale_url = URI.parse("#{ENV['SPL_URL']}/api/tx/sale")
+    sale_url = URI.parse(Spl::UrlCreatorService.new.sale)
     response_body = send_request(sale_url, body)
     handle_response(response_body)
   end
 
   def find_transaction(order_token)
     body = build_find_transaction_body(order_token)
-    order_find_url = URI.parse("#{ENV['SPL_URL']}/api/tx/find")
+    order_find_url = URI.parse(Spl::UrlCreatorService.new.find)
     response_body = send_request(order_find_url, body)
     response_body&.dig('response', 0) if response_body && response_body['errorCode'] == '0'
   end
 
   def refund(order_token, basket, date, card_number)
     body = build_refund_body(order_token, basket, date, card_number)
-    refund_url = URI.parse("#{ENV['SPL_URL']}/api/tx/saleRefund")
+    refund_url = URI.parse(Spl::UrlCreatorService.new.sale_refund)
     response_body = send_request(refund_url, body)
     handle_response(response_body)
   end
