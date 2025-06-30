@@ -43,7 +43,7 @@ module Spl
     end
 
     def verify_card_request
-      url = URI.parse(ENV['SPL_CHECK_CARD_URL'])
+      url = URI.parse(Spl::UrlCreatorService.new.check_card)
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 
@@ -74,7 +74,7 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{card_number}"
+      data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])

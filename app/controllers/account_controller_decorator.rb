@@ -6,9 +6,25 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
+  def register_loyalty_account
+    spree_authorize! :update, spree_current_user
+    Spl::RegisterAccountService.new(spree_current_user, params).call
+    spree_current_user.reload
+    render_serialized_payload { serialize_resource(spree_current_user) }
+  rescue Spl::RegisterAccountService::SplRegisterAccountError => e
+    render json: { error: e }, status: :bad_request
+  end
+
+  def registration_code
+    Spl::SendOneTimePasswordCodeService.new(DateTime.current, params).call
+    head 204
+  rescue Spl::SendOneTimePasswordCodeService::SplSendOtpCodeError => e
+    render json: { error: e }, status: :bad_request
+  end
+
   private
 
-  def validate_spl_no_card
+  def validate_spl_no_card # rubocop:disable Metrics/AbcSize
     return unless user_update_params[:public_metadata].present?
     return if disactivated_card
     return unless user_update_params[:public_metadata][:spl_no_card].present?
