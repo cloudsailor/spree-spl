@@ -37,7 +37,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV['SPL_PRG_CODE']
+          prgCode: ENV.fetch('SPL_PRG_CODE')
         },
         channel: 'S', # S = SMS
         mobileCountry: @mobile_country,
@@ -50,7 +50,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV['SPL_PRG_CODE']
+          prgCode: ENV.fetch('SPL_PRG_CODE')
         },
         channel: 'E', # E = email
         email: @email
