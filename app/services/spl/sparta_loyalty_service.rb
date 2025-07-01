@@ -15,7 +15,7 @@ module Spl
       @date = date.to_i * 1000
       @products = products
       @check_only = check_only
-      @url = URI.parse(ENV['SPL_SALE_URL'])
+      @url = URI.parse(Spl::UrlCreatorService.new.sale)
     end
 
     def call
@@ -34,15 +34,7 @@ module Spl
     private
 
     def send_request
-      http = Net::HTTP.new(@url.host, @url.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(@url)
-      request['Content-Type'] = 'application/json'
-      request.body = prepare_basket_body.to_json
-      Rails.logger.debug 'SPL LOYALTY SERVICE REQUEST BODY'
-      Rails.logger.debug request.body.inspect
-      http.request(request)
+      Spl::SendRequestService.new(@url, @body).call
     end
 
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
@@ -89,7 +81,7 @@ module Spl
 
     def generate_signature
       check_only = @check_only ? 1 : ''
-      data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{@date}#{@order_token}#{check_only}#{@card_number}"
+      data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{@date}#{@order_token}#{check_only}#{@card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])

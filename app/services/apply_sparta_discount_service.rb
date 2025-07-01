@@ -16,7 +16,7 @@ class ApplySpartaDiscountService
       spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
       next if sparta_item['discounts'].nil?
 
-      label = "SPARTA_#{sparta_item&.fetch("discounts")&.first&.fetch("name")}_#{line_item.id}"
+      label = "SPARTA_#{sparta_item&.fetch('discounts')&.first&.fetch('name')}_#{line_item.id}"
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
       discounts_present?(line_item, label)
       update_sparta_adjustment(line_item, label, amount)

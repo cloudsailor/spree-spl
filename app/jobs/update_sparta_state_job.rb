@@ -31,11 +31,10 @@ class UpdateSpartaStateJob < ActiveJob::Base
   private
 
   def send_request(url, body)
-    uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
+    http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
 
-    request = Net::HTTP::Post.new(uri)
+    request = Net::HTTP::Post.new(url)
     request['Content-Type'] = 'application/json'
     request.body = body.to_json
     Rails.logger.debug request.body
@@ -46,19 +45,22 @@ class UpdateSpartaStateJob < ActiveJob::Base
 
   def update_order_status(order_token, basket, date, card_number, order_number = '')
     body = build_body(order_token, basket, date, card_number, order_number)
-    response_body = send_request(ENV['SPL_SALE_URL'], body)
+    sale_url = URI.parse(Spl::UrlCreatorService.new.sale)
+    response_body = send_request(sale_url, body)
     handle_response(response_body)
   end
 
   def find_transaction(order_token)
     body = build_find_transaction_body(order_token)
-    response_body = send_request(ENV['SPL_ORDER_FIND_URL'], body)
+    order_find_url = URI.parse(Spl::UrlCreatorService.new.find)
+    response_body = send_request(order_find_url, body)
     response_body&.dig('response', 0) if response_body && response_body['errorCode'] == '0'
   end
 
   def refund(order_token, basket, date, card_number)
     body = build_refund_body(order_token, basket, date, card_number)
-    response_body = send_request(ENV['SPL_REFUND_URL'], body)
+    refund_url = URI.parse(Spl::UrlCreatorService.new.sale_refund)
+    response_body = send_request(refund_url, body)
     handle_response(response_body)
   end
 
@@ -122,7 +124,7 @@ class UpdateSpartaStateJob < ActiveJob::Base
   end
 
   def generate_signature(order_number, date = '', card_number = '', check_only = '', order_name = '') # rubocop:disable Metrics/ParameterLists
-    data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
+    data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
     Rails.logger.debug data.inspect
     signature_base = Digest::SHA256.hexdigest(data)
     Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
