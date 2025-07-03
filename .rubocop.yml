@@ -1,20 +1,11 @@
 AllCops:
-  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    - bin/**
+    - config/**/*
 
 Style/Documentation:
   Enabled: false
-
-Metrics/AbcSize:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
-
-Metrics/MethodLength:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
-
-Metrics/ClassLength:
-  Exclude:
-    - app/jobs/update_sparta_state_job.rb
 
 Metrics/ParameterLists:
   Max: 8

@@ -46,17 +46,17 @@ module CartControllerDecorator
     return unless user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
 
     spl_card_active = cast_boolean(user.public_metadata['spl_card_active'])
-    params[:public_metadata].merge!("spl_card_active": spl_card_active,
-                                    "spl_no_card": user.public_metadata['spl_no_card'])
+    params[:public_metadata].merge!(spl_card_active: spl_card_active,
+                                    spl_no_card: user.public_metadata['spl_no_card'])
   end
 
   def switch_spl_active_param(order, check_only)
     return unless order.public_metadata.key?(:spl_card_active)
 
     if order.public_metadata[:spl_card_active] == true
-      order.update(public_metadata: order.public_metadata.merge("spl_card_active": false))
+      order.update(public_metadata: order.public_metadata.merge(spl_card_active: false))
     else
-      order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
+      order.update(public_metadata: order.public_metadata.merge(spl_card_active: true))
     end
 
     promotion_switcher(order, check_only)
@@ -67,13 +67,13 @@ module CartControllerDecorator
 
     active_param = cast_boolean(user.public_metadata[:spl_card_active])
     spl_card = user.public_metadata[:spl_no_card]
-    order.update(public_metadata: order.public_metadata.merge("spl_card_active": active_param, "spl_no_card": spl_card))
+    order.update(public_metadata: order.public_metadata.merge(spl_card_active: active_param, spl_no_card: spl_card))
   end
 
   def maintain_spl_adjustments(order)
     return unless order.public_metadata.key?(:spl_card_active)
 
-    order.update(public_metadata: order.public_metadata.merge("spl_card_active": true))
+    order.update(public_metadata: order.public_metadata.merge(spl_card_active: true))
     promotion_switcher(order, true)
   end
 
