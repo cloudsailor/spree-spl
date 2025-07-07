@@ -40,6 +40,18 @@ module Spl
       }
     end
 
+    def prepare_oauth_token_body_with_oauth_code
+      {
+        context: {
+          prgCode: ENV.fetch('SPL_PRG_CODE')
+        },
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
+        oauthCode: oauth_code,
+        grantType: 'authorization_code'
+      }
+    end
+
     def generate_signature
       Spl::ClientSignatureService.new(@date).call
     end

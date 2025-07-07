@@ -26,6 +26,14 @@ module Spl
       "#{client_base}/requestOTP"
     end
 
+    def get_otp # rubocop:disable Naming/AccessorMethodName
+      "#{oauth_base}/getOTP"
+    end
+
+    def login
+      "#{oauth_base}/login"
+    end
+
     def oauth_token
       "#{oauth_base}/token"
     end
