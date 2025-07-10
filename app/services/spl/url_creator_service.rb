@@ -18,6 +18,10 @@ module Spl
       "#{eshop_base}/saleRefund"
     end
 
+    def me
+      "#{client_base}/me"
+    end
+
     def register
       "#{client_base}/register"
     end

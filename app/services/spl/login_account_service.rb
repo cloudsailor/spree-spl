@@ -21,7 +21,7 @@ module Spl
       login_response = send_request(@login_url, login_body)
       login_response_body = JSON.parse(login_response.body)
       Rails.logger.debug login_response_body
-      raise SplLoginError, login_response_body['msg'] if login_response_body['errorCode'] != '0'
+      raise SplLoginAccountError, login_response_body['msg'] if login_response_body['errorCode'] != '0'
 
       access_token = login_response_body.dig('response', 'oauthCode')
       get_access_token(access_token)
