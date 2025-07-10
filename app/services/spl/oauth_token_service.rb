@@ -40,10 +40,10 @@ module Spl
     def prepare_oauth_token_body_with_signature
       {
         context: {
-          prgCode: ENV['SPL_PRG_CODE']
+          prgCode: ENV.fetch('SPL_PRG_CODE')
         },
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
         signature: generate_signature,
         date: @date,
         grantType: 'signature'

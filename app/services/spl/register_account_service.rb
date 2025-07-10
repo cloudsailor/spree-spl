@@ -36,7 +36,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV['SPL_PRG_CODE']
+          prgCode: ENV.fetch('SPL_PRG_CODE')
         },
         person: {
           firstName: @user[:first_name],
@@ -50,18 +50,18 @@ module Spl
           }
         },
         authCode: @params.dig('user', 'public_metadata', 'splAuthCode'),
-        partnerCode: ENV['SPL_PARTNER_CODE'],
-        placeCode: ENV['SPL_PLACE_CODE']
+        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+        placeCode: ENV.fetch('SPL_PLACE_CODE')
       }
     end
 
     def update_account(card_number, params)
       mobile_country = params.dig('user', 'public_metadata', 'mobileCountry')
       mobile_phone = params.dig('user', 'public_metadata', 'phone_number')
-      @user.update(public_metadata: @user.public_metadata.merge('spl_no_card': card_number,
-                                                                'spl_card_active': true,
-                                                                'mobile_country': mobile_country,
-                                                                'phone_number': mobile_phone))
+      @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number,
+                                                                spl_card_active: true,
+                                                                mobile_country: mobile_country,
+                                                                phone_number: mobile_phone))
     end
   end
 end

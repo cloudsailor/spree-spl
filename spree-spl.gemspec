@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Extension for Spree to allow to integrate with SpartaLoyalty'
   spec.description = 'Extension for Spree to allow to integrate with SpartaLoyalty'
   spec.homepage = 'https://github.com/cloudsailor/spree-spl'
-  spec.required_ruby_version = '>= 3.1.0'
+  spec.required_ruby_version = '>= 3.3.0'
   spec.license = 'MIT'
 
   spec.metadata['homepage_uri'] = spec.homepage
@@ -36,9 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'spree_api', spree_version
   spec.add_dependency 'spree_auth_devise'
   spec.add_dependency 'spree_core', spree_version
-  spec.add_development_dependency 'rspec-rails'
-  spec.add_development_dependency 'rspec-retry'
-  spec.add_development_dependency 'rubocop-rspec'
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end

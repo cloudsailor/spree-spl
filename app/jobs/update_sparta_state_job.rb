@@ -4,11 +4,11 @@ require 'digest'
 require 'net/http'
 require 'json'
 
-class UpdateSpartaStateJob < ActiveJob::Base
+class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLength
   ORDER_STATES = %w[C D].freeze
   ERROR_CODES = %w[ORDER_NOT_FOUND REQUEST_ALREADY_PROCESSED].freeze
 
-  def perform(order_token, state, order_number)
+  def perform(order_token, state, order_number) # rubocop:disable Metrics/MethodLength
     return if order_token.blank? || !ORDER_STATES.include?(state&.upcase)
 
     transaction = find_transaction(order_token)
@@ -30,8 +30,9 @@ class UpdateSpartaStateJob < ActiveJob::Base
 
   private
 
-  def send_request(url, body)
-    http = Net::HTTP.new(url.host, url.port)
+  def send_request(url, body) # rubocop:disable Metrics/AbcSize
+    uri = URI.parse(url)
+    http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(url)
@@ -64,15 +65,15 @@ class UpdateSpartaStateJob < ActiveJob::Base
     handle_response(response_body)
   end
 
-  def build_body(order_token, basket, date, card_number, order_number)
+  def build_body(order_token, basket, date, card_number, order_number) # rubocop:disable Metrics/MethodLength
     date_in_ms = date.to_i * 1000
     {
       ver: 4,
-      apiUser: ENV['SPL_API_USER'],
-      apiToken: ENV['SPL_API_TOKEN'],
-      partnerCode: ENV['SPL_PARTNER_CODE'],
-      placeCode: ENV['SPL_PLACE_CODE'],
-      mode: ENV['SPL_UPDATE_STATUS_MODE'],
+      apiUser: ENV.fetch('SPL_API_USER'),
+      apiToken: ENV.fetch('SPL_API_TOKEN'),
+      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+      placeCode: ENV.fetch('SPL_PLACE_CODE'),
+      mode: ENV.fetch('SPL_UPDATE_STATUS_MODE'),
       pending: false,
       date: date_in_ms,
       no: order_token,
@@ -83,35 +84,35 @@ class UpdateSpartaStateJob < ActiveJob::Base
     }
   end
 
-  def build_find_transaction_body(order_token)
+  def build_find_transaction_body(order_token) # rubocop:disable Metrics/MethodLength
     date_in_ms = DateTime.current.to_i * 1000
     {
       ver: 3,
-      apiUser: ENV['SPL_API_USER'],
-      apiToken: ENV['SPL_API_TOKEN'],
-      partnerCode: ENV['SPL_PARTNER_CODE'],
-      placeCode: ENV['SPL_PLACE_CODE'],
+      apiUser: ENV.fetch('SPL_API_USER'),
+      apiToken: ENV.fetch('SPL_API_TOKEN'),
+      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+      placeCode: ENV.fetch('SPL_PLACE_CODE'),
       requestDate: date_in_ms,
       no: order_token,
-      prgCode: ENV['SPL_PRG_CODE'],
+      prgCode: ENV.fetch('SPL_PRG_CODE'),
       orderNo: order_token,
       signature: generate_signature('', date_in_ms)
     }
   end
 
-  def build_refund_body(order_token, basket, date, card_number)
+  def build_refund_body(order_token, basket, date, card_number) # rubocop:disable Metrics/MethodLength
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid
     {
       ver: 3,
-      prgCode: ENV['SPL_PRG_CODE'],
-      apiUser: ENV['SPL_API_USER'],
-      apiToken: ENV['SPL_API_TOKEN'],
-      mode: ENV['SPL_MODE'],
-      partnerCode: ENV['SPL_PARTNER_CODE'],
-      placeCode: ENV['SPL_PLACE_CODE'],
-      relPartnerCode: ENV['SPL_PARTNER_CODE'],
-      relPlaceCode: ENV['SPL_PLACE_CODE'],
+      prgCode: ENV.fetch('SPL_PRG_CODE'),
+      apiUser: ENV.fetch('SPL_API_USER'),
+      apiToken: ENV.fetch('SPL_API_TOKEN'),
+      mode: ENV.fetch('SPL_MODE'),
+      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+      placeCode: ENV.fetch('SPL_PLACE_CODE'),
+      relPartnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+      relPlaceCode: ENV.fetch('SPL_PLACE_CODE'),
       relDate: date_in_ms,
       relNo: order_token,
       date: date_in_ms,
@@ -124,10 +125,10 @@ class UpdateSpartaStateJob < ActiveJob::Base
   end
 
   def generate_signature(order_number, date = '', card_number = '', check_only = '', order_name = '') # rubocop:disable Metrics/ParameterLists
-    data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
+    data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
     Rails.logger.debug data.inspect
     signature_base = Digest::SHA256.hexdigest(data)
-    Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
+    Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
   end
 
   def handle_response(response_body)

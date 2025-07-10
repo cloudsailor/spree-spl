@@ -16,7 +16,7 @@ class ApplySpartaDiscountService
       spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
       next if sparta_item['discounts'].nil?
 
-      label = "SPARTA_#{sparta_item&.fetch('discounts')&.first&.fetch('name')}_#{line_item.id}"
+      label = "SPARTA_#{sparta_item&.fetch('discounts')&.first&.fetch('name')}_#{line_item.id}" # rubocop:disable Style/SafeNavigationChainLength
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
       discounts_present?(line_item, label)
       update_sparta_adjustment(line_item, label, amount)
@@ -33,7 +33,7 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present?
+    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     adjustments = line_item.adjustments.where(source_type: 'SPL')
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
@@ -41,10 +41,10 @@ class ApplySpartaDiscountService
 
   def discounts_present?(line_item, label)
     adjustments = line_item.adjustments.where(source_type: 'SPL')
-    return if adjustments.blank?
+    return if adjustments.blank? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     existing_labels = adjustments.pluck(:label)
-    return if existing_labels.include?(label)
+    return if existing_labels.include?(label) # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end

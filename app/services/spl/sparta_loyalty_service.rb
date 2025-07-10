@@ -40,11 +40,11 @@ module Spl
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {
         ver: 4,
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
-        partnerCode: ENV['SPL_PARTNER_CODE'],
-        placeCode: ENV['SPL_PLACE_CODE'],
-        mode: ENV['SPL_MODE'],
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
+        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+        placeCode: ENV.fetch('SPL_PLACE_CODE'),
+        mode: ENV.fetch('SPL_MODE'),
         date: @date,
         no: @order_token,
         orderNo: @order_token,
@@ -81,10 +81,10 @@ module Spl
 
     def generate_signature
       check_only = @check_only ? 1 : ''
-      data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{@date}#{@order_token}#{check_only}#{@card_number}"
+      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{@date}#{@order_token}#{check_only}#{@card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
+      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
     end
   end
 end
