@@ -28,6 +28,14 @@ module Spl
       "#{client_base}/requestOTP"
     end
 
+    def login
+      "#{oauth_base}/login"
+    end
+
+    def send_otp
+      "#{oauth_base}/sendOTP"
+    end
+
     def oauth_token
       "#{oauth_base}/token"
     end

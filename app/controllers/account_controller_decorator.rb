@@ -6,6 +6,15 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
+  def connect_loyalty_account
+    spree_authorize! :update, spree_current_user
+    Spl::LoginAccountService.new(DateTime.current, spree_current_user, params).call
+    spree_current_user.reload
+    render_serialized_payload { serialize_resource(spree_current_user) }
+  rescue Spl::LoginAccountService::SplRegisterAccountError => e
+    render json: { error: e }, status: :bad_request
+  end
+
   def register_loyalty_account
     spree_authorize! :update, spree_current_user
     Spl::RegisterAccountService.new(spree_current_user, params).call
@@ -16,9 +25,17 @@ module AccountControllerDecorator
   end
 
   def registration_code
-    Spl::SendOneTimePasswordCodeService.new(DateTime.current, params).call
+    Spl::RequestOtpService.new(DateTime.current, params).call
     head 204
-  rescue Spl::SendOneTimePasswordCodeService::SplSendOtpCodeError => e
+  rescue Spl::RequestOtpService::SplRequestOtpError => e
+    render json: { error: e }, status: :bad_request
+  end
+
+  def login_code
+    spree_authorize! :update, spree_current_user
+    Spl::SendOtpService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
+    head 204
+  rescue Spl::SendOtpService::SplSendOtpError => e
     render json: { error: e }, status: :bad_request
   end
 
