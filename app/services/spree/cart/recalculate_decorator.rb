@@ -6,7 +6,7 @@ module Spree
       private
 
       def spl_cart_active?(order)
-        return unless order.public_metadata.key?(:spl_card_active)
+        return unless order.public_metadata.key?(:spl_card_active) # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
         ActiveModel::Type::Boolean.new.cast(order.public_metadata[:spl_card_active])
       end

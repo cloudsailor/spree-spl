@@ -15,7 +15,7 @@ module Spl
     private
 
     def generate_signature
-      data = "#{ENV['SPL_API_TOKEN']}#{ENV['SPL_SIGNATURE_SEED']}#{@date}"
+      data = "#{ENV.fetch('SPL_API_TOKEN')}#{ENV.fetch('SPL_SIGNATURE_SEED')}#{@date}"
       Rails.logger.debug data.inspect
       Digest::SHA256.hexdigest(data)
     end
