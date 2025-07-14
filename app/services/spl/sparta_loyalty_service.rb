@@ -20,7 +20,8 @@ module Spl
 
     def call
       Rails.logger.debug 'SPL LOYALTY SERVICE START'
-      response = send_request
+      basket_body = prepare_basket_body
+      response = send_request(basket_body)
       return unless response.is_a?(Net::HTTPSuccess)
 
       response_body = JSON.parse(response.body)
@@ -33,8 +34,8 @@ module Spl
 
     private
 
-    def send_request
-      Spl::SendRequestService.new(@url, @body).call
+    def send_request(body)
+      Spl::SendRequestService.new(@url, body).call
     end
 
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
@@ -81,7 +82,7 @@ module Spl
 
     def generate_signature
       check_only = @check_only ? 1 : ''
-      data = "#{ENV['SPL_PARTNER_CODE']}#{ENV['SPL_PLACE_CODE']}#{@date}#{@order_token}#{check_only}#{@card_number}"
+      data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{@date}#{@order_token}#{check_only}#{@card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
