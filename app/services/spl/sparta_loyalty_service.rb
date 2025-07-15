@@ -15,12 +15,13 @@ module Spl
       @date = date.to_i * 1000
       @products = products
       @check_only = check_only
-      @url = URI.parse(ENV['SPL_SALE_URL'])
+      @url = URI.parse(Spl::UrlCreatorService.new.sale)
     end
 
     def call
       Rails.logger.debug 'SPL LOYALTY SERVICE START'
-      response = send_request
+      basket_body = prepare_basket_body
+      response = send_request(basket_body)
       return unless response.is_a?(Net::HTTPSuccess)
 
       response_body = JSON.parse(response.body)
@@ -33,26 +34,18 @@ module Spl
 
     private
 
-    def send_request
-      http = Net::HTTP.new(@url.host, @url.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(@url)
-      request['Content-Type'] = 'application/json'
-      request.body = prepare_basket_body.to_json
-      Rails.logger.debug 'SPL LOYALTY SERVICE REQUEST BODY'
-      Rails.logger.debug request.body.inspect
-      http.request(request)
+    def send_request(body)
+      Spl::SendRequestService.new(@url, body).call
     end
 
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {
         ver: 4,
-        apiUser: ENV['SPL_API_USER'],
-        apiToken: ENV['SPL_API_TOKEN'],
-        partnerCode: ENV['SPL_PARTNER_CODE'],
-        placeCode: ENV['SPL_PLACE_CODE'],
-        mode: ENV['SPL_MODE'],
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
+        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
+        placeCode: ENV.fetch('SPL_PLACE_CODE'),
+        mode: ENV.fetch('SPL_MODE'),
         date: @date,
         no: @order_token,
         orderNo: @order_token,
@@ -89,10 +82,10 @@ module Spl
 
     def generate_signature
       check_only = @check_only ? 1 : ''
-      data = "#{ENV["SPL_PARTNER_CODE"]}#{ENV["SPL_PLACE_CODE"]}#{@date}#{@order_token}#{check_only}#{@card_number}"
+      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{@date}#{@order_token}#{check_only}#{@card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV['SPL_POS_KEY'])
+      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
     end
   end
 end
