@@ -6,8 +6,7 @@ module Spl
   class LoginAccountService
     class SplLoginAccountError < StandardError; end
 
-    def initialize(date, user, params)
-      @date = date.to_i * 1000
+    def initialize(user, params)
       @login_url = URI.parse(Spl::UrlCreatorService.new.login)
       @user = user
       @mobile_country = params.dig('user', 'public_metadata', 'mobile_country')
@@ -17,13 +16,13 @@ module Spl
     end
 
     def call
-      login_body = prepare_login_body
-      login_response = send_request(@login_url, login_body)
-      login_response_body = JSON.parse(login_response.body)
-      Rails.logger.debug login_response_body
-      raise SplLoginAccountError, login_response_body['msg'] if login_response_body['errorCode'] != '0'
+      body = prepare_login_body
+      response = send_request(@login_url, body)
+      response_body = JSON.parse(response.body)
+      Rails.logger.debug response_body
+      raise SplLoginAccountError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      access_token = login_response_body.dig('response', 'oauthCode')
+      access_token = response_body.dig('response', 'oauthCode')
       get_access_token(access_token)
     end
 

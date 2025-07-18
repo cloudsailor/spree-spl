@@ -14,13 +14,13 @@ module Spl
     end
 
     def call
-      send_otp_body = prepare_sms_otp_body
-      send_otp_response = send_request(@send_otp_url, send_otp_body)
-      send_otp_response_body = JSON.parse(send_otp_response.body)
-      Rails.logger.debug send_otp_response_body
-      raise SplSendOtpError, send_otp_response_body if send_otp_response_body['errorCode'] != '0'
+      body = prepare_sms_otp_body
+      response = send_request(@send_otp_url, body)
+      response_body = JSON.parse(response.body)
+      Rails.logger.debug response_body
+      raise SplSendOtpError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      send_otp_response_body
+      response_body
     end
 
     private

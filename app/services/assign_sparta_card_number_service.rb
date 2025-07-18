@@ -8,8 +8,7 @@ class AssignSpartaCardNumberService
   end
 
   def call
-    customer_data = customer_info
-    card_data = customer_data.dig('response', 'mainCard')
+    card_data = customer_info.dig('response', 'mainCard')
     add_card_number_to_user(card_data)
   end
 
@@ -23,7 +22,7 @@ class AssignSpartaCardNumberService
     if card_data['status'] != 'A'
       raise AssignSpartaCardNumberError, I18n.t('spl.card_validation.errors.card_not_active')
     end
-    if cards_assigned_user(card_data['no'])
+    unless cards_assigned_user(card_data['no'])
       raise AssignSpartaCardNumberError, I18n.t('spl.card_validation.errors.wrong_owner')
     end
 
@@ -32,6 +31,6 @@ class AssignSpartaCardNumberService
   end
 
   def cards_assigned_user(card_number)
-    Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }.id != @user.id
+    Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }.id == @user.id
   end
 end

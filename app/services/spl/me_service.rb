@@ -12,13 +12,13 @@ module Spl
     end
 
     def call
-      me_body = prepare_me_body
-      me_response = send_request(@me_url, me_body)
-      me_response_body = JSON.parse(me_response.body)
-      Rails.logger.debug me_response_body
-      raise SplMeError, me_response_body['msg'] if me_response_body['errorCode'] != '0'
+      body = prepare_me_body
+      response = send_request(@me_url, body)
+      response_body = JSON.parse(response.body)
+      Rails.logger.debug response_body
+      raise SplMeError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      me_response_body
+      response_body
     end
 
     private

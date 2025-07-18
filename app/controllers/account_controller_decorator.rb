@@ -8,7 +8,7 @@ module AccountControllerDecorator
 
   def connect_loyalty_account
     spree_authorize! :update, spree_current_user
-    Spl::LoginAccountService.new(DateTime.current, spree_current_user, params).call
+    Spl::LoginAccountService.new(spree_current_user, params).call
     AssignSpartaCardNumberService.new(spree_current_user).call
     spree_current_user.reload
     render_serialized_payload { serialize_resource(spree_current_user) }

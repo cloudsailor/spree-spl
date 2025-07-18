@@ -12,23 +12,23 @@ module Spl
     end
 
     def annonymus_token
-      oauth_body = prepare_oauth_token_body_with_signature
-      oauth_response = send_request(@token_url, oauth_body)
-      oauth_response_body = JSON.parse(oauth_response.body)
+      body = prepare_oauth_token_body_with_signature
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      oauth_response_body
+      response_body
     end
 
     def authorization_code_token(auth_code)
-      oauth_body = prepare_oauth_token_body_with_oauth_code(auth_code)
-      oauth_response = send_request(@token_url, oauth_body)
-      oauth_response_body = JSON.parse(oauth_response.body)
+      body = prepare_oauth_token_body_with_oauth_code(auth_code)
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      oauth_response_body['response']
+      response_body['response']
     end
 
     private
