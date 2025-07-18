@@ -3,8 +3,8 @@
 require 'json'
 
 module Spl
-  class SendOneTimePasswordCodeService
-    class SplSendOtpCodeError < StandardError; end
+  class RequestOtpService
+    class SplRequestOtpError < StandardError; end
 
     def initialize(date, params)
       @date = date.to_i * 1000
@@ -15,7 +15,7 @@ module Spl
     end
 
     def call
-      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).annonymus_token
       access_token = oauth_response_body.dig('response', 'accessToken')
 
       request_otp_body = @email.nil? ? prepare_sms_otp_body(access_token) : prepare_email_otp_body(access_token)
