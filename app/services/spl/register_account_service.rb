@@ -13,14 +13,14 @@ module Spl
     end
 
     def call
-      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).call
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).annonymus_token
       access_token = oauth_response_body.dig('response', 'accessToken')
 
       register_body = prepare_registration_body(access_token)
       register_response = send_request(@register_url, register_body)
       register_response_body = JSON.parse(register_response.body)
-
-      raise SplRegisterAccountError, register_response_body if register_response_body['errorCode'] != '0'
+      Rails.logger.debug register_response_body
+      raise SplRegisterAccountError, register_response_body['msg'] if register_response_body['errorCode'] != '0'
 
       spl_card = register_response_body.dig('response', 'cardNo')
       update_account(spl_card, @params)

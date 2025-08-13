@@ -18,12 +18,24 @@ module Spl
       "#{eshop_base}/saleRefund"
     end
 
+    def me
+      "#{client_base}/me"
+    end
+
     def register
       "#{client_base}/register"
     end
 
     def request_otp
       "#{client_base}/requestOTP"
+    end
+
+    def login
+      "#{oauth_base}/login"
+    end
+
+    def send_otp
+      "#{oauth_base}/sendOTP"
     end
 
     def oauth_token

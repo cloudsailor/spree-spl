@@ -8,7 +8,9 @@ Spree::Core::Engine.add_routes do
           patch :update_spl_card_activate, to: 'cart#update_spl_card_activate'
         end
         resource :account, controller: :account, only: %i[show create update] do
+          patch :login_code, to: 'account#login_code'
           patch :registration_code, to: 'account#registration_code'
+          post :connect_loyalty_account, to: 'account#connect_loyalty_account'
           post :register_loyalty_account, to: 'account#register_loyalty_account'
         end
       end
