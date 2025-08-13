@@ -11,14 +11,24 @@ module Spl
       @token_url = URI.parse(Spl::UrlCreatorService.new.oauth_token)
     end
 
-    def call
-      oauth_body = prepare_oauth_token_body_with_signature
-      oauth_response = send_request(@token_url, oauth_body)
-      oauth_response_body = JSON.parse(oauth_response.body)
+    def annonymus_token
+      body = prepare_oauth_token_body_with_signature
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, oauth_response_body['msg'] if oauth_response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      oauth_response_body
+      response_body
+    end
+
+    def authorization_code_token(auth_code)
+      body = prepare_oauth_token_body_with_oauth_code(auth_code)
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
+
+      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+
+      response_body['response']
     end
 
     private
@@ -37,6 +47,18 @@ module Spl
         signature: generate_signature,
         date: @date,
         grantType: 'signature'
+      }
+    end
+
+    def prepare_oauth_token_body_with_oauth_code(auth_code)
+      {
+        context: {
+          prgCode: ENV.fetch('SPL_PRG_CODE')
+        },
+        apiUser: ENV.fetch('SPL_API_USER'),
+        apiToken: ENV.fetch('SPL_API_TOKEN'),
+        oauthCode: auth_code,
+        grantType: 'authorization_code'
       }
     end
 
