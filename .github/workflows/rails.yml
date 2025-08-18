@@ -25,7 +25,7 @@ jobs:
           bundler-cache: true
 
       - name: Run RuboCop
-        run: bundle exec rubocop --debug
+        run: bundle exec rubocop
 
   brakeman:
     runs-on: ubuntu-latest

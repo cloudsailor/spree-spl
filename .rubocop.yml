@@ -6,6 +6,7 @@ AllCops:
   Exclude:
     - bin/**
     - config/**/*
+    - vendor/**/*
 
 Style/Documentation:
   Enabled: false
