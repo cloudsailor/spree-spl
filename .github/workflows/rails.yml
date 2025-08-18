@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   linter:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         run: bundle exec rubocop
 
   brakeman:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v4
