@@ -5,6 +5,7 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     CartControllerDecorator
   )
 
+  
   ::Spree::V2::Storefront::CartSerializer.prepend(
     CartSerializerDecorator
   )
