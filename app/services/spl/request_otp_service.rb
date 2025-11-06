@@ -59,7 +59,9 @@ module Spl
     end
 
     def generate_signature
-      Spl::ClientSignatureService.new(@date, @store.private_metadata['spl_api_token'], @store.private_metadata['spl_signature_seed']).call
+      Spl::ClientSignatureService.new(@date,
+                                      @store.private_metadata['spl_api_token'],
+                                      @store.private_metadata['spl_signature_seed']).call
     end
   end
 end

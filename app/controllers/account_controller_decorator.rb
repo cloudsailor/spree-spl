@@ -48,7 +48,9 @@ module AccountControllerDecorator
     return if disactivated_card
     return unless user_update_params[:public_metadata][:spl_no_card].present?
 
-    Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card], spree_current_user, current_store).call
+    Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card],
+                                 spree_current_user,
+                                 current_store).call
   rescue Spl::ValidateCardService::SplCardValidationError => e
     update_order
     render json: { error: e.message }, status: :bad_request

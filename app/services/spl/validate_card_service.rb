@@ -43,7 +43,7 @@ module Spl
                                                                                                  'status') != 'A'
     end
 
-    def verify_card_request
+    def verify_card_request # rubocop:disable Metrics/AbcSize
       url = URI.parse(Spl::UrlCreatorService.new(@store.rpivate_metadata['spl_url']).check_card)
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
