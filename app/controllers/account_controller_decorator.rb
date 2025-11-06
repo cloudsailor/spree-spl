@@ -8,8 +8,8 @@ module AccountControllerDecorator
 
   def connect_loyalty_account
     spree_authorize! :update, spree_current_user
-    Spl::LoginAccountService.new(spree_current_user, params).call
-    AssignSpartaCardNumberService.new(spree_current_user).call
+    Spl::LoginAccountService.new(spree_current_user, current_store, params).call
+    AssignSpartaCardNumberService.new(spree_current_user, current_store).call
     spree_current_user.reload
     render_serialized_payload { serialize_resource(spree_current_user) }
   rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
@@ -19,7 +19,7 @@ module AccountControllerDecorator
 
   def register_loyalty_account
     spree_authorize! :update, spree_current_user
-    Spl::RegisterAccountService.new(spree_current_user, params).call
+    Spl::RegisterAccountService.new(spree_current_user, current_store, params).call
     spree_current_user.reload
     render_serialized_payload { serialize_resource(spree_current_user) }
   rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
@@ -27,7 +27,7 @@ module AccountControllerDecorator
   end
 
   def registration_code
-    Spl::RequestOtpService.new(DateTime.current, params).call
+    Spl::RequestOtpService.new(DateTime.current, current_store, params).call
     head 204
   rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
     render json: { error: e }, status: :bad_request
@@ -35,7 +35,7 @@ module AccountControllerDecorator
 
   def login_code
     spree_authorize! :update, spree_current_user
-    Spl::SendOtpService.new(DateTime.current, params[:mobile_country], params[:phone_number]).call
+    Spl::SendOtpService.new(DateTime.current, params[:mobile_country], params[:phone_number], current_store).call
     head 204
   rescue Spl::SendOtpService::SplSendOtpError => e
     render json: { error: e }, status: :bad_request
@@ -48,7 +48,7 @@ module AccountControllerDecorator
     return if disactivated_card
     return unless user_update_params[:public_metadata][:spl_no_card].present?
 
-    Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card], spree_current_user).call
+    Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card], spree_current_user, current_store).call
   rescue Spl::ValidateCardService::SplCardValidationError => e
     update_order
     render json: { error: e.message }, status: :bad_request

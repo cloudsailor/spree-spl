@@ -28,7 +28,8 @@ class PromotionSwitcherService
                                                  order.line_items,
                                                  DateTime.current,
                                                  order.products,
-                                                 check_only).call
+                                                 check_only,
+                                                 order.store).call
     return unless spl_response
 
     create_sparta_adjustments(spl_response, order)

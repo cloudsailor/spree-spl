@@ -6,9 +6,10 @@ module Spl
   class LoginAccountService
     class SplLoginAccountError < StandardError; end
 
-    def initialize(user, params)
-      @login_url = URI.parse(Spl::UrlCreatorService.new.login)
+    def initialize(user, store, params)
+      @login_url = URI.parse(Spl::UrlCreatorService.new(store.public_metadata['spl_url']).login)
       @user = user
+      @store = store
       @mobile_country = params.dig('user', 'public_metadata', 'mobile_country')
       @phone_number = params.dig('user', 'public_metadata', 'phone_number')
       @card_number = params.dig('user', 'public_metadata', 'card_number')
@@ -35,9 +36,9 @@ module Spl
     def prepare_login_body # rubocop:disable Metrics/MethodLength
       {
         context: {
-          prgCode: ENV.fetch('SPL_PRG_CODE')
+          prgCode: @store.public_metadata['spl_prg_code']
         },
-        apiUser: ENV.fetch('SPL_API_USER'),
+        apiUser: @store.public_metadata['spl_api_user'],
         scope: ['spl_cwp'],
         responseType: 'code',
         login: generate_login,
@@ -58,7 +59,7 @@ module Spl
     end
 
     def get_access_token(access_token)
-      token_body = Spl::OauthTokenService.new(DateTime.current).authorization_code_token(access_token)
+      token_body = Spl::OauthTokenService.new(DateTime.current, @store).authorization_code_token(access_token)
       add_loyalty_tokents_to_user(token_body['accessToken'], token_body['refreshToken'])
     end
 

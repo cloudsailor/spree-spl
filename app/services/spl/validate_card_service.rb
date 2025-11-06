@@ -9,9 +9,10 @@ module Spl
   class ValidateCardService
     class SplCardValidationError < StandardError; end
 
-    def initialize(card_number, user)
+    def initialize(card_number, user, store)
       @card_number = card_number
       @user = user
+      @store = store
     end
 
     def call
@@ -43,7 +44,7 @@ module Spl
     end
 
     def verify_card_request
-      url = URI.parse(Spl::UrlCreatorService.new.check_card)
+      url = URI.parse(Spl::UrlCreatorService.new(@store.rpivate_metadata['spl_url']).check_card)
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 
@@ -62,10 +63,10 @@ module Spl
       {
         ver: 4,
         requestId: uuid,
-        apiUser: ENV.fetch('SPL_API_USER'),
-        apiToken: ENV.fetch('SPL_API_TOKEN'),
-        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-        placeCode: ENV.fetch('SPL_PLACE_CODE'),
+        apiUser: @store.rpivate_metadata['spl_api_user'],
+        apiToken: @store.rpivate_metadata['spl_api_token'],
+        partnerCode: @store.rpivate_metadata['spl_partner_code'],
+        placeCode: @store.rpivate_metadata['spl_place_code'],
         date: date_in_ms,
         cardNo: card_number,
         signature: signature(date_in_ms, card_number),
@@ -74,10 +75,10 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{date}#{card_number}"
+      data = "#{@store.rpivate_metadata['spl_partner_code']}#{@store.rpivate_metadata['spl_place_code']}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
+      Digest::SHA256.hexdigest(signature_base + @store.rpivate_metadata['spl_pos_key'])
     end
 
     def cards_assigned_user(card_number)

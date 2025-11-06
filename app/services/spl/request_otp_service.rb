@@ -6,16 +6,17 @@ module Spl
   class RequestOtpService
     class SplRequestOtpError < StandardError; end
 
-    def initialize(date, params)
+    def initialize(date, store, params)
       @date = date.to_i * 1000
-      @request_otp_url = URI.parse(Spl::UrlCreatorService.new.request_otp)
+      @store = store
+      @request_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).request_otp)
       @mobile_country = params[:mobile_country]
       @phone_number = params[:phone_number]
       @email = params[:email]
     end
 
     def call
-      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).annonymus_token
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current, @store).annonymus_token
       access_token = oauth_response_body.dig('response', 'accessToken')
 
       request_otp_body = @email.nil? ? prepare_sms_otp_body(access_token) : prepare_email_otp_body(access_token)
@@ -37,7 +38,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV.fetch('SPL_PRG_CODE')
+          prgCode: @store.private_metadata['spl_prg_code']
         },
         channel: 'S', # S = SMS
         mobileCountry: @mobile_country,
@@ -50,7 +51,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV.fetch('SPL_PRG_CODE')
+          prgCode: @store.private_metadata['spl_prg_code']
         },
         channel: 'E', # E = email
         email: @email
@@ -58,7 +59,7 @@ module Spl
     end
 
     def generate_signature
-      Spl::ClientSignatureService.new(@date).call
+      Spl::ClientSignatureService.new(@date, @store.private_metadata['spl_api_token'], @store.private_metadata['spl_signature_seed']).call
     end
   end
 end
