@@ -7,7 +7,7 @@ module Spl
     class SplLoginAccountError < StandardError; end
 
     def initialize(user, store, params)
-      @login_url = URI.parse(Spl::UrlCreatorService.new(store.public_metadata['spl_url']).login)
+      @login_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).login)
       @user = user
       @store = store
       @mobile_country = params.dig('user', 'public_metadata', 'mobile_country')
@@ -36,9 +36,9 @@ module Spl
     def prepare_login_body # rubocop:disable Metrics/MethodLength
       {
         context: {
-          prgCode: @store.public_metadata['spl_prg_code']
+          prgCode: @store.private_metadata['spl_prg_code']
         },
-        apiUser: @store.public_metadata['spl_api_user'],
+        apiUser: @store.private_metadata['spl_api_user'],
         scope: ['spl_cwp'],
         responseType: 'code',
         login: generate_login,
