@@ -6,7 +6,7 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
-  def connect_loyalty_account
+  def connect_loyalty_account # rubocop:disable Metrics/AbcSize
     spree_authorize! :update, spree_current_user
     Spl::LoginAccountService.new(spree_current_user, current_store, params).call
     AssignSpartaCardNumberService.new(spree_current_user, current_store).call

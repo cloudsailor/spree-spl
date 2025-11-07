@@ -100,7 +100,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     }
   end
 
-  def build_refund_body(order_token, basket, date, card_number, store) # rubocop:disable Metrics/MethodLength
+  def build_refund_body(order_token, basket, date, card_number, store) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid
     {

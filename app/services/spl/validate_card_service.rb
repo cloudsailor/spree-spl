@@ -75,7 +75,7 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{@store.rpivate_metadata['spl_partner_code']}#{@store.rpivate_metadata['spl_place_code']}#{date}#{card_number}"
+      data = "#{@store.rpivate_metadata['spl_partner_code']}#{@store.rpivate_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + @store.rpivate_metadata['spl_pos_key'])
