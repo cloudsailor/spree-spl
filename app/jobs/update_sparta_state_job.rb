@@ -8,10 +8,10 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
   ORDER_STATES = %w[C D].freeze
   ERROR_CODES = %w[ORDER_NOT_FOUND REQUEST_ALREADY_PROCESSED].freeze
 
-  def perform(order_token, state, order_number) # rubocop:disable Metrics/MethodLength
+  def perform(order_token, state, order_number, store) # rubocop:disable Metrics/MethodLength
     return if order_token.blank? || !ORDER_STATES.include?(state&.upcase)
 
-    transaction = find_transaction(order_token)
+    transaction = find_transaction(order_token, store)
     return if transaction.blank?
 
     Rails.logger.debug transaction.inspect
@@ -22,9 +22,9 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
 
     case state
     when 'D'
-      update_order_status(order_token, basket, date, card_number, order_number)
+      update_order_status(order_token, basket, date, card_number, store, order_number)
     when 'C'
-      refund(order_token, basket, date, card_number)
+      refund(order_token, basket, date, store, card_number)
     end
   end
 
@@ -44,36 +44,36 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
   end
 
-  def update_order_status(order_token, basket, date, card_number, order_number = '')
-    body = build_body(order_token, basket, date, card_number, order_number)
-    sale_url = URI.parse(Spl::UrlCreatorService.new.sale)
+  def update_order_status(order_token, basket, date, card_number, store, order_number = '')
+    body = build_body(order_token, basket, date, card_number, order_number, store)
+    sale_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).sale)
     response_body = send_request(sale_url, body)
     handle_response(response_body)
   end
 
-  def find_transaction(order_token)
-    body = build_find_transaction_body(order_token)
-    order_find_url = URI.parse(Spl::UrlCreatorService.new.find)
+  def find_transaction(order_token, store)
+    body = build_find_transaction_body(order_token, store)
+    order_find_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).find)
     response_body = send_request(order_find_url, body)
     response_body&.dig('response', 0) if response_body && response_body['errorCode'] == '0'
   end
 
-  def refund(order_token, basket, date, card_number)
+  def refund(order_token, basket, date, store, card_number)
     body = build_refund_body(order_token, basket, date, card_number)
-    refund_url = URI.parse(Spl::UrlCreatorService.new.sale_refund)
+    refund_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).sale_refund)
     response_body = send_request(refund_url, body)
     handle_response(response_body)
   end
 
-  def build_body(order_token, basket, date, card_number, order_number) # rubocop:disable Metrics/MethodLength
+  def build_body(order_token, basket, date, card_number, order_number, store) # rubocop:disable Metrics/MethodLength
     date_in_ms = date.to_i * 1000
     {
       ver: 4,
-      apiUser: ENV.fetch('SPL_API_USER'),
-      apiToken: ENV.fetch('SPL_API_TOKEN'),
-      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-      placeCode: ENV.fetch('SPL_PLACE_CODE'),
-      mode: ENV.fetch('SPL_UPDATE_STATUS_MODE'),
+      apiUser: store.private_metadata['spl_api_user'],
+      apiToken: store.private_metadata['spl_api_token'],
+      partnerCode: store.private_metadata['spl_partner_code'],
+      placeCode: store.private_metadata['spl_place_code'],
+      mode: store.private_metadata['spl_update_status_mode'],
       pending: false,
       date: date_in_ms,
       no: order_token,
@@ -84,35 +84,35 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     }
   end
 
-  def build_find_transaction_body(order_token) # rubocop:disable Metrics/MethodLength
+  def build_find_transaction_body(order_token, store) # rubocop:disable Metrics/MethodLength
     date_in_ms = DateTime.current.to_i * 1000
     {
       ver: 3,
-      apiUser: ENV.fetch('SPL_API_USER'),
-      apiToken: ENV.fetch('SPL_API_TOKEN'),
-      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-      placeCode: ENV.fetch('SPL_PLACE_CODE'),
+      apiUser: store.private_metadata['spl_api_user'],
+      apiToken: store.private_metadata['spl_api_token'],
+      partnerCode: store.private_metadata['spl_partner_code'],
+      placeCode: store.private_metadata['spl_place_code'],
       requestDate: date_in_ms,
       no: order_token,
-      prgCode: ENV.fetch('SPL_PRG_CODE'),
+      prgCode: store.private_metadata['spl_prg_code'],
       orderNo: order_token,
       signature: generate_signature('', date_in_ms)
     }
   end
 
-  def build_refund_body(order_token, basket, date, card_number) # rubocop:disable Metrics/MethodLength
+  def build_refund_body(order_token, basket, date, card_number, store) # rubocop:disable Metrics/MethodLength
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid
     {
       ver: 3,
-      prgCode: ENV.fetch('SPL_PRG_CODE'),
-      apiUser: ENV.fetch('SPL_API_USER'),
-      apiToken: ENV.fetch('SPL_API_TOKEN'),
-      mode: ENV.fetch('SPL_MODE'),
-      partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-      placeCode: ENV.fetch('SPL_PLACE_CODE'),
-      relPartnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-      relPlaceCode: ENV.fetch('SPL_PLACE_CODE'),
+      prgCode: store.private_metadata['spl_prg_code'],
+      apiUser: store.private_metadata['spl_api_user'],
+      apiToken: store.private_metadata['spl_api_token'],
+      mode: store.private_metadata['spl_mode'],
+      partnerCode: store.private_metadata['spl_partner_code'],
+      placeCode: store.private_metadata['spl_place_code'],
+      relPartnerCode: store.private_metadata['spl_partner_code'],
+      relPlaceCode: store.private_metadata['spl_place_code'],
       relDate: date_in_ms,
       relNo: order_token,
       date: date_in_ms,
@@ -120,15 +120,15 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
       no: new_number,
       cardNo: card_number,
       basket: basket,
-      signature: generate_signature(new_number, date_in_ms, card_number)
+      signature: generate_signature(new_number, store, date_in_ms, card_number)
     }
   end
 
-  def generate_signature(order_number, date = '', card_number = '', check_only = '', order_name = '') # rubocop:disable Metrics/ParameterLists
-    data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
+  def generate_signature(order_number, store, date = '', card_number = '', check_only = '', order_name = '') # rubocop:disable Metrics/ParameterLists
+    data = "#{store.private_metadata['spl_partner_code']}#{store.private_metadata['spl_place_code']}#{date}#{order_number}#{order_name}#{check_only}#{card_number}" # rubocop:disable Layout/LineLength
     Rails.logger.debug data.inspect
     signature_base = Digest::SHA256.hexdigest(data)
-    Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
+    Digest::SHA256.hexdigest(signature_base + store.private_metadata['spl_pos_key'])
   end
 
   def handle_response(response_body)
