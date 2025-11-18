@@ -44,7 +44,7 @@ module Spl
     end
 
     def verify_card_request # rubocop:disable Metrics/AbcSize
-      url = URI.parse(Spl::UrlCreatorService.new(@store.rpivate_metadata['spl_url']).check_card)
+      url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
 
@@ -63,10 +63,10 @@ module Spl
       {
         ver: 4,
         requestId: uuid,
-        apiUser: @store.rpivate_metadata['spl_api_user'],
-        apiToken: @store.rpivate_metadata['spl_api_token'],
-        partnerCode: @store.rpivate_metadata['spl_partner_code'],
-        placeCode: @store.rpivate_metadata['spl_place_code'],
+        apiUser: @store.private_metadata['spl_api_user'],
+        apiToken: @store.private_metadata['spl_api_token'],
+        partnerCode: @store.private_metadata['spl_partner_code'],
+        placeCode: @store.private_metadata['spl_place_code'],
         date: date_in_ms,
         cardNo: card_number,
         signature: signature(date_in_ms, card_number),
@@ -75,10 +75,10 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{@store.rpivate_metadata['spl_partner_code']}#{@store.rpivate_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
+      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + @store.rpivate_metadata['spl_pos_key'])
+      Digest::SHA256.hexdigest(signature_base + @store.private_metadata['spl_pos_key'])
     end
 
     def cards_assigned_user(card_number)
