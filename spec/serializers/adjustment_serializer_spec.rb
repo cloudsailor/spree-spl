@@ -7,15 +7,7 @@ RSpec.describe AdjustmentSerializer, type: :serializer do
 
   let(:order) { create(:order) }
   let(:adjustment) do
-    create(
-      :adjustment,
-      order: order,
-      label: 'Tax',
-      amount: 5.00,
-      eligible: true,
-      created_at: Time.zone.parse('2024-01-01 10:00'),
-      updated_at: Time.zone.parse('2024-01-02 11:00')
-    )
+    adjustment
   end
 
   it 'has the correct type' do
@@ -36,4 +28,16 @@ RSpec.describe AdjustmentSerializer, type: :serializer do
     expect(attrs[:created_at]).to eq adjustment.created_at
     expect(attrs[:updated_at]).to eq adjustment.updated_at
   end
+end
+
+def adjustment
+  create(
+    :adjustment,
+    order: order,
+    label: 'Tax',
+    amount: 5.00,
+    eligible: true,
+    created_at: Time.zone.parse('2024-01-01 10:00'),
+    updated_at: Time.zone.parse('2024-01-02 11:00')
+  )
 end

@@ -7,9 +7,13 @@ PATH
       faraday
       openssl
       rails (~> 7.0)
+      rspec-rails
+      rspec-retry
+      rubocop-rspec
       spree (>= 4.6.0, < 5.0)
       spree_api (>= 4.6.0, < 5.0)
       spree_auth_devise
+      spree_dev_tools
 
 GEM
   remote: https://rubygems.org/
@@ -522,12 +526,20 @@ GEM
     rubocop-ast (1.48.0)
       parser (>= 3.3.7.2)
       prism (~> 1.4)
+    rubocop-performance (1.26.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.75.0, < 2.0)
+      rubocop-ast (>= 1.47.1, < 2.0)
     rubocop-rails (2.34.0)
       activesupport (>= 4.2.0)
       lint_roller (~> 1.1)
       rack (>= 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.44.0, < 2.0)
+    rubocop-rails-omakase (1.1.0)
+      rubocop (>= 1.72)
+      rubocop-performance (>= 1.24)
+      rubocop-rails (>= 2.30)
     rubocop-rspec (3.8.0)
       lint_roller (~> 1.1)
       rubocop (~> 1.81)
@@ -749,15 +761,12 @@ DEPENDENCIES
   ffaker
   observer
   rake (~> 13.0)
-  rspec-rails
-  rspec-retry
   rubocop (~> 1.79, >= 1.79.2)
   rubocop-rails (~> 2.33, >= 2.33.3)
-  rubocop-rspec
+  rubocop-rails-omakase
   spree (< 5.0)
   spree-spl!
   spree_backend (< 5.0.0)
-  spree_dev_tools
   sqlite3 (>= 2.0)
 
 BUNDLED WITH
