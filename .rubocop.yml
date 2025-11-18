@@ -9,6 +9,7 @@ AllCops:
     - bin/**
     - config/**/*
     - vendor/**/*
+    - spec/dummy/**/*
 
 Style/Documentation:
   Enabled: false

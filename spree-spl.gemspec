@@ -38,9 +38,8 @@ Gem::Specification.new do |spec|
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
   spec.metadata['rubygems_mfa_required'] = 'true'
-
-  spec.add_development_dependency "spree_dev_tools"
-  spec.add_development_dependency 'rspec-rails'
-  spec.add_development_dependency 'rspec-retry'
-  spec.add_development_dependency 'rubocop-rspec'
+  spec.add_dependency 'rspec-rails'
+  spec.add_dependency 'rspec-retry'
+  spec.add_dependency 'rubocop-rspec'
+  spec.add_dependency 'spree_dev_tools'
 end
