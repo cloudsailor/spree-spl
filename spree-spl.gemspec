@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spree_version = '>= 4.6.0', '< 5.0'
   spec.add_dependency 'bigdecimal'
   spec.add_dependency 'rails', '~> 7.0'
-  spec.add_dependency 'spree', '< 5.0.0'
+  spec.add_dependency 'spree', spree_version
   spec.add_dependency 'spree_api', spree_version
   spec.add_dependency 'spree_auth_devise'
   # For more information and examples about making a new gem, check out our

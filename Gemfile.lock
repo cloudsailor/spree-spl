@@ -7,7 +7,7 @@ PATH
       faraday
       openssl
       rails (~> 7.0)
-      spree (< 5.0.0)
+      spree (>= 4.6.0, < 5.0)
       spree_api (>= 4.6.0, < 5.0)
       spree_auth_devise
 
