@@ -82,7 +82,7 @@ module Spl
     end
 
     def cards_assigned_user(card_number)
-      Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }
+      Spree::User.find { |u| u.public_metadata&.dig('spl_no_card') == card_number }
     end
 
     def card_assigned_to_different_user(card_assignment)

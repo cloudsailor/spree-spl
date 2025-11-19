@@ -9,17 +9,19 @@ module ProfileControllerDecorator
 
   def user_params
     params.require(:user).permit(:first_name, :last_name, :phone, :email,
-                                 public_metadata: [:spl_card_active, :spl_no_card])
+                                 public_metadata: %i[spl_card_active spl_no_card])
   end
 
   def validate_spl_no_card # rubocop:disable Metrics/AbcSize
-    return unless user_params[:public_metadata].present? || user_params[:public_metadata][:spl_no_card].present?
-    return if disactivated_card
+    return if user_params[:public_metadata].blank?
+    return if user_params[:public_metadata][:spl_no_card].blank?
+    return if disactivated_card?
 
     ::Spl::ValidateCardService.new(user_params[:public_metadata][:spl_no_card], spree_current_user, current_store).call
   rescue ::Spl::ValidateCardService::SplCardValidationError => e
     update_order
-    render json: { error: e.message }, status: :bad_request
+    flash[:error] = e.message
+    render :edit, status: :unprocessable_entity
   end
 
   def update_order(spl_card: nil, active: false)
@@ -36,7 +38,7 @@ module ProfileControllerDecorator
     )
   end
 
-  def disactivated_card
+  def disactivated_card?
     user_params[:public_metadata][:spl_card_active].present? && !user_params[:public_metadata][:spl_card_active]
   end
 end
