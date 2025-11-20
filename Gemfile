@@ -8,11 +8,11 @@ gemspec
 gem 'rake', '~> 13.0'
 group :development, :test do
   gem 'brakeman'
+  gem 'byebug'
   gem 'rubocop', '~> 1.79', '>= 1.79.2'
   gem 'rubocop-rails', '~> 2.33', '>= 2.33.3'
   gem 'rubocop-rails-omakase'
   gem 'sqlite3', '>= 2.0'
-  gem 'byebug'
 end
 
 group :test do
