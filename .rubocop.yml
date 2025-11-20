@@ -10,6 +10,7 @@ AllCops:
     - config/**/*
     - vendor/**/*
     - spec/dummy/**/*
+    - Rakefile
 
 Style/Documentation:
   Enabled: false
