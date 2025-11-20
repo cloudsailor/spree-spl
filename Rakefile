@@ -14,7 +14,7 @@ rescue LoadError => e
 end
 
 desc 'Generate test dummy app'
-task test_app: :environment do
+task :test_app do
   # Auto-detect gem name from gemspec
   ENV['LIB_NAME'] = 'spree/spl'
 
