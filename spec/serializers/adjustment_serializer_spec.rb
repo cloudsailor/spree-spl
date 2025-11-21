@@ -6,9 +6,7 @@ RSpec.describe AdjustmentSerializer, type: :serializer do
   subject(:serialized) { described_class.new(adjustment).serializable_hash }
 
   let(:order) { create(:order) }
-  let(:adjustment) do
-    adjustment
-  end
+  let(:adjustment) { create_adjustment }
 
   it 'has the correct type' do
     expect(serialized.dig(:data, :type)).to eq(:adjustment)
@@ -30,7 +28,7 @@ RSpec.describe AdjustmentSerializer, type: :serializer do
   end
 end
 
-def adjustment
+def create_adjustment
   create(
     :adjustment,
     order: order,
