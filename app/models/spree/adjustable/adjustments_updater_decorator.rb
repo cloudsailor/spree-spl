@@ -5,11 +5,6 @@ module Spree
     module AdjustmentsUpdaterDecorator
       private
 
-      def apply_spl_adjustments(attributes, totals)
-        set_spree_adjustments if order_with_adjustments?
-        recalculate_spl_adjustments(attributes, totals) if line_item_with_spl_adjustments?
-      end
-
       def set_spree_adjustments
         adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
 
