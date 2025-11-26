@@ -44,4 +44,8 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   ::Spree::Account::ProfileController.prepend(ProfileControllerDecorator)
 
   ::Spree::CheckoutHelper.prepend(CheckoutHelperDecorator)
+
+  ::Spree::Order.prepend(OrderDecorator)
+
+  ::Spree::Promotion::Rules::ItemTotal.prepend(Spree::Promotion::Rules::ItemTotalDecorator)
 end
