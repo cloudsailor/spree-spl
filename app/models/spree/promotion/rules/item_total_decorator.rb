@@ -5,7 +5,8 @@ module Spree
     module Rules
       module ItemTotalDecorator
         def eligible?(order, _options = {})
-          return true if order.with_spl_adjustments?
+          return true if ::Spl::ValidateCardService.new(order.user.public_metadata['spl_no_card'],
+                                                        order.user, order.store).call
 
           super
         end
