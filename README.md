@@ -111,3 +111,12 @@ recalculate_spl_adjustments(attributes, totals) if line_item_with_spl_adjustment
 _______
 
 #### Add these methods to any other endpoints involved in processing an order in your repository.
+
+## Testing
+To run tests type in terminal:
+```sh
+bundle update
+bundle exec rake test_app
+bundle exec rspec
+```
+
