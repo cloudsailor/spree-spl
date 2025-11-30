@@ -23,4 +23,4 @@ group :test do
   gem 'spree', '> 5.0'
 end
 
-gem "sprockets-rails", "~> 3.5"
+gem 'sprockets-rails', '~> 3.5'
