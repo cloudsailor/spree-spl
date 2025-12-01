@@ -20,6 +20,7 @@ group :test do
   gem 'factory_bot_rails'
   gem 'ffaker'
   gem 'observer'
-  gem 'spree', '< 5.0'
-  gem 'spree_backend', '< 5.0.0'
+  gem 'spree', '> 5.0'
 end
+
+gem 'sprockets-rails', '~> 3.5'

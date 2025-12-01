@@ -6,9 +6,10 @@ module Spl
   class MeService
     class SplMeError < StandardError; end
 
-    def initialize(user)
-      @me_url = URI.parse(Spl::UrlCreatorService.new.me)
+    def initialize(user, store)
+      @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)
       @user = user
+      @store = store
     end
 
     def call
@@ -30,7 +31,7 @@ module Spl
     def prepare_me_body
       {
         context: {
-          prgCode: ENV.fetch('SPL_PRG_CODE'),
+          prgCode: @store.private_metadata['spl_prg_code'],
           oauthToken: @user.private_metadata['spl_access_token']
         }
       }

@@ -6,11 +6,12 @@ module Spl
   class SendOtpService
     class SplSendOtpError < StandardError; end
 
-    def initialize(date, mobile_country, phone_number)
+    def initialize(date, mobile_country, phone_number, store)
       @date = date.to_i * 1000
-      @send_otp_url = URI.parse(Spl::UrlCreatorService.new.send_otp)
+      @send_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).send_otp)
       @mobile_country = mobile_country
       @phone_number = phone_number
+      @store = store
     end
 
     def call
@@ -32,11 +33,11 @@ module Spl
     def prepare_sms_otp_body # rubocop:disable Metrics/MethodLength
       {
         context: {
-          prgCode: ENV.fetch('SPL_PRG_CODE')
+          prgCode: @store.private_metadata['spl_prg_code']
         },
-        apiUser: ENV.fetch('SPL_API_USER'),
-        apiToken: ENV.fetch('SPL_API_TOKEN'),
-        signatureSeed: ENV.fetch('SPL_SIGNATURE_SEED'),
+        apiUser: @store.private_metadata['spl_api_user'],
+        apiToken: @store.private_metadata['spl_api_token'],
+        signatureSeed: @store.private_metadata['spl_signature_seed'],
         date: @date,
         mobileCountry: @mobile_country,
         mobile: @phone_number,
@@ -45,7 +46,9 @@ module Spl
     end
 
     def generate_signature
-      Spl::ClientSignatureService.new(@date).call
+      Spl::ClientSignatureService.new(@date,
+                                      @store.private_metadata['spl_api_token'],
+                                      @store.private_metadata['spl_signature_seed']).call
     end
   end
 end

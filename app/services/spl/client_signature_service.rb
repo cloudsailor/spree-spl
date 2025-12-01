@@ -4,8 +4,10 @@ require 'digest'
 
 module Spl
   class ClientSignatureService
-    def initialize(date)
+    def initialize(date, spl_api_token, spl_signature_seed)
       @date = date
+      @spl_api_token = spl_api_token
+      @spl_signature_seed = spl_signature_seed
     end
 
     def call
@@ -15,7 +17,7 @@ module Spl
     private
 
     def generate_signature
-      data = "#{ENV.fetch('SPL_API_TOKEN')}#{ENV.fetch('SPL_SIGNATURE_SEED')}#{@date}"
+      data = "#{@spl_api_token}#{@spl_signature_seed}#{@date}"
       Rails.logger.debug data.inspect
       Digest::SHA256.hexdigest(data)
     end
