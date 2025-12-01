@@ -2,10 +2,12 @@
 
 module Spl
   class UrlCreatorService
-    def check_card
-      "#{eshop_base}/checkCard"
+    ## Client data
+    def me
+      "#{client_base}/me"
     end
 
+    ## Promotions data
     def find
       "#{eshop_base}/find"
     end
@@ -18,8 +20,16 @@ module Spl
       "#{eshop_base}/saleRefund"
     end
 
-    def me
-      "#{client_base}/me"
+    ## Coupons
+
+    def coupon_find
+      "#{coupon_base}/find"
+    end
+
+    ## Authentication and Authorization
+
+    def check_card
+      "#{eshop_base}/checkCard"
     end
 
     def register
@@ -54,6 +64,10 @@ module Spl
 
     def oauth_base
       "#{ENV.fetch('SPL_URL')}/api/oauth"
+    end
+
+    def coupon_base
+      "#{ENV.fetch('SPL_URL')}/api/cwp/coupon"
     end
   end
 end
