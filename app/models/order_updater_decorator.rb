@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module OrderUpdaterDecorator
-  def update
+  def update # rubocop:disable Metrics/AbcSize
     super
 
-    UpdateSpartaStateJob.perform_later(order.token, 'D', order.number) if order.payment_state == 'paid'
-    UpdateSpartaStateJob.perform_later(order.token, 'C', order.number) if order.state == 'canceled'
+    UpdateSpartaStateJob.perform_later(order.token, 'D', order.number, order.store) if order.payment_state == 'paid'
+    UpdateSpartaStateJob.perform_later(order.token, 'C', order.number, order.store) if order.state == 'canceled'
   end
 
   private

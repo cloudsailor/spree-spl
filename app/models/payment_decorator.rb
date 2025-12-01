@@ -14,6 +14,6 @@ module PaymentDecorator
     return unless order.public_metadata.key?(:spl_no_card) && order.public_metadata.key?(:spl_card_active)
     return unless order.public_metadata['spl_card_active']
 
-    UpdateSpartaStateJob.perform_later(order.token, 'D', order.number)
+    UpdateSpartaStateJob.perform_later(order.token, 'D', order.number, order.store)
   end
 end
