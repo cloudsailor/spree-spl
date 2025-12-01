@@ -8,14 +8,15 @@ module Spl
   class SpartaLoyaltyService
     class SplSendRequestError < StandardError; end
 
-    def initialize(order_token, card_number, line_items, date, products, check_only)
+    def initialize(order_token, card_number, line_items, date, products, check_only, store)
       @order_token = order_token
       @card_number = card_number
       @line_items = line_items
       @date = date.to_i * 1000
       @products = products
       @check_only = check_only
-      @url = URI.parse(Spl::UrlCreatorService.new.sale)
+      @store = store
+      @url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).sale)
     end
 
     def call
@@ -41,11 +42,11 @@ module Spl
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {
         ver: 4,
-        apiUser: ENV.fetch('SPL_API_USER'),
-        apiToken: ENV.fetch('SPL_API_TOKEN'),
-        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-        placeCode: ENV.fetch('SPL_PLACE_CODE'),
-        mode: ENV.fetch('SPL_MODE'),
+        apiUser: @store.private_metadata['spl_api_user'],
+        apiToken: @store.private_metadata['spl_api_token'],
+        partnerCode: @store.private_metadata['spl_partner_code'],
+        placeCode: @store.private_metadata['spl_place_code'],
+        mode: @store.private_metadata['spl_mode'],
         date: @date,
         no: @order_token,
         orderNo: @order_token,
@@ -82,10 +83,10 @@ module Spl
 
     def generate_signature
       check_only = @check_only ? 1 : ''
-      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{@date}#{@order_token}#{check_only}#{@card_number}" # rubocop:disable Layout/LineLength
+      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{@date}#{@order_token}#{check_only}#{@card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
+      Digest::SHA256.hexdigest(signature_base + @store.private_metadata['spl_pos_key'])
     end
   end
 end
