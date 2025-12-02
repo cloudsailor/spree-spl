@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 module OrderUpdaterDecorator
-  def update
-    super
+  private
 
+  def preform_update_sparta_state_job
     UpdateSpartaStateJob.perform_later(order.token, 'D', order.number) if order.payment_state == 'paid'
     UpdateSpartaStateJob.perform_later(order.token, 'C', order.number) if order.state == 'canceled'
   end
-
-  private
 
   def check_spl_adjustments # rubocop:disable Metrics/MethodLength
     if order.public_metadata['spl_card_active'] == true
