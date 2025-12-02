@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spree-spl (1.7.1)
+    spree-spl (1.7.2)
       bigdecimal
       deface
       faraday
