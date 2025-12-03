@@ -6,14 +6,15 @@ module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
 
-    def initialize(user, params)
-      @register_url = URI.parse(Spl::UrlCreatorService.new.register)
+    def initialize(user, store, params)
+      @register_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).register)
       @user = user
+      @store = store
       @params = params
     end
 
     def call
-      oauth_response_body = Spl::OauthTokenService.new(DateTime.current).annonymus_token
+      oauth_response_body = Spl::OauthTokenService.new(DateTime.current, @store).annonymus_token
       access_token = oauth_response_body.dig('response', 'accessToken')
 
       register_body = prepare_registration_body(access_token)
@@ -36,7 +37,7 @@ module Spl
       {
         context: {
           oauthToken: access_token,
-          prgCode: ENV.fetch('SPL_PRG_CODE')
+          prgCode: @store.private_metadata['spl_prg_code']
         },
         person: {
           firstName: @user[:first_name],
@@ -50,8 +51,8 @@ module Spl
           }
         },
         authCode: @params.dig('user', 'public_metadata', 'splAuthCode'),
-        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-        placeCode: ENV.fetch('SPL_PLACE_CODE')
+        partnerCode: @store.private_metadata['spl_partner_code'],
+        placeCode: @store.private_metadata['spl_place_code']
       }
     end
 

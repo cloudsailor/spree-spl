@@ -3,8 +3,9 @@
 class AssignSpartaCardNumberService
   class AssignSpartaCardNumberError < StandardError; end
 
-  def initialize(user)
+  def initialize(user, store)
     @user = user
+    @store = store
   end
 
   def call
@@ -15,7 +16,7 @@ class AssignSpartaCardNumberService
   private
 
   def customer_info
-    Spl::MeService.new(@user).call
+    Spl::MeService.new(@user, @store).call
   end
 
   def add_card_number_to_user(card_data)

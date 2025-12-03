@@ -9,9 +9,10 @@ module Spl
   class ValidateCardService
     class SplCardValidationError < StandardError; end
 
-    def initialize(card_number, user)
+    def initialize(card_number, user, store)
       @card_number = card_number
       @user = user
+      @store = store
     end
 
     def call
@@ -43,17 +44,14 @@ module Spl
     end
 
     def verify_card_request
-      url = URI.parse(Spl::UrlCreatorService.new.check_card)
-      http = Net::HTTP.new(url.host, url.port)
-      http.use_ssl = true
+      url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
+      body = {}
 
-      request = Net::HTTP::Post.new(url)
-      request['Content-Type'] = 'application/json'
+      Spl::SendRequestService.new(url, body).call
+    end
 
-      request.body = body(@card_number, DateTime.current).to_json
-
-      response = http.request(request)
-      response.body
+    def send_request(url, body)
+      Spl::SendRequestService.new(url, body).call
     end
 
     def body(card_number, date) # rubocop: disable Metrics/MethodLength
@@ -62,10 +60,10 @@ module Spl
       {
         ver: 4,
         requestId: uuid,
-        apiUser: ENV.fetch('SPL_API_USER'),
-        apiToken: ENV.fetch('SPL_API_TOKEN'),
-        partnerCode: ENV.fetch('SPL_PARTNER_CODE'),
-        placeCode: ENV.fetch('SPL_PLACE_CODE'),
+        apiUser: @store.private_metadata['spl_api_user'],
+        apiToken: @store.private_metadata['spl_api_token'],
+        partnerCode: @store.private_metadata['spl_partner_code'],
+        placeCode: @store.private_metadata['spl_place_code'],
         date: date_in_ms,
         cardNo: card_number,
         signature: signature(date_in_ms, card_number),
@@ -74,10 +72,10 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{ENV.fetch('SPL_PARTNER_CODE')}#{ENV.fetch('SPL_PLACE_CODE')}#{date}#{card_number}"
+      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
-      Digest::SHA256.hexdigest(signature_base + ENV.fetch('SPL_POS_KEY'))
+      Digest::SHA256.hexdigest(signature_base + @store.private_metadata['spl_pos_key'])
     end
 
     def cards_assigned_user(card_number)

@@ -2,6 +2,12 @@
 
 module Spl
   class UrlCreatorService
+    def initialize(url)
+      @url = url
+    end
+
+    def check_card
+      "#{eshop_base}/checkCard"
     ## Client data
     def me
       "#{client_base}/me"
@@ -55,19 +61,19 @@ module Spl
     private
 
     def client_base
-      "#{ENV.fetch('SPL_URL')}/api/cwp/customer"
+      "#{@url}/api/cwp/customer"
     end
 
     def eshop_base
-      "#{ENV.fetch('SPL_URL')}/api/tx"
+      "#{@url}/api/tx"
     end
 
     def oauth_base
-      "#{ENV.fetch('SPL_URL')}/api/oauth"
+      "#{@url}/api/oauth"
     end
 
     def coupon_base
-      "#{ENV.fetch('SPL_URL')}/api/cwp/coupon"
+      "#{@url}/api/cwp/coupon"
     end
   end
 end
