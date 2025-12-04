@@ -52,3 +52,12 @@ Additionally, Add the following lines to view spree/checkout/_line_item.html.erb
 
 
 #### Add these methods to any other endpoints involved in processing an order in your repository.
+
+## Testing
+To run tests type in terminal:
+```sh
+bundle update
+bundle exec rake test_app
+bundle exec rspec
+```
+

@@ -1,3 +1,34 @@
+Version 2.0.0:
+ - Merge pull request #17 from cloudsailor/EK-751
+ - Fix rubocop offenses
+ - Fix dummy app
+ - Merge branch 'develop' into EK-751
+ - Changes after cr
+ - Merge pull request #19 from cloudsailor/EK-579
+ - typo
+ - Sort gems in alphabetical order
+ - Move byebug gem to dev/test gem group
+ - Remove environment key from test_app task, add Rakefile to rubocop.yml
+ - Fix typo
+ - Fix styles, add rubocop missing part to run it locally
+ - Adjust styles
+ - Dummy app RSpec setup: Update Gemfile, gemspec, add spec helpers, update gitignore and README.md
+ - Comment rubocop offenses
+ - Improve update_sparta_state_job.rb
+ - Fix rubocop offenses
+ - Fix login account service
+ - Remove deprecated dependencies
+ - switch envs to store private metadata
+ - Upgrade spree version
+ - Merge branch 'release-1.6.0' into develop
+ - Merge branch 'release-1.6.0'
+ - Merge branch 'release-1.5.0'
+ - Merge branch 'release-1.4.0'
+ - Merge branch 'release-1.3.0'
+ - Merge branch 'release-1.2.0'
+ - Merge branch 'release-1.1.0'
+ - Merge branch release-1.0.0
+
 Version 1.6.0:
  - Merge pull request #16 from cloudsailor/EK-637
  - Delete ruby-version file
