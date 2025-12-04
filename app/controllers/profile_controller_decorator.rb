@@ -12,15 +12,18 @@ module ProfileControllerDecorator
                                  public_metadata: %i[spl_card_active spl_no_card])
   end
 
-  def validate_spl_no_card # rubocop:disable Metrics/AbcSize
-    return if user_params[:public_metadata].blank?
-    return if user_params[:public_metadata][:spl_no_card].blank?
+  def validate_spl_no_card
+    return unless user_params[:public_metadata].present? && user_params[:public_metadata][:spl_no_card].present?
     return if disactivated_card?
 
     ::Spl::ValidateCardService.new(user_params[:public_metadata][:spl_no_card], spree_current_user, current_store).call
   rescue ::Spl::ValidateCardService::SplCardValidationError => e
+    handle_validation_error(e)
+  end
+
+  def handle_validation_error(error)
     update_order
-    flash[:error] = e.message
+    flash[:error] = error.message
     render :edit, status: :unprocessable_entity
   end
 
