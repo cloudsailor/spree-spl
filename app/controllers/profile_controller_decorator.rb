@@ -24,7 +24,7 @@ module ProfileControllerDecorator
   def handle_validation_error(error)
     update_order
     flash[:error] = error.message
-    render :edit, status: :unprocessable_entity
+    render :edit, status: :unprocessable_content
   end
 
   def update_order(spl_card: nil, active: false)
