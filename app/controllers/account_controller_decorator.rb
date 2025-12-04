@@ -6,10 +6,9 @@ module AccountControllerDecorator
     base.before_action :validate_spl_no_card, only: :update
   end
 
-  def connect_loyalty_account # rubocop:disable Metrics/AbcSize
+  def connect_loyalty_account
     spree_authorize! :update, spree_current_user
-    Spl::LoginAccountService.new(spree_current_user, current_store, params).call
-    AssignSpartaCardNumberService.new(spree_current_user, current_store).call
+    assign_card_number(spree_current_user, current_store, params)
     spree_current_user.reload
     render_serialized_payload { serialize_resource(spree_current_user) }
   rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
@@ -42,6 +41,11 @@ module AccountControllerDecorator
   end
 
   private
+
+  def assign_card_number(user, store, params)
+    Spl::LoginAccountService.new(user, store, params).call
+    AssignSpartaCardNumberService.new(user, store).call
+  end
 
   def validate_spl_no_card # rubocop:disable Metrics/AbcSize
     return unless user_update_params[:public_metadata].present?

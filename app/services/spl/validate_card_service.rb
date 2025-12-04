@@ -43,18 +43,15 @@ module Spl
                                                                                                  'status') != 'A'
     end
 
-    def verify_card_request # rubocop:disable Metrics/AbcSize
+    def verify_card_request
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
-      http = Net::HTTP.new(url.host, url.port)
-      http.use_ssl = true
+      body = {}
 
-      request = Net::HTTP::Post.new(url)
-      request['Content-Type'] = 'application/json'
+      Spl::SendRequestService.new(url, body).call
+    end
 
-      request.body = body(@card_number, DateTime.current).to_json
-
-      response = http.request(request)
-      response.body
+    def send_request(url, body)
+      Spl::SendRequestService.new(url, body).call
     end
 
     def body(card_number, date) # rubocop: disable Metrics/MethodLength

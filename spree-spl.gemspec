@@ -33,8 +33,13 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'bigdecimal'
   spec.add_dependency 'rails', '~> 7.0'
   spec.add_dependency 'spree', spree_version
+  spec.add_dependency 'spree_api', spree_version
   spec.add_dependency 'spree_auth_devise'
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
   spec.metadata['rubygems_mfa_required'] = 'true'
+  spec.add_dependency 'rspec-rails'
+  spec.add_dependency 'rspec-retry'
+  spec.add_dependency 'rubocop-rspec'
+  spec.add_dependency 'spree_dev_tools'
 end
