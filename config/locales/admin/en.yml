@@ -2,5 +2,5 @@ en:
   spree:
     promotion_rule_types:
       user_from_club:
-        description: The user has a valid active VeronaClub card
-        name: VeronaClub User
+        description: The user has a valid active loyalty card
+        name: Loyalty club member
