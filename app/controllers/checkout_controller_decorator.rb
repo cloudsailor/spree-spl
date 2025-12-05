@@ -8,6 +8,10 @@ module CheckoutControllerDecorator
   private
 
   def promotion_switcher
-    PromotionSwitcherService.new(@order, false).call
+    if request.url.include?('confirm')
+      PromotionSwitcherService.new(@order, false).call
+    else
+      PromotionSwitcherService.new(@order, true).call
+    end
   end
 end

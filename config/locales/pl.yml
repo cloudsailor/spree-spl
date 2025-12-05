@@ -1,4 +1,4 @@
-en:
+pl:
   order:
     loyalty_card_missing: Do zamówienia nie przypisano karty lojalnościowej
   spl:
@@ -8,5 +8,5 @@ en:
         card_not_match: Karta nie jest zgodna z numerem karty użytkownika
         wrong_owner: Karta przypisana innemu użytkownikowi
     user:
-      card_number: Numer karty klubowej VERONA przypisany do konta
+      card_number: Numer karty klubowej został przypisany do konta
       card_active: Aktywacja karty SPL
