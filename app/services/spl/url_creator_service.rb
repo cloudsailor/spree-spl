@@ -6,8 +6,6 @@ module Spl
       @url = url
     end
 
-    def check_card
-      "#{eshop_base}/checkCard"
     ## Client data
     def me
       "#{client_base}/me"
