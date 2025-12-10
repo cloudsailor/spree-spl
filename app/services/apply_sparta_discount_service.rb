@@ -70,13 +70,6 @@ class ApplySpartaDiscountService
     return if amount.zero? || adjustments.find_by(label: label).nil?
     return if adjustments.find_by(label: label, amount: amount).present?
 
-    remove_spree_promotions_adjustments(line_item)
     adjustments.find_by(label: label).update(amount: amount)
-  end
-
-  def remove_spree_promotions_adjustments(line_item)
-    return unless line_item.adjustments.where.not(source_type: 'SPL').any?
-
-    line_item.adjustments.where.not(source_type: 'SPL').destroy_all
   end
 end
