@@ -8,7 +8,6 @@ module CheckoutControllerDecorator
   private
 
   def promotion_switcher
-    PromotionSwitcherService.new(@order, true).call
-    RemoveSpartaDiscountService.destroy_not_spl_adjustments(@order)
+    PromotionSwitcherService.new(@order, request.url.include?('confirm')).call
   end
 end
