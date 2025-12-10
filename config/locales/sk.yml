@@ -7,3 +7,5 @@ sk:
         card_not_active: Karta nie je aktívna
         card_not_match: Karta nezodpovedá číslu karty používateľa
         wrong_owner: Karta je priradená inému používateľovi
+    profile:
+      connect_button: Connect to your loyalty account

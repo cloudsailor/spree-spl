@@ -7,3 +7,5 @@ cs:
         card_not_active: Karta není aktivní
         card_not_match: Karta neodpovídá číslu karty uživatele
         wrong_owner: Karta je přiřazena jinému uživateli
+    profile:
+      connect_button: Connect to your loyalty account

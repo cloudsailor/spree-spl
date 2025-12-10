@@ -1,0 +1,11 @@
+pl:
+  order:
+    loyalty_card_missing: Do zamówienia nie przypisano karty lojalnościowej
+  spl:
+    card_validation:
+      errors:
+        card_not_active: Karta nie jest aktywna
+        card_not_match: Karta nie jest zgodna z numerem karty użytkownika
+        wrong_owner: Karta przypisana innemu użytkownikowi
+    profile:
+      connect_button: Połącz z kontem lojalnościowym
