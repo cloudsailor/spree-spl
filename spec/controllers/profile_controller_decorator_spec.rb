@@ -25,7 +25,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
     context 'when spl_card_active is false (card deactivated)' do
       it 'does NOT call ValidateCardService' do
-        put :update, params: { user: { public_metadata: { spl_no_card: '123', spl_card_active: false } } }
+        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123', spl_card_active: false } } }
 
         expect(Spl::ValidateCardService).not_to receive(:new)
       end
@@ -33,7 +33,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
     context 'when spl_no_card exists and card is active' do
       it 'calls ValidateCardService with correct parameters' do
-        put :update, params: { user: { public_metadata: { spl_no_card: '222', spl_card_active: true } } }
+        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123', spl_card_active: true } } }
 
         expect(service_double).to have_received(:call)
       end
@@ -46,20 +46,20 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
       end
 
       it 'renders edit with status 422' do
-        put :update, params: { user: { public_metadata: { spl_no_card: '999' } } }
+        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123' } } }
 
         expect(response.status).to eq(422)
         expect(response).to render_template(:edit)
       end
 
       it 'sets flash error message' do
-        put :update, params: { user: { public_metadata: { spl_no_card: '999' } } }
+        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123' } } }
 
         expect(flash[:error]).to eq('Invalid')
       end
 
       it "updates the user's last order metadata (deactivates card)" do
-        put :update, params: { user: { public_metadata: { spl_no_card: '999' } } }
+        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123' } } }
 
         order = user.orders.last
         expect(order.public_metadata['spl_no_card']).to eq(nil)
