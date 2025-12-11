@@ -3,9 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spl::SpartaLoyaltyService do
-  let!(:country) do
-    create(:country) # or create(:country, iso: 'PL', name: 'Poland')
-  end
+  let!(:country) { create(:country) }
 
   let(:store) do
     create(
@@ -177,20 +175,18 @@ RSpec.describe Spl::SpartaLoyaltyService do
         result = service.call
         expect(result).to eq(response_body_hash)
 
-        # ---- request body checks, matching Sparta template as much as possible ----
-
         expect(captured_body).to include(
           date: (date.to_i * 1000),
           no: order_token,
           orderNo: order_token,
-          partnerCode: 'partner', # from private_metadata
+          partnerCode: 'partner',
           pending: true,
           reverse: false,
           cardNo: '5100179585157',
-          apiUser: 'user', # from private_metadata
-          mode: 'mode', # from private_metadata
-          apiToken: 'token', # from private_metadata
-          placeCode: 'place', # from private_metadata
+          apiUser: 'user',
+          mode: 'mode',
+          apiToken: 'token',
+          placeCode: 'place',
           checkOnly: check_only,
           ver: 4
         )
