@@ -106,7 +106,7 @@ RSpec.describe RemoveSpartaDiscountService do
 
     let(:relation) { line_item1.adjustments.where(source_type: 'SPL') }
 
-    it 'marks eligible SPL adjustments as ineligible & closed, recalculates cart, then destroys all given adjustments' do
+    it 'marks eligible SPL adjustments as ineligible & closed, recalculates cart, then destroys all given adjustments' do # rubocop:disable Layout/LineLength
       expect(line_item1.adjustments.where(source_type: 'SPL').count).to eq(2)
       expect(FakeCartRecalculateService).to receive(:call).with(order: order, line_item: line_item1).twice
 
@@ -119,9 +119,9 @@ RSpec.describe RemoveSpartaDiscountService do
     it 'is safe when relation is empty' do
       empty_relation = line_item2.adjustments.where(source_type: 'SPL')
 
-      expect {
+      expect do
         described_class.destroy_inactive_adjustments(empty_relation, line_item2, order)
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 end
