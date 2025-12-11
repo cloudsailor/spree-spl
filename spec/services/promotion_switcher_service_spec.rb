@@ -25,64 +25,64 @@ RSpec.describe PromotionSwitcherService do
 
   let(:sparta_response) do
     {
-      'errorCode'      => '0',
-      'balanceBurn'    => 0.0,
-      'balanceEarn'    => 0.0,
-      'balanceAfter'   => 0.12,
-      'bookedEarn'     => false,
-      'processId'      => '663c92b05012e0b396ac632b',
-      'messages'       => [],
-      'basket'         => [
+      'errorCode' => '0',
+      'balanceBurn' => 0.0,
+      'balanceEarn' => 0.0,
+      'balanceAfter' => 0.12,
+      'bookedEarn' => false,
+      'processId' => '663c92b05012e0b396ac632b',
+      'messages' => [],
+      'basket' => [
         {
-          'productCode'     => 'TESTPRD1',
-          'productCode2'    => nil,
-          'quantity'        => 1.0,
-          'amountGross'     => 6.75,
-          'discountGross'   => 0.0,
+          'productCode' => 'TESTPRD1',
+          'productCode2' => nil,
+          'quantity' => 1.0,
+          'amountGross' => 6.75,
+          'discountGross' => 0.0,
           'discountPercent' => nil,
-          'unitPriceGross'  => 6.75,
-          'discounts'       => nil,
-          'isAward'         => nil,
-          'notPromoted'     => nil,
-          'skipCB'          => nil,
-          'skipDD'          => nil,
-          'skipRD'          => nil,
-          'pos'             => 1
+          'unitPriceGross' => 6.75,
+          'discounts' => nil,
+          'isAward' => nil,
+          'notPromoted' => nil,
+          'skipCB' => nil,
+          'skipDD' => nil,
+          'skipRD' => nil,
+          'pos' => 1
         },
         {
-          'productCode'     => 'TESTPRD4',
-          'productCode2'    => nil,
-          'quantity'        => 3.0,
-          'amountGross'     => 23.2,
-          'discountGross'   => 0.8,
+          'productCode' => 'TESTPRD4',
+          'productCode2' => nil,
+          'quantity' => 3.0,
+          'amountGross' => 23.2,
+          'discountGross' => 0.8,
           'discountPercent' => nil,
-          'unitPriceGross'  => 7.73,
-          'discounts'       => [
+          'unitPriceGross' => 7.73,
+          'discounts' => [
             {
-              'source'                   => 'LP',
-              'amount'                   => 0.8,
-              'percent'                  => 5.0,
-              'code'                     => '663c926e5012e0b396ac6328',
-              'name'                     => '5% discount for TESTPRD4',
-              'order'                    => 1,
-              'quantity'                 => 2.0,
+              'source' => 'LP',
+              'amount' => 0.8,
+              'percent' => 5.0,
+              'code' => '663c926e5012e0b396ac6328',
+              'name' => '5% discount for TESTPRD4',
+              'order' => 1,
+              'quantity' => 2.0,
               'unitPriceGrossDiscounted' => nil
             }
           ],
-          'isAward'         => nil,
-          'notPromoted'     => nil,
-          'skipCB'          => nil,
-          'skipDD'          => nil,
-          'skipRD'          => nil,
-          'pos'             => 2
+          'isAward' => nil,
+          'notPromoted' => nil,
+          'skipCB' => nil,
+          'skipDD' => nil,
+          'skipRD' => nil,
+          'pos' => 2
         }
       ],
-      'basketChanged'  => true,
-      'amountGross'    => 29.95,
-      'discountGross'  => 0.8,
-      'coupons'        => [],
-      'cardType'       => { 'code' => 'DV' },
-      'requestId'      => '00003_LSHRV'
+      'basketChanged' => true,
+      'amountGross' => 29.95,
+      'discountGross' => 0.8,
+      'coupons' => [],
+      'cardType' => { 'code' => 'DV' },
+      'requestId' => '00003_LSHRV'
     }
   end
 
@@ -99,7 +99,7 @@ RSpec.describe PromotionSwitcherService do
         sparta_service_double = instance_double(Spl::SpartaLoyaltyService)
         apply_service_double  = instance_double(ApplySpartaDiscountService)
 
-        expect(Spl::SpartaLoyaltyService).to receive(:new) do |token, card_no, line_items, date, products, chk, store_arg|
+        expect(Spl::SpartaLoyaltyService).to receive(:new) do |token, card_no, line_items, date, products, chk, store_arg| # rubocop:disable Layout/LineLength
           expect(token).to eq(order.token)
           expect(card_no).to eq('5100179585157')
           expect(line_items).to match_array(order.line_items)
