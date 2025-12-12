@@ -34,7 +34,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
       product: product1,
       price: 6.75,
       compare_at_price: 6.75,
-      sku: 'TESTPRD1'
+      sku: 'BS49252-BZ020-PSA000-000'
     )
   end
 
@@ -44,7 +44,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
       :variant,
       product: product2,
       price: 24.0,
-      sku: 'TESTPRD4'
+      sku: 'BS49252-BZ020-PSA000-001'
     )
   end
 
@@ -107,7 +107,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
         'messages' => [],
         'basket' => [
           {
-            'productCode' => 'TESTPRD1',
+            'productCode' => 'BS49252-BZ020-PSA000-000',
             'productCode2' => nil,
             'quantity' => 1.0,
             'amountGross' => 6.75,
@@ -123,7 +123,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
             'pos' => 1
           },
           {
-            'productCode' => 'TESTPRD4',
+            'productCode' => 'BS49252-BZ020-PSA000-001',
             'productCode2' => nil,
             'quantity' => 3.0,
             'amountGross' => 23.2,
@@ -136,7 +136,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
                 'amount' => 0.8,
                 'percent' => 5.0,
                 'code' => '663c926e5012e0b396ac6328',
-                'name' => '5% discount for TESTPRD4',
+                'name' => '5% discount for BS49252-BZ020-PSA000-001',
                 'order' => 1,
                 'quantity' => 2.0,
                 'unitPriceGrossDiscounted' => nil
@@ -196,14 +196,14 @@ RSpec.describe Spl::SpartaLoyaltyService do
           [
             {
               pos: line_item1.id,
-              productCode: 'TESTPRD1',
+              productCode: 'BS49252-BZ020-PSA000-000',
               quantity: 1,
               amountGross: 6.75,
               notPromoted: false
             },
             {
               pos: line_item2.id,
-              productCode: 'TESTPRD4',
+              productCode: 'BS49252-BZ020-PSA000-001',
               quantity: 3,
               amountGross: 24.0,
               notPromoted: false

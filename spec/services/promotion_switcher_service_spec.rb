@@ -17,8 +17,8 @@ RSpec.describe PromotionSwitcherService do
 
   let(:service) { described_class.new(order, check_only) }
 
-  let(:variant1) { create(:variant, sku: 'TESTPRD1', price: 6.75) }
-  let(:variant2) { create(:variant, sku: 'TESTPRD4', price: 7.73) }
+  let(:variant1) { create(:variant, sku: 'BS49252-BZ020-PSA000-000', price: 6.75) }
+  let(:variant2) { create(:variant, sku: 'BS49252-BZ020-PSA000-001', price: 7.73) }
 
   let!(:line_item1) { create(:line_item, order:, variant: variant1, quantity: 1, price: 6.75) }
   let!(:line_item2) { create(:line_item, order:, variant: variant2, quantity: 3, price: 7.73) }

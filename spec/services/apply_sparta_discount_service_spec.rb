@@ -7,8 +7,8 @@ RSpec.describe ApplySpartaDiscountService do
   let(:store)    { create(:store, default_country: country) }
   let(:order)    { create(:order, store: store) }
 
-  let(:variant1) { create(:variant, price: 6.75,  sku: 'TESTPRD1') }
-  let(:variant2) { create(:variant, price: 7.73,  sku: 'TESTPRD4') }
+  let(:variant1) { create(:variant, price: 6.75,  sku: 'BS49252-BZ020-PSA000-000') }
+  let(:variant2) { create(:variant, price: 7.73,  sku: 'BS49252-BZ020-PSA000-001') }
 
   let!(:line_item1) { create(:line_item, order: order, variant: variant1, quantity: 1, price: 6.75) }
   let!(:line_item2) { create(:line_item, order: order, variant: variant2, quantity: 3, price: 7.73) }
