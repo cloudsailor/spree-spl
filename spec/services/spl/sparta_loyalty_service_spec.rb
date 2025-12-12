@@ -82,6 +82,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
   end
 
   let(:url_creator_double) { instance_double(Spl::UrlCreatorService, sale: 'https://spl.test/sale') }
+  let(:send_request_service_double) { instance_double(Spl::SendRequestService) }
 
   before do
     allow(Spl::UrlCreatorService).to receive(:new)
@@ -90,11 +91,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
   end
 
   describe '#call' do
-    let(:http_response) do
-      resp = instance_double('Net::HTTPSuccess', body: response_body_hash.to_json)
-      allow(resp).to receive(:is_a?).with(Net::HTTPSuccess).and_return(true)
-      resp
-    end
+    let(:http_response) { instance_double(Net::HTTPSuccess, body: response_body_hash.to_json) }
 
     let(:response_body_hash) do
       {
@@ -160,9 +157,12 @@ RSpec.describe Spl::SpartaLoyaltyService do
     end
 
     context 'when Sparta returns HTTP success and errorCode = "0"' do
+      before do
+        allow(http_response).to receive(:is_a?).with(Net::HTTPSuccess).and_return(true)
+      end
+
       it 'sends Sparta-like payload and returns parsed response' do
         captured_body = nil
-        send_request_service_double = instance_double(Spl::SendRequestService)
 
         expect(Spl::SendRequestService).to receive(:new) do |url, body|
           expect(url).to eq(URI.parse('https://spl.test/sale'))
@@ -221,14 +221,8 @@ RSpec.describe Spl::SpartaLoyaltyService do
       let(:http_response) { instance_double(Net::HTTPInternalServerError) }
 
       it 'returns nil' do
-        send_request_service_double = instance_double(Spl::SendRequestService)
-
-        expect(Spl::SendRequestService).to receive(:new)
-          .and_return(send_request_service_double)
-
-        expect(send_request_service_double).to receive(:call)
-          .and_return(http_response)
-
+        expect(Spl::SendRequestService).to receive(:new).and_return(send_request_service_double)
+        expect(send_request_service_double).to receive(:call).and_return(http_response)
         expect(service.call).to be_nil
       end
     end
@@ -241,14 +235,13 @@ RSpec.describe Spl::SpartaLoyaltyService do
         }
       end
 
+      before do
+        allow(http_response).to receive(:is_a?).with(Net::HTTPSuccess).and_return(true)
+      end
+
       it 'raises SplSendRequestError with response body' do
-        send_request_service_double = instance_double(Spl::SendRequestService)
-
-        expect(Spl::SendRequestService).to receive(:new)
-          .and_return(send_request_service_double)
-
-        expect(send_request_service_double).to receive(:call)
-          .and_return(http_response)
+        expect(Spl::SendRequestService).to receive(:new).and_return(send_request_service_double)
+        expect(send_request_service_double).to receive(:call).and_return(http_response)
 
         expect do
           service.call

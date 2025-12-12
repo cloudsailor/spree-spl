@@ -23,7 +23,7 @@ RSpec.describe PromotionSwitcherService do
   let!(:line_item1) { create(:line_item, order:, variant: variant1, quantity: 1, price: 6.75) }
   let!(:line_item2) { create(:line_item, order:, variant: variant2, quantity: 3, price: 7.73) }
 
-  let(:sparta_response) do
+  let(:exemple_sparta_response) do
     {
       'errorCode' => '0',
       'balanceBurn' => 0.0,
@@ -111,8 +111,8 @@ RSpec.describe PromotionSwitcherService do
           sparta_service_double
         end
 
-        expect(sparta_service_double).to receive(:call).and_return(sparta_response)
-        expect(ApplySpartaDiscountService).to receive(:new).with(sparta_response, order)
+        expect(sparta_service_double).to receive(:call).and_return(exemple_sparta_response)
+        expect(ApplySpartaDiscountService).to receive(:new).with(exemple_sparta_response, order)
                                                            .and_return(apply_service_double)
         expect(apply_service_double).to receive(:call)
         expect(order).to receive(:reload).and_call_original
