@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe AssignSpartaCardNumberService do
-  let!(:country) { create(:country) }
+  let(:country) { create(:country) }
   let(:store) { create(:store, default_country: country) }
   let(:user)  { create(:user, public_metadata: initial_public_metadata) }
 
@@ -42,10 +42,6 @@ RSpec.describe AssignSpartaCardNumberService do
   before do
     allow(Spl::MeService).to receive(:new).with(user, store).and_return(me_service_double)
     allow(me_service_double).to receive(:call).and_return(base_me_response)
-    allow(I18n).to receive(:t).with('spl.card_validation.errors.card_not_active')
-                              .and_return('card_not_active')
-    allow(I18n).to receive(:t).with('spl.card_validation.errors.wrong_owner')
-                              .and_return('wrong_owner')
     stub_const('Spree::User', Spree.user_class)
   end
 
@@ -76,7 +72,7 @@ RSpec.describe AssignSpartaCardNumberService do
           service.call
         end.to raise_error(
           AssignSpartaCardNumberService::AssignSpartaCardNumberError,
-          'card_not_active'
+          I18n.t('spl.card_validation.errors.card_not_active')
         )
 
         expect(Spl::MeService).to have_received(:new).with(user, store)
@@ -93,7 +89,7 @@ RSpec.describe AssignSpartaCardNumberService do
           service.call
         end.to raise_error(
           AssignSpartaCardNumberService::AssignSpartaCardNumberError,
-          'wrong_owner'
+          I18n.t('spl.card_validation.errors.wrong_owner')
         )
 
         expect(main_card_data['status']).to eq('A')
