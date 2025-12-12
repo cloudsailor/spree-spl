@@ -36,4 +36,8 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   ::Spree::Payment.prepend(
     PaymentDecorator
   )
+
+  ::Spree::Account::ProfileController.prepend(
+    ProfileControllerDecorator
+  )
 end

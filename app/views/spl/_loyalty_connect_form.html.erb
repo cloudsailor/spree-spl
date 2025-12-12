@@ -1,0 +1,28 @@
+<%= form_with url: login_code_account_profile_path, method: :patch, local: true do |f| %>
+  <div class="mb-4">
+    <%= f.label :phone,
+                Spree.t(:phone),
+                class: 'text-xs text-neutral-600 block mb-2' %>
+
+    <%= f.telephone_field :phone,
+          class: 'text-input w-full',
+          placeholder: Spree.t('loyalty.phone_label'),
+          value: try_spree_current_user&.phone %>
+  </div>
+
+  <div class="mb-4 flex items-start gap-2">
+    <%= check_box_tag :accept_yc_terms,
+                      '1',
+                      ActiveModel::Type::Boolean.new.cast(try_spree_current_user&.public_metadata['accept_yc_terms']),
+                      class: 'mt-1' %>
+
+    <label for="accept_yc_terms" class="text-sm text-neutral-700">
+      <%= Spree.t('loyalty.accept_yc_terms_label') %>
+    </label>
+  </div>
+
+  <div>
+    <%= f.submit Spree.t('loyalty.send_code_button'),
+                 class: 'btn-primary w-full' %>
+  </div>
+<% end %>
