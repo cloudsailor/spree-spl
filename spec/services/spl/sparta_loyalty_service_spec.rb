@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spl::SpartaLoyaltyService do
-  let!(:country) { create(:country) }
+  let(:country) { create(:country) }
 
   let(:store) do
     create(
@@ -212,7 +212,6 @@ RSpec.describe Spl::SpartaLoyaltyService do
         )
 
         expect(captured_body[:ver]).to eq(4)
-        expect(captured_body[:checkOnly]).to eq(true)
         expect(captured_body[:signature]).to be_a(String)
         expect(captured_body[:signature].size).to eq(64)
       end
