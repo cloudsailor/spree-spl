@@ -32,6 +32,6 @@ class AssignSpartaCardNumberService
   end
 
   def cards_assigned_user(card_number)
-    Spree::User.all.detect { |u| u.public_metadata&.dig('spl_no_card') == card_number }&.id == @user.id
+    Spree::User.exists?(["id = ? AND public_metadata ->> 'spl_no_card' = ?", @user.id, card_number])
   end
 end
