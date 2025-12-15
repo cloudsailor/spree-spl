@@ -43,11 +43,13 @@ module CartControllerDecorator
 
   def add_spl_discount_params_to_order(user)
     return unless user.present?
-    return unless user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
 
-    spl_card_active = cast_boolean(user.public_metadata['spl_card_active'])
+    symbolized_keys = user.public_metadata.to_h.deep_symbolize_keys
+    return unless symbolized_keys.key?(:spl_no_card) && symbolized_keys.key?(:spl_card_active)
+
+    spl_card_active = cast_boolean(symbolized_keys[:spl_card_active])
     params[:public_metadata].merge!(spl_card_active: spl_card_active,
-                                    spl_no_card: user.public_metadata['spl_no_card'])
+                                    spl_no_card: symbolized_keys[:spl_no_card])
   end
 
   def switch_spl_active_param(order, check_only)

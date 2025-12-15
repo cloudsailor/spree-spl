@@ -75,7 +75,7 @@ module AccountControllerDecorator
   end
 
   def disactivated_card
-    user_update_params[:public_metadata][:spl_card_active].present? &&
+    user_update_params[:public_metadata][:spl_card_active].to_s.present? &&
       !user_update_params[:public_metadata][:spl_card_active]
   end
 end
