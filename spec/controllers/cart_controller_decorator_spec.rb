@@ -29,9 +29,9 @@ RSpec.describe Spree::Api::V2::Storefront::CartController, type: :controller do
         post :create, params: { public_metadata: {} }, as: :json
 
         expect(controller.params[:public_metadata].permit!.to_h).to include(
-                                                              'spl_no_card' => 'SPL-123',
-                                                              'spl_card_active' => true
-                                                            )
+          'spl_no_card' => 'SPL-123',
+          'spl_card_active' => true
+        )
       end
     end
 
@@ -63,8 +63,8 @@ RSpec.describe Spree::Api::V2::Storefront::CartController, type: :controller do
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(order.errors[:base]).to include(
-                                         I18n.t('order.loyalty_card_missing')
-                                       )
+          I18n.t('order.loyalty_card_missing')
+        )
       end
     end
 

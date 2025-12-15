@@ -102,8 +102,6 @@ RSpec.describe Spree::Payment, type: :model do
       end
     end
 
-
-
     context 'when public_metadata is empty' do
       let(:public_metadata) { {} }
 

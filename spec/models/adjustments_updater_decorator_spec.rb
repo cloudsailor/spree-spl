@@ -3,7 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
-
   let(:store) { Spree::Store.default || create(:store, default: true) }
   let(:public_metadata) { {} }
 
@@ -17,7 +16,6 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
   let(:adjustable) { order }
   subject(:updater) { described_class.new(adjustable) }
 
-
   describe '#set_spree_adjustments (private)' do
     def run_set_spree_adjustments
       updater.send(:set_spree_adjustments)
@@ -27,11 +25,13 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       shipment.adjustments << shipment_adjustment
       order.save
       shipment.save
-    rescue;end;
+    rescue StandardError
+      # Ignored
+    end
 
     context 'when adjustable is an order with spl_card_active: true (symbol key)' do
       let(:public_metadata) { { spl_card_active: true } }
-      let(:adjustments) { [adjustment1, adjustment2]}
+      let(:adjustments) { [adjustment1, adjustment2] }
       let(:adjustment1) { create(:adjustment, order: order) }
       let(:adjustment2) { create(:adjustment, order: order) }
 
@@ -43,7 +43,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
 
     context 'when adjustable is an order with spl_card_active: true (string key)' do
       let(:public_metadata) { { 'spl_card_active' => true } }
-      let(:adjustments) { [adjustment1, adjustment2]}
+      let(:adjustments) { [adjustment1, adjustment2] }
       let(:adjustment1) { create(:adjustment, order: order) }
       let(:adjustment2) { create(:adjustment, order: order) }
 
@@ -55,7 +55,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
 
     context 'when adjustable is an order with spl_card_active: false' do
       let(:public_metadata) { { spl_card_active: false } }
-      let(:adjustments) { [adjustment]}
+      let(:adjustments) { [adjustment] }
       let!(:adjustment) { create(:adjustment, order: order, adjustable: order) }
 
       it 'does not destroy adjustments' do
@@ -68,18 +68,18 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       let(:public_metadata) { { spl_card_active: true } }
       let(:adjustable) { shipment }
       let!(:shipment) { create(:shipment, order: order) }
-      let(:adjustments) { [order_adjustment]}
+      let(:adjustments) { [order_adjustment] }
       let!(:shipment_adjustment) { create(:adjustment, order: order, adjustable: shipment) }
       let!(:order_adjustment)    { create(:adjustment, order: order, adjustable: order) }
 
       it 'destroys only the shipment adjustments, not order adjustments' do
-        expect {
+        expect do
           run_set_spree_adjustments
-        }.to change { shipment.adjustments.reload.count }.from(1).to(0)
+        end.to change { shipment.adjustments.reload.count }.from(1).to(0)
 
-        expect {
+        expect do
           run_set_spree_adjustments
-        }.not_to(change { order.adjustments.reload.count })
+        end.not_to(change { order.adjustments.reload.count })
       end
     end
 
@@ -101,7 +101,6 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
 
         expect { run_set_spree_adjustments }
           .to change { line_item.adjustments.reload.count }.from(1).to(0)
-
       end
     end
 
@@ -211,8 +210,9 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       line_item.save
       order.line_items << line_item
       order.save
-    rescue;end;
-
+    rescue StandardError
+      # Ignored
+    end
 
     context 'when adjustable is a line item with SPL adjustment' do
       let(:adjustable) { line_item }
@@ -261,14 +261,15 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
     end
   end
 
-
   describe '#recalculate_spl_adjustments (private)' do
     before do
       line_item.adjustments = adjustments
       line_item.save
       order.line_items << line_item
       order.save
-    rescue;end;
+    rescue StandardError
+      # Ignored
+    end
 
     def recalculate_spl_adjustments(attributes, totals)
       updater.send(:recalculate_spl_adjustments, attributes, totals)
@@ -276,9 +277,9 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
 
     let(:adjustable) { line_item }
     let!(:line_item) { create(:line_item) }
-    let(:adjustments){
-      [ spl_adj1, spl_adj2 , spl_ineligible, other_adj]
-    }
+    let(:adjustments) do
+      [spl_adj1, spl_adj2, spl_ineligible, other_adj]
+    end
 
     let!(:spl_adj1) do
       create(:adjustment,

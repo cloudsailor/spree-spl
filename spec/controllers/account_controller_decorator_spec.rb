@@ -5,31 +5,31 @@ require 'rails_helper'
 RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller do
   let(:store) { Spree::Store.default || create(:store, default: true) }
   let(:user)  { create(:user) }
-  
+
   before do
     allow(controller).to receive(:spree_current_user).and_return(user)
     allow(controller).to receive(:current_store).and_return(store)
   end
 
   describe 'POST #connect_loyalty_account' do
-    let(:params) {
+    let(:params) do
       {
         'user' => {
           'public_metadata' => {
             'mobile_country' => '+48',
             'phone_number' => '123345125',
             'card_number' => '0123456789123',
-            'spl_auth_code' => 'BVSMWX8YYTH98SZAVHYEZJZC7PYPKS',
+            'spl_auth_code' => 'BVSMWX8YYTH98SZAVHYEZJZC7PYPKS'
           }
         }
       }
-    }
-    
+    end
+
     context 'when successful' do
       before do
         allow(controller).to receive(:assign_card_number)
-                               .with(user, store, kind_of(ActionController::Parameters))
-                               .and_return(true)
+          .with(user, store, kind_of(ActionController::Parameters))
+          .and_return(true)
       end
 
       it 'authorizes the action' do
@@ -50,7 +50,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:ok)
 
         json = response.parsed_body
-        expect(json).to have_key('data') 
+        expect(json).to have_key('data')
       end
     end
 
@@ -94,7 +94,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
   end
 
   describe 'POST #register_loyalty_account' do
-    let(:params) {
+    let(:params) do
       {
         'user' => {
           'public_metadata' => {
@@ -106,7 +106,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
           }
         }
       }
-    }
+    end
 
     let(:service_instance) do
       instance_double(Spl::RegisterAccountService)
@@ -118,8 +118,8 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
       allow(Spl::RegisterAccountService)
         .to receive(:new)
-              .with(user, store, kind_of(ActionController::Parameters))
-              .and_return(service_instance)
+        .with(user, store, kind_of(ActionController::Parameters))
+        .and_return(service_instance)
     end
 
     context 'when successful' do
@@ -146,7 +146,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:ok)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json).to have_key('data')
         expect(json['data']).to have_key('attributes')
       end
@@ -155,7 +155,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
     context 'when SplRegisterAccountError is raised' do
       before do
         allow(service_instance).to receive(:call)
-                                     .and_raise(Spl::RegisterAccountService::SplRegisterAccountError.new('Register failed'))
+          .and_raise(Spl::RegisterAccountService::SplRegisterAccountError.new('Register failed'))
       end
 
       it 'returns bad_request with error JSON' do
@@ -163,7 +163,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:bad_request)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json['error']).to include('Register failed')
       end
     end
@@ -171,7 +171,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
     context 'when OauthTokenError is raised' do
       before do
         allow(service_instance).to receive(:call)
-                                     .and_raise(Spl::OauthTokenService::OauthTokenError.new('Token invalid'))
+          .and_raise(Spl::OauthTokenService::OauthTokenError.new('Token invalid'))
       end
 
       it 'returns bad_request with error JSON' do
@@ -179,7 +179,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:bad_request)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json['error']).to include('Token invalid')
       end
     end
@@ -194,8 +194,8 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
       allow(Spl::RequestOtpService)
         .to receive(:new)
-              .with(instance_of(DateTime), store, kind_of(ActionController::Parameters))
-              .and_return(service_instance)
+        .with(instance_of(DateTime), store, kind_of(ActionController::Parameters))
+        .and_return(service_instance)
     end
 
     context 'when OTP request succeeds' do
@@ -215,7 +215,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
     context 'when SplRequestOtpError is raised' do
       before do
         allow(service_instance).to receive(:call)
-                                     .and_raise(Spl::RequestOtpService::SplRequestOtpError.new('OTP failed'))
+          .and_raise(Spl::RequestOtpService::SplRequestOtpError.new('OTP failed'))
       end
 
       it 'returns 400 Bad Request with error JSON' do
@@ -223,7 +223,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:bad_request)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json['error']).to include('OTP failed')
       end
     end
@@ -231,7 +231,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
     context 'when OauthTokenError is raised' do
       before do
         allow(service_instance).to receive(:call)
-                                     .and_raise(Spl::OauthTokenService::OauthTokenError.new('Token invalid'))
+          .and_raise(Spl::OauthTokenService::OauthTokenError.new('Token invalid'))
       end
 
       it 'returns 400 Bad Request with error JSON' do
@@ -239,7 +239,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:bad_request)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json['error']).to include('Token invalid')
       end
     end
@@ -260,21 +260,20 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
       allow(Spl::SendOtpService)
         .to receive(:new)
-              .with(
-                instance_of(DateTime),
-                '+48',
-                '123345125',
-                store
-              )
-              .and_return(service_instance)
+        .with(
+          instance_of(DateTime),
+          '+48',
+          '123345125',
+          store
+        )
+        .and_return(service_instance)
     end
-
 
     context 'when authorization passes' do
       before do
         allow(controller).to receive(:spree_authorize!)
-                               .with(:update, user)
-                               .and_return(true)
+          .with(:update, user)
+          .and_return(true)
 
         allow(service_instance).to receive(:call).and_return(true)
       end
@@ -291,8 +290,8 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
     context 'when authorization fails' do
       before do
         allow(controller).to receive(:spree_authorize!)
-                               .with(:update, user)
-                               .and_raise(CanCan::AccessDenied.new('Not allowed'))
+          .with(:update, user)
+          .and_raise(CanCan::AccessDenied.new('Not allowed'))
       end
 
       it 'returns 403 Forbidden' do
@@ -305,7 +304,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
       before do
         allow(controller).to receive(:spree_authorize!).and_return(true)
         allow(service_instance).to receive(:call)
-                                     .and_raise(Spl::SendOtpService::SplSendOtpError.new('OTP sending failed'))
+          .and_raise(Spl::SendOtpService::SplSendOtpError.new('OTP sending failed'))
       end
 
       it 'returns 400 Bad Request with error JSON' do
@@ -313,7 +312,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
 
         expect(response).to have_http_status(:bad_request)
 
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json['error']).to include('OTP sending failed')
       end
     end
@@ -378,7 +377,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
             as: :json
 
       expect(response).to have_http_status(:bad_request)
-      expect(JSON.parse(response.body)).to eq('error' => 'Invalid SPL card')
+      expect(response.parsed_body).to eq('error' => 'Invalid SPL card')
 
       order.reload
       expect(order.public_metadata['spl_no_card']).to be_nil

@@ -17,3 +17,8 @@ Style/Documentation:
 
 Metrics/ParameterLists:
   Max: 8
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - spree-spl.gemspec
