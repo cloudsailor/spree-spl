@@ -2,6 +2,10 @@ en:
   order:
     loyalty_card_missing: There is no loyalty card assigned to order
   spl:
+    user:
+      errors:
+        must_accept_yc_terms: You must accept the loyalty club terms and conditions to continue
+        invalid_phone: Podaj poprawny numer telefonu
     card_validation:
       errors:
         card_not_active: Card is not active

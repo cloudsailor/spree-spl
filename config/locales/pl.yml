@@ -2,6 +2,10 @@ pl:
   order:
     loyalty_card_missing: Do zamówienia nie przypisano karty lojalnościowej
   spl:
+    user:
+      errors:
+        must_accept_yc_terms: Musisz zaakceptować regulamin klubu lojalnościowego
+        invalid_phone: Podaj poprawny numer telefonu
     card_validation:
       errors:
         card_not_active: Karta nie jest aktywna

@@ -2,6 +2,10 @@ sk:
   order:
     loyalty_card_missing: K objednávke nie je priradená žiadna vernostná karta
   spl:
+    user:
+      errors:
+        must_accept_yc_terms: You must accept the loyalty club terms and conditions to continue
+        invalid_phone: Podaj poprawny numer telefonu
     card_validation:
       errors:
         card_not_active: Karta nie je aktívna
