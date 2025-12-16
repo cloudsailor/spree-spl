@@ -7,12 +7,11 @@ module Spl
     class SplSendOtpError < StandardError; end
 
     def initialize(date, mobile_country, phone_number, store)
-      debugger
       @date = date.to_i * 1000
       @send_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).send_otp)
       @mobile_country = mobile_country
       @phone_number = phone_number
-      @env = Spl::StorePrivateMetadata.all(store)
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
