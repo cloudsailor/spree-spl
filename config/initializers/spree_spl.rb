@@ -37,11 +37,19 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     PaymentDecorator
   )
 
-  ::Spree::CheckoutController.prepend(CheckoutControllerDecorator)
+  ::Spree::CheckoutController.prepend(
+    CheckoutControllerDecorator
+  )
 
-  ::Spree::LineItemsController.prepend(LineItemsControllerDecorator)
+  ::Spree::LineItemsController.prepend(
+    LineItemsControllerDecorator
+  )
 
-  ::Spree::Account::ProfileController.prepend(ProfileControllerDecorator)
+  ::Spree::Account::ProfileController.prepend(
+    ProfileControllerDecorator
+  )
 
-  ::Spree::CheckoutHelper.prepend(CheckoutHelperDecorator)
+  ::Spree::CheckoutHelper.prepend(
+    CheckoutHelperDecorator
+  )
 end
