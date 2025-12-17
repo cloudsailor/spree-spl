@@ -4,7 +4,11 @@ require 'rails_helper'
 
 RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/BlockLength
   let!(:order) do
-    create(:order, state: 'complete', public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => true })
+    create(
+      :order,
+      state: 'complete',
+      public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => true }
+    )
   end
 
   let(:order_token)  { order.token }
@@ -12,6 +16,7 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
   let(:card_number)  { order.public_metadata['spl_no_card'] }
   let(:basket)       { [{ 'name' => 'Item', 'price' => 100 }] }
   let(:iso_date)     { DateTime.now.iso8601 }
+
   let!(:store) do
     order.store.tap do |s|
       s.update!(
@@ -28,6 +33,15 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
         }
       )
     end
+  end
+
+  let(:find_tx) do
+    {
+      'errorCode' => '0',
+      'response' => [
+        { 'date' => iso_date, 'cardNo' => card_number, 'basket' => basket }
+      ]
+    }
   end
 
   before do
@@ -52,17 +66,10 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
 
   describe '#perform' do # rubocop:disable Metrics/BlockLength
     context "state = 'D' (update order)" do
+      let(:success_response) { { 'errorCode' => '0' } }
+
       it 'finds transaction and updates order' do
-        find_tx = {
-          'errorCode' => '0',
-          'response' => [
-            { 'date' => iso_date, 'cardNo' => card_number, 'basket' => basket }
-          ]
-        }
-
-        success = { 'errorCode' => '0' }
-
-        stub_http_responses(find_tx, success)
+        stub_http_responses(find_tx, success_response)
 
         expect do
           described_class.perform_now(order_token, 'D', order_number, store)
@@ -71,18 +78,11 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
     end
 
     context "state = 'C' (refund)" do
+      let(:refund_response) { { 'errorCode' => '0' } }
+
       it 'finds transaction and performs refund' do
         order.update(state: 'canceled')
-        find_tx = {
-          'errorCode' => '0',
-          'response' => [
-            { 'date' => iso_date, 'cardNo' => card_number, 'basket' => basket }
-          ]
-        }
-
-        refund_ok = { 'errorCode' => '0' }
-
-        stub_http_responses(find_tx, refund_ok)
+        stub_http_responses(find_tx, refund_response)
 
         expect do
           described_class.perform_now(order_token, 'C', order_number, store)
@@ -91,8 +91,10 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
     end
 
     context 'when find_transaction returns ORDER_NOT_FOUND' do
+      let(:order_not_found_response) { { 'errorCode' => 'ORDER_NOT_FOUND' } }
+
       it 'exits without raising error' do
-        stub_http_responses({ 'errorCode' => 'ORDER_NOT_FOUND' })
+        stub_http_responses(order_not_found_response)
 
         expect do
           described_class.perform_now(order_token, 'D', order_number, store)
@@ -101,8 +103,10 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
     end
 
     context 'when find_transaction returns REQUEST_ALREADY_PROCESSED' do
+      let(:request_already_processed_response) { { 'errorCode' => 'REQUEST_ALREADY_PROCESSED' } }
+
       it 'exits without raising error' do
-        stub_http_responses({ 'errorCode' => 'REQUEST_ALREADY_PROCESSED' })
+        stub_http_responses(request_already_processed_response)
 
         expect do
           described_class.perform_now(order_token, 'D', order_number, store)
@@ -111,16 +115,9 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
     end
 
     context 'when unhandled error returned' do
+      let(:bad_response) { { 'errorCode' => '999', 'msg' => 'Unexpected error' } }
+
       it 'raises StandardError' do
-        find_tx = {
-          'errorCode' => '0',
-          'response' => [
-            { 'date' => iso_date, 'cardNo' => card_number, 'basket' => basket }
-          ]
-        }
-
-        bad_response = { 'errorCode' => '999', 'msg' => 'Unexpected error' }
-
         stub_http_responses(find_tx, bad_response)
 
         expect do
