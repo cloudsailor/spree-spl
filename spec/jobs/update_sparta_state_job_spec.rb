@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/BlockLength
+RSpec.describe UpdateSpartaStateJob, type: :job do
   let!(:order) do
     create(
       :order,
@@ -64,7 +64,7 @@ RSpec.describe UpdateSpartaStateJob, type: :job do # rubocop:disable Metrics/Blo
     allow(http).to receive(:request).and_return(*responses)
   end
 
-  describe '#perform' do # rubocop:disable Metrics/BlockLength
+  describe '#perform' do
     context "state = 'D' (update order)" do
       let(:success_response) { { 'errorCode' => '0' } }
 
