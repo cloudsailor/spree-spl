@@ -15,7 +15,7 @@ module Spl
           spree_current_user.reload
           render_serialized_payload { serialize_resource(spree_current_user) }
         rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
-          Spl::MeService::SplMeError => e
+               Spl::MeService::SplMeError => e
           render json: { error: e }, status: :bad_request
         end
 
@@ -30,7 +30,7 @@ module Spl
 
         def registration_code
           Spl::RequestOtpService.new(DateTime.current, current_store, params).call
-          head 204
+          head :no_content
         rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
           render json: { error: e }, status: :bad_request
         end
@@ -38,7 +38,7 @@ module Spl
         def login_code
           spree_authorize! :update, spree_current_user
           Spl::SendOtpService.new(DateTime.current, params[:mobile_country], params[:phone_number], current_store).call
-          head 204
+          head :no_content
         rescue Spl::SendOtpService::SplSendOtpError => e
           render json: { error: e }, status: :bad_request
         end
@@ -51,9 +51,9 @@ module Spl
         end
 
         def validate_spl_no_card # rubocop:disable Metrics/AbcSize
-          return unless user_update_params[:public_metadata].present?
-          return if disactivated_card
-          return unless user_update_params[:public_metadata][:spl_no_card].present?
+          return if user_update_params[:public_metadata].blank?
+          return if disactivated_card?
+          return if user_update_params[:public_metadata][:spl_no_card].blank?
 
           Spl::ValidateCardService.new(user_update_params[:public_metadata][:spl_no_card],
                                        spree_current_user,
@@ -77,12 +77,11 @@ module Spl
           )
         end
 
-        def disactivated_card
+        def disactivated_card?
           user_update_params[:public_metadata][:spl_card_active].present? &&
             !user_update_params[:public_metadata][:spl_card_active]
         end
       end
     end
   end
-
 end

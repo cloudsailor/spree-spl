@@ -20,9 +20,9 @@ group :test do
   gem 'factory_bot_rails'
   gem 'ffaker'
   gem 'observer'
+  gem 'rails-controller-testing'
   gem 'spree', '> 5.0'
   gem 'spree_storefront'
-  gem "rails-controller-testing"
 end
 
 gem 'sprockets-rails', '~> 3.5'

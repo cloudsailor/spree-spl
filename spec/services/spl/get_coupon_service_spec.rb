@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Spl::GetCouponsService do
@@ -21,8 +23,8 @@ RSpec.describe Spl::GetCouponsService do
   before do
     store.update(private_metadata: { 'spl_url' => 'https://example.com', 'spl_prg_code' => 'prg-2' })
     allow(Spl::SendRequestService).to receive(:new)
-                                        .with(request_url, prepared_body)
-                                        .and_return(request_service)
+      .with(request_url, prepared_body)
+      .and_return(request_service)
     allow(request_service).to receive(:call).and_return(response_double)
   end
 
@@ -100,7 +102,8 @@ RSpec.describe Spl::GetCouponsService do
 
     context 'when service returns an error' do
       let(:error_response_body) do
-        {"errorCode" => "TOKEN_EXPIRED", "validationMessages" => nil, "fieldValidationMessages" => nil, "response" => nil, "msg" => "Token expired"}
+        { 'errorCode' => 'TOKEN_EXPIRED', 'validationMessages' => nil, 'fieldValidationMessages' => nil,
+          'response' => nil, 'msg' => 'Token expired' }
       end
 
       before do
@@ -110,8 +113,8 @@ RSpec.describe Spl::GetCouponsService do
       it 'raises SplGetCouponError with message' do
         expect { service.call }.to raise_error(
           Spl::GetCouponsService::SplGetCouponError,
-          'Something went wrong'
-                                   )
+          'Token expired'
+        )
       end
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddCouponsInCheckout
   Deface::Override.new(
     virtual_path: 'spree/checkout/_sidebar',

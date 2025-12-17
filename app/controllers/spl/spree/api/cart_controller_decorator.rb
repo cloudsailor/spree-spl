@@ -45,7 +45,7 @@ module Spl
         end
 
         def add_spl_discount_params_to_order(user)
-          return unless user.present?
+          return if user.blank?
           return unless user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
 
           spl_card_active = cast_boolean(user.public_metadata['spl_card_active'])
@@ -70,7 +70,8 @@ module Spl
 
           active_param = cast_boolean(user.public_metadata[:spl_card_active])
           spl_card = user.public_metadata[:spl_no_card]
-          order.update(public_metadata: order.public_metadata.merge(spl_card_active: active_param, spl_no_card: spl_card))
+          order.update(public_metadata: order.public_metadata.merge(spl_card_active: active_param,
+                                                                    spl_no_card: spl_card))
         end
 
         def maintain_spl_adjustments(order)
