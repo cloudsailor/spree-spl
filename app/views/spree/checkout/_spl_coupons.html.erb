@@ -1,0 +1,6 @@
+<div>
+  <h2> Your SPL coupons: </h2>
+  <% @coupons&.each do |coupon| %>
+    <%= coupon["typeCustomerName"] %>
+  <% end %>
+</div>

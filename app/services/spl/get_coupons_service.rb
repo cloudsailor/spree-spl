@@ -6,19 +6,20 @@ module Spl
   class GetCouponsService
     class SplGetCouponError < StandardError; end
 
-    def initialize(user)
-      @get_coupons_url = URI.parse(Spl::UrlCreatorService.new.coupon_find)
+    def initialize(user, store)
+      @store = store
+      @find_coupons_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).coupon_find)
       @user = user
     end
 
     def call
       body = prepare_me_body
-      response = send_request(@get_coupons_url, body)
+      response = send_request(@find_coupons_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplMeError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplGetCouponError, response_body['msg'] if response_body['errorCode'] != '0'
 
-      response_body
+      response_body['response']
     end
 
     private
@@ -30,7 +31,7 @@ module Spl
     def prepare_me_body
       {
         context: {
-          prgCode: ENV.fetch('SPL_PRG_CODE'),
+          prgCode: @store.private_metadata['spl_prg_code'],
           oauthToken: @user.private_metadata['spl_access_token']
         }
       }

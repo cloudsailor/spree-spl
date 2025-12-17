@@ -21,6 +21,8 @@ group :test do
   gem 'ffaker'
   gem 'observer'
   gem 'spree', '> 5.0'
+  gem 'spree_storefront'
+  gem "rails-controller-testing"
 end
 
 gem 'sprockets-rails', '~> 3.5'
