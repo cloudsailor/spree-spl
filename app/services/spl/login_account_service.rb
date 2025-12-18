@@ -10,10 +10,10 @@ module Spl
       @login_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).login)
       @user = user
       @store = store
-      @mobile_country = params.dig('user', 'public_metadata', 'mobile_country')
-      @phone_number = params.dig('user', 'public_metadata', 'phone_number')
-      @card_number = params.dig('user', 'public_metadata', 'card_number')
-      @otp_code = params.dig('user', 'public_metadata', 'spl_auth_code')
+      @phone_number = user.phone
+      @card_number = params.dig('user', 'card_number')
+      @otp_code = params.dig('user', 'spl_auth_code')
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
@@ -36,9 +36,9 @@ module Spl
     def prepare_login_body # rubocop:disable Metrics/MethodLength
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
+        apiUser: @env['spl_api_user'],
         scope: ['spl_cwp'],
         responseType: 'code',
         login: generate_login,
@@ -52,8 +52,8 @@ module Spl
     end
 
     def generate_login
-      login = "#{@mobile_country}#{@phone_number}" if @card_number.nil?
-      login = @card_number if @mobile_country.nil? || @phone_number.nil?
+      login = @phone_number if @card_number.nil?
+      login = @card_number if @phone_number.nil?
 
       login
     end

@@ -9,7 +9,7 @@ module Spl
     def initialize(user, store)
       @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)
       @user = user
-      @store = store
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
@@ -31,7 +31,7 @@ module Spl
     def prepare_me_body
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code'],
+          prgCode: @env['spl_prg_code'],
           oauthToken: @user.private_metadata['spl_access_token']
         }
       }

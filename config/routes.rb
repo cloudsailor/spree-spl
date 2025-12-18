@@ -19,6 +19,7 @@ Spree::Core::Engine.add_routes do
   namespace :account do
     resource :profile, controller: :profile, only: [:edit, :update] do
       patch :login_code, to: 'profile#login_code'
+      post :connect_loyalty_account, to: 'profile#connect_loyalty_account'
     end
   end
 end
