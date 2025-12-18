@@ -13,3 +13,13 @@ en:
         wrong_owner: Card assigned to a different user
     profile:
       connect_button: Connect to your loyalty account
+    errors:
+      generic: We couldn't connect your loyalty account. Please try again.
+      auth_temporary_blocked: Too many failed attempts. Please try again later.
+      auth_failed: Authentication failed.
+      token_expired: Your session has expired. Please sign in again.
+      not_authorized: You are not authorized to perform this action.
+      coupon_cannot_be_modified: This coupon cannot be modified.
+      coupon_expired: This coupon has expired.
+      coupon_is_not_valid: This coupon is not valid.
+      coupon_already_used: This coupon has already been used.

@@ -13,3 +13,13 @@ pl:
         wrong_owner: Karta przypisana innemu użytkownikowi
     profile:
       connect_button: Połącz z kontem lojalnościowym
+    errors:
+      generic: Nie udało się połączyć konta lojalnościowego. Spróbuj ponownie.
+      auth_temporary_blocked: Zbyt wiele nieudanych prób. Spróbuj ponownie później.
+      auth_failed: Uwierzytelnienie nie powiodło się.
+      token_expired: Twoja sesja wygasła. Zaloguj się ponownie.
+      not_authorized: Nie masz uprawnień do wykonania tej operacji.
+      coupon_cannot_be_modified: Ten kupon nie może zostać zmodyfikowany.
+      coupon_expired: Ten kupon wygasł.
+      coupon_is_not_valid: Ten kupon jest nieprawidłowy.
+      coupon_already_used: Ten kupon został już wykorzystany.

@@ -19,7 +19,7 @@ module Spl
       response = send_request(@send_otp_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplSendOtpError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplSendOtpError, response_body if response_body['errorCode'] != '0'
 
       response_body
     end

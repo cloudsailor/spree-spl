@@ -17,7 +17,7 @@ module Spl
       response = send_request(@me_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplMeError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplMeError, response_body if response_body['errorCode'] != '0'
 
       response_body
     end

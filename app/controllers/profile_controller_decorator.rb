@@ -11,8 +11,10 @@ module ProfileControllerDecorator
     try_spree_current_user.update!(phone: login_code_params[:phone], public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true))
     render_login_code_success(phone)
   rescue Spl::SendOtpService::SplSendOtpError => e
+    payload = Spl::ErrorPayloadParser.parse(e.message) || {}
+    msg = Spl::ErrorTranslator.translate(payload)
     clear_errors
-    try_spree_current_user.errors.add(:base, e.message.presence || I18n.t('spl.errors.otp_send_failed'))
+    try_spree_current_user.errors.add(:base, msg)
 
     render_login_code_error
   end
@@ -23,8 +25,8 @@ module ProfileControllerDecorator
     redirect_to spree.edit_account_profile_path, notice: Spree.t(:successfully_updated, resource: Spree.t(:account))
   rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
          Spl::MeService::SplMeError => e
-    payload = e.respond_to?(:payload) ? e.payload : (e.message.is_a?(Hash) ? e.message : nil)
-    msg = payload ? Spl::ErrorTranslator.translate(payload) : I18n.t('spl.errors.generic')
+    payload = Spl::ErrorPayloadParser.parse(e.message) || {}
+    msg = Spl::ErrorTranslator.translate(payload)
     clear_errors
     try_spree_current_user.errors.add(:base, msg)
     render_connect_loyalty_account_error(try_spree_current_user.phone)
