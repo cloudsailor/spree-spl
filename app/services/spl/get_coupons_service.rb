@@ -13,7 +13,7 @@ module Spl
     end
 
     def call
-      body = prepare_me_body
+      body = prepare_body
       response = send_request(@find_coupons_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
@@ -28,7 +28,7 @@ module Spl
       Spl::SendRequestService.new(url, body).call
     end
 
-    def prepare_me_body
+    def prepare_body
       {
         context: {
           prgCode: @store.private_metadata['spl_prg_code'],

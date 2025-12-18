@@ -7,3 +7,6 @@ en:
         card_not_active: Card is not active
         card_not_match: Card doesnt match user's card number
         wrong_owner: Card assigned to a different user
+    coupons:
+      find:
+        checkout_list: Your SPL coupons
