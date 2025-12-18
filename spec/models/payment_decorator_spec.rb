@@ -31,7 +31,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist and spl_card_active is true (symbol keys)' do
-      let(:public_metadata) { { spl_no_card: true, spl_card_active: true } }
+      let(:public_metadata) { { spl_no_card: '1234567890123', spl_card_active: true } }
 
       it 'initializes PromotionSwitcherService with order and check_only and calls it' do
         result = run_promotion_switcher(true)
@@ -49,7 +49,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist but spl_card_active is true (string keys)' do
-      let(:public_metadata) { { 'spl_no_card' => true, 'spl_card_active' => true } }
+      let(:public_metadata) { { 'spl_no_card' => '1234567890123', 'spl_card_active' => true } }
 
       it 'initializes PromotionSwitcherService with order and check_only and calls it' do
         result = run_promotion_switcher(true)
@@ -67,7 +67,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist but spl_card_active is false (symbol keys)' do
-      let(:public_metadata) { { spl_no_card: true, spl_card_active: false } }
+      let(:public_metadata) { { spl_no_card: '1234567890123', spl_card_active: false } }
 
       it 'does not initialize PromotionSwitcherService' do
         result = run_promotion_switcher(true)
@@ -80,7 +80,7 @@ RSpec.describe Spree::Payment, type: :model do
 
     context 'when only one of required keys is present' do
       context 'when spl_no_card present but spl_card_active missing' do
-        let(:public_metadata) { { spl_no_card: true } }
+        let(:public_metadata) { { spl_no_card: '1234567890123' } }
 
         it 'does nothing and returns nil' do
           result = run_promotion_switcher(true)
@@ -91,7 +91,7 @@ RSpec.describe Spree::Payment, type: :model do
       end
 
       context 'when spl_card_active present but spl_no_card missing' do
-        let(:public_metadata) { { spl_card_active: true } }
+        let(:public_metadata) { { spl_card_active: '1234567890123' } }
 
         it 'does nothing and returns nil' do
           result = run_promotion_switcher(true)
@@ -120,7 +120,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist and spl_card_active is true (symbol keys)' do
-      let(:public_metadata) { { spl_no_card: true, spl_card_active: true } }
+      let(:public_metadata) { { spl_no_card: '1234567890123', spl_card_active: true } }
 
       it 'enqueues UpdateSpartaStateJob with D state' do
         run_update_sparta_state
@@ -135,7 +135,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist and spl_card_active is true (string keys)' do
-      let(:public_metadata) { { 'spl_no_card' => true, 'spl_card_active' => true } }
+      let(:public_metadata) { { 'spl_no_card' => '1234567890123', 'spl_card_active' => true } }
 
       it 'enqueues UpdateSpartaStateJob with D state' do
         run_update_sparta_state
@@ -150,7 +150,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
 
     context 'when both keys exist but spl_card_active is false (symbol keys)' do
-      let(:public_metadata) { { spl_no_card: true, spl_card_active: false } }
+      let(:public_metadata) { { spl_no_card: '1234567890123', spl_card_active: false } }
 
       it 'does not enqueue UpdateSpartaStateJob' do
         run_update_sparta_state
@@ -161,7 +161,7 @@ RSpec.describe Spree::Payment, type: :model do
 
     context 'when only one of required keys is present' do
       context 'when spl_no_card present but spl_card_active missing' do
-        let(:public_metadata) { { spl_no_card: true } }
+        let(:public_metadata) { { spl_no_card: '1234567890123' } }
 
         it 'does not enqueue UpdateSpartaStateJob' do
           run_update_sparta_state

@@ -111,10 +111,9 @@ RSpec.describe Spree::Api::V2::Storefront::CheckoutController, type: :controller
     end
 
     describe '#promotion_switcher' do
+      let(:service) { instance_double(PromotionSwitcherService, call: true) }
       context 'when check_only is true' do
         it 'calls PromotionSwitcherService with check_only=true' do
-          service = instance_double(PromotionSwitcherService, call: true)
-
           expect(PromotionSwitcherService)
             .to receive(:new).with(order, true)
                              .and_return(service)
@@ -125,8 +124,6 @@ RSpec.describe Spree::Api::V2::Storefront::CheckoutController, type: :controller
 
       context 'when check_only is false' do
         it 'calls PromotionSwitcherService with check_only=false' do
-          service = instance_double(PromotionSwitcherService, call: true)
-
           expect(PromotionSwitcherService)
             .to receive(:new).with(order, false)
                              .and_return(service)
@@ -136,11 +133,13 @@ RSpec.describe Spree::Api::V2::Storefront::CheckoutController, type: :controller
       end
 
       context 'when service raises an error' do
-        it 'lets the error raise' do
+        before do
           allow(PromotionSwitcherService)
             .to receive(:new)
             .and_raise(StandardError.new('unhandled error'))
+        end
 
+        it 'lets the error raise' do
           expect do
             controller.send(:promotion_switcher, order, true)
           end.to raise_error(StandardError, 'unhandled error')

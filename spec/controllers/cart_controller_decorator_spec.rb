@@ -20,7 +20,7 @@ RSpec.describe Spree::Api::V2::Storefront::CartController, type: :controller do
     context 'when user has SPL metadata' do
       let(:user_metadata) do
         {
-          'spl_no_card' => 'SPL-123',
+          'spl_no_card' => '0123456789123',
           'spl_card_active' => 'true'
         }
       end
@@ -29,7 +29,7 @@ RSpec.describe Spree::Api::V2::Storefront::CartController, type: :controller do
         post :create, params: { public_metadata: {} }, as: :json
 
         expect(controller.params[:public_metadata].permit!.to_h).to include(
-          'spl_no_card' => 'SPL-123',
+          'spl_no_card' => '0123456789123',
           'spl_card_active' => true
         )
       end

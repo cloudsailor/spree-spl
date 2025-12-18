@@ -320,6 +320,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
     let(:attributes) { {} }
     let(:totals_hash) { { some_total: 123.to_d } }
     let(:fixed_time) { Time.zone.parse('2024-01-01 12:00:00') }
+    let(:expected_total) { spl_adj1.amount + spl_adj2.amount }
 
     before do
       allow(Time).to receive(:current).and_return(fixed_time)
@@ -328,10 +329,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
     end
 
     it 'sums only eligible SPL adjustments and passes them to assign_spl_totals' do
-      expected_total = spl_adj1.amount + spl_adj2.amount
-
       recalculate_spl_adjustments(attributes, totals_hash)
-
       expect(updater).to have_received(:assign_spl_totals).with(
         attributes,
         expected_total,
@@ -346,8 +344,6 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
     end
 
     it 'mutates attributes to contain adjustment_total, promo_total and updated_at' do
-      expected_total = spl_adj1.amount + spl_adj2.amount
-
       recalculate_spl_adjustments(attributes, totals_hash)
 
       expect(attributes[:adjustment_total]).to eq(expected_total)
