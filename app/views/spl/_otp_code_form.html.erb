@@ -3,11 +3,11 @@
   <%= form_with scope: :user, url: connect_loyalty_account_account_profile_path, method: :post, data: { turbo_frame: "otp_code_form" } do |f| %>
 
     <div class="mb-4 text-sm text-neutral-700">
-      <%= I18n.t("spl.otp.sent_to", phone: phone_e164) if phone_e164.present? %>
+      <%= I18n.t("spl.user.sent_to", phone: phone_e164) if phone_e164.present? %>
     </div>
 
     <div class="mb-4">
-      <%= f.label :spl_auth_code, I18n.t("spl.otp.code_label"), class: "text-xs text-neutral-600 block mb-2" %>
+      <%= f.label :spl_auth_code, I18n.t("spl.user.code_label"), class: "text-xs text-neutral-600 block mb-2" %>
       <%= f.text_field :spl_auth_code, class: "text-input w-full" %>
     </div>
 
