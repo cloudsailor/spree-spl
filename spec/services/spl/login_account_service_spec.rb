@@ -89,8 +89,6 @@ RSpec.describe Spl::LoginAccountService, type: :service do
 
         expect(Spl::SendRequestService).to receive(:new) do |url, body|
           expect(url).to eq(login_url)
-
-          # core body assertions
           expect(body).to include(
             apiUser: 'user',
             scope: ['spl_cwp'],
@@ -99,8 +97,6 @@ RSpec.describe Spl::LoginAccountService, type: :service do
           )
           expect(body[:context]).to eq(prgCode: 'PRG')
           expect(body[:password]).to eq(expected_password)
-
-          # login should be phone when card_number nil
           expect(body[:login]).to eq(phone)
 
           send_request_service

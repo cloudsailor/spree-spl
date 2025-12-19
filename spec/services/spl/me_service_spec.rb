@@ -29,7 +29,102 @@ RSpec.describe Spl::MeService, type: :service do
         }
       end
       let(:success_response_hash) do
-        { 'errorCode' => '0', 'data' => { 'foo' => 'bar' } }
+        {
+          'errorCode' => '0',
+          'validationMessages' => nil,
+          'fieldValidationMessages' => nil,
+          'response' => {
+            'person' => {
+              'addonsList' => [],
+              'address' => {},
+              'addresses' => nil,
+              'assignedPlace' => {
+                'id' => 'id123',
+                'idAsDictLabel' => 'shop.pl'
+              },
+              'assignedPlaceManualId' => nil,
+              'avatarUrl' => nil,
+              'birthDate' => nil,
+              'cards' => [
+                {
+                  'burnEnabled' => true,
+                  'cardType' => {
+                    'id' => 'id234',
+                    'idAsDictLabel' => 'Shop - Default Virtual Card'
+                  },
+                  'depositBurnDisabled' => nil,
+                  'no' => '5100179585157',
+                  'status' => 'A',
+                  'statusAsDictLabel' => 'Active'
+                }
+              ],
+              'company' => nil,
+              'email' => 'name.surname@email.com',
+              'emailVerified' => nil,
+              'firstName' => 'name',
+              'gender' => nil,
+              'lastName' => 'surname',
+              'marital' => nil,
+              'middleName' => nil,
+              'mobile' => '500600700',
+              'mobileCountry' => '+48',
+              'mobileVerified' => true,
+              'nameDay' => nil,
+              'passwordLastChanged' => nil,
+              'permissions' => {},
+              'personId' => 'id345',
+              'phone' => nil,
+              'preReg' => nil,
+              'preferredCommChannel' => nil,
+              'pushNotificationsEnabled' => nil,
+              'social' => [],
+              'taxNo' => nil,
+              'undefined' => false,
+              'walletOwner' => true,
+              'maritalAsDictLabel' => nil
+            },
+            'cards' => [
+              {
+                'burnEnabled' => true,
+                'cardType' => {
+                  'id' => 'id456',
+                  'idAsDictLabel' => 'Shop - Default Virtual Card'
+                },
+                'depositBurnDisabled' => nil,
+                'no' => '5100179585157',
+                'status' => 'A',
+                'statusAsDictLabel' => 'Active'
+              }
+            ],
+            'wallet' => {
+              'balances' => [
+                {
+                  'balance' => 0.0,
+                  'nbBalance' => 0.0,
+                  'type' => 'P',
+                  'typeAsDictLabel' => 'Points'
+                }
+              ],
+              'primaryBalance' => 0.0,
+              'toBeExpired' => { 'primaryBalance' => {} },
+              'firstTx' => { 'date' => nil }
+            },
+            'badges' => [],
+            'mainCard' => {
+              'burnEnabled' => true,
+              'cardType' => {
+                'id' => 'id567',
+                'idAsDictLabel' => 'Shop - Default Virtual Card'
+              },
+              'depositBurnDisabled' => nil,
+              'no' => '5100179585157',
+              'status' => 'A',
+              'statusAsDictLabel' => 'Active'
+            },
+            'forcePasswordChange' => false
+          },
+          'msg' => 'OK'
+        }
       end
 
       it 'sends request with correct body and returns parsed response body' do

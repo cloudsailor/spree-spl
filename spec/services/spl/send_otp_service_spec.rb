@@ -19,7 +19,7 @@ RSpec.describe Spl::SendOtpService, type: :service do
     }
   end
 
-  let(:date) { Time.zone.parse('2025-12-16 12:00:00 UTC') }
+  let(:date) { DateTime.parse('2025-12-16 12:00:00 UTC') }
   let(:date_ms) { date.to_i * 1000 }
   let(:mobile_country) { '+48' }
   let(:phone_number) { '500600700' }

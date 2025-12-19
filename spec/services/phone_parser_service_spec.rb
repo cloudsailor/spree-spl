@@ -6,7 +6,6 @@ RSpec.describe PhoneParserService, type: :service do
   describe '#initialize' do
     it 'parses the raw phone with Phonelib and stores it as #phone' do
       phone_double = instance_double('Phonelib::Phone')
-
       expect(Phonelib).to receive(:parse).with('+48500600700').and_return(phone_double)
 
       service = described_class.new('+48500600700')
@@ -15,10 +14,12 @@ RSpec.describe PhoneParserService, type: :service do
   end
 
   describe '#valid?' do
-    it 'delegates to the parsed phone object' do
+    before do
       phone_double = instance_double('Phonelib::Phone', valid?: true)
       allow(Phonelib).to receive(:parse).and_return(phone_double)
+    end
 
+    it 'delegates to the parsed phone object' do
       expect(described_class.new('anything')).to be_valid
     end
   end
@@ -34,10 +35,6 @@ RSpec.describe PhoneParserService, type: :service do
         national_number: '500600700',
         e164: '+48500600700'
       )
-    end
-
-    before do
-      allow(Phonelib).to receive(:parse).with('+48500600700').and_return(phone_double)
     end
 
     describe '#country_code' do

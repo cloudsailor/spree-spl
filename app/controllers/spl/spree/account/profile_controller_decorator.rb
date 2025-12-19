@@ -2,17 +2,16 @@
 
 module Spl
   module Spree
-    module Storefront
+    module Account
       module ProfileControllerDecorator
         def self.prepended(base)
           base.before_action :validate_login_code_request, only: :login_code
         end
 
         def login_code
-          phone = phone_parser
-          Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, current_store).call
+          send_otp(phone_parser, current_store)
           update_user_after_otp_request
-          render_login_code_success(phone)
+          render_login_code_success(phone_parser)
         rescue Spl::SendOtpService::SplSendOtpError => e
           handle_spl_error(e)
           render_login_code_error
@@ -55,7 +54,7 @@ module Spl
         end
 
         def phone_parser
-          PhoneParserService.new(login_code_params[:phone])
+          @phone_parser ||= PhoneParserService.new(login_code_params[:phone])
         end
 
         def clear_errors
@@ -93,6 +92,10 @@ module Spl
             }
           ),
                  status: :unprocessable_entity
+        end
+
+        def send_otp(phone, store)
+          Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, store).call
         end
 
         def update_user_after_otp_request

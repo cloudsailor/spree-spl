@@ -11,17 +11,22 @@ RSpec.describe Spl::ErrorTranslator do
       allow(Spree::Spl).to receive(:report_error).and_return(nil)
     end
 
+    around do |example|
+      I18n.with_locale(locale) do
+        example.run
+      end
+    end
+
     context 'when errorCode is present and translation key exists' do
       let(:temporary_blocked_payload) do
         { 'errorCode' => 'TEMPORARY_BLOCKED', 'msg' => 'Temporarily blocked' }
       end
-      let(:temporary_blocked_key) { 'spl.errors.temporary_blocked' }
 
       it 'returns the translated message and does not report error' do
-        expect(I18n).to receive(:exists?).with(temporary_blocked_key, locale).and_return(true)
-        expect(I18n).to receive(:t).with(temporary_blocked_key, locale: locale).and_return('Translated message')
         expect(Spree::Spl).not_to receive(:report_error)
-        expect(described_class.translate(temporary_blocked_payload, locale: locale)).to eq('Translated message')
+
+        expected = I18n.t('spl.errors.temporary_blocked', locale: locale)
+        expect(described_class.translate(temporary_blocked_payload, locale: locale)).to eq(expected)
       end
     end
 
@@ -29,9 +34,8 @@ RSpec.describe Spl::ErrorTranslator do
       let(:unknown_code_payload) do
         { 'errorCode' => 'SOME_NEW_CODE', 'msg' => 'Raw message' }
       end
-      let(:some_new_code_key) { 'spl.errors.some_new_code' }
+
       it 'reports error and returns generic translation' do
-        expect(I18n).to receive(:exists?).with(some_new_code_key, locale).and_return(false)
         expect(Spree::Spl).to receive(:report_error).with(
           'Unknown Sparta error code',
           hash_including(
@@ -40,8 +44,9 @@ RSpec.describe Spl::ErrorTranslator do
             payload: unknown_code_payload
           )
         )
-        expect(I18n).to receive(:t).with('spl.errors.generic', locale: locale).and_return('Generic message')
-        expect(described_class.translate(unknown_code_payload, locale: locale)).to eq('Generic message')
+
+        expected = I18n.t('spl.errors.generic', locale: locale)
+        expect(described_class.translate(unknown_code_payload, locale: locale)).to eq(expected)
       end
     end
 
@@ -49,8 +54,8 @@ RSpec.describe Spl::ErrorTranslator do
       let(:nil_code_payload) do
         { 'errorCode' => nil, 'msg' => 'Raw message' }
       end
+
       it 'reports error and returns generic translation' do
-        expect(I18n).not_to receive(:exists?)
         expect(Spree::Spl).to receive(:report_error).with(
           'Unknown Sparta error code',
           hash_including(
@@ -59,9 +64,9 @@ RSpec.describe Spl::ErrorTranslator do
             payload: nil_code_payload
           )
         )
-        expect(I18n).to receive(:t).with('spl.errors.generic', locale: locale).and_return('Generic message')
 
-        expect(described_class.translate(nil_code_payload, locale: locale)).to eq('Generic message')
+        expected = I18n.t('spl.errors.generic', locale: locale)
+        expect(described_class.translate(nil_code_payload, locale: locale)).to eq(expected)
       end
     end
 
@@ -69,12 +74,15 @@ RSpec.describe Spl::ErrorTranslator do
       it 'uses the provided locale for lookup and translation' do
         payload = { 'errorCode' => 'TEMPORARY_BLOCKED' }
         pl = :pl
-        key = 'spl.errors.temporary_blocked'
 
-        expect(I18n).to receive(:exists?).with(key, pl).and_return(true)
-        expect(I18n).to receive(:t).with(key, locale: pl).and_return('PL message')
+        # jeśli masz pl.yml w appce, to wystarczy:
+        # expected = I18n.t('spl.errors.temporary_blocked', locale: pl)
 
-        expect(described_class.translate(payload, locale: pl)).to eq('PL message')
+        # jeśli NIE masz pl.yml, ale chcesz przetestować ścieżkę "locale param działa":
+        I18n.backend.store_translations(pl, spl: { errors: { temporary_blocked: 'PL message' } })
+        expected = I18n.t('spl.errors.temporary_blocked', locale: pl)
+
+        expect(described_class.translate(payload, locale: pl)).to eq(expected)
       end
     end
   end

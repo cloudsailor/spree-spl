@@ -4,9 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Spree::Account::ProfileController, type: :controller do
   before do
-    unless defined?(Spl::SendOtpService::SplSendOtpError)
-      stub_const('Spl::SendOtpService::SplSendOtpError', Class.new(StandardError))
-    end
+    stub_const('Spl::SendOtpService::SplSendOtpError', Class.new(StandardError)) unless defined?(Spl::SendOtpService::SplSendOtpError)
   end
 
   let(:country) { create(:country) }

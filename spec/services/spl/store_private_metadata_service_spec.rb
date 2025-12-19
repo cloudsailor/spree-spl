@@ -62,7 +62,7 @@ RSpec.describe Spl::StorePrivateMetadataService, type: :service do
         expect(described_class.fetch(nil, :spl_url, default: 'x')).to eq('x')
       end
 
-      it 'raises KeyError when key is missing and no default is provided' do
+      it 'returns nil when store is nil and no default is provided' do
         expect(described_class.fetch(nil, :spl_url)).to be_nil
       end
     end
@@ -79,7 +79,7 @@ RSpec.describe Spl::StorePrivateMetadataService, type: :service do
       expect(described_class.fetch(store, :missing_key, default: 'fallback')).to eq('fallback')
     end
 
-    it 'raises KeyError when key is missing and no default is provided' do
+    it 'returns nil when key is missing and no default is provided' do
       expect(described_class.fetch(store, :missing_key)).to be_nil
     end
 

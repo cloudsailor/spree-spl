@@ -33,5 +33,7 @@ module Spl
       s = s[1..-2] if s.start_with?('"') && s.end_with?('"')
       s.gsub('\"', '"').gsub('\\\\', '\\')
     end
+
+    private_class_method :parse_value, :unquote
   end
 end
