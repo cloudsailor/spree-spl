@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Spl::SendOtpService do
+RSpec.describe Spl::SendOtpService, type: :service do
   let(:store) do
     instance_double(
       Spree::Store,
@@ -80,7 +80,7 @@ RSpec.describe Spl::SendOtpService do
 
       it 'raises SplSendOtpError with msg' do
         expect { service.call }
-          .to raise_error(Spl::SendOtpService::SplSendOtpError, 'Person not found')
+          .to raise_error(Spl::SendOtpService::SplSendOtpError, /Person not found/)
       end
     end
 

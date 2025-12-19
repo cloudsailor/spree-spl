@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe PromotionSwitcherService do
+RSpec.describe PromotionSwitcherService, type: :service do
   let(:country) { create(:country) }
   let(:store) { create(:store, default_country: country) }
   let(:order) do

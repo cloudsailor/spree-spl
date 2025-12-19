@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Spl::SpartaLoyaltyService do
+RSpec.describe Spl::SpartaLoyaltyService, type: :service do
   let(:country) { create(:country) }
 
   let(:store) do

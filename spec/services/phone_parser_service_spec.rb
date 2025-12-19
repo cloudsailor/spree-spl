@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe PhoneParserService do
+RSpec.describe PhoneParserService, type: :service do
   describe '#initialize' do
     it 'parses the raw phone with Phonelib and stores it as #phone' do
       phone_double = instance_double('Phonelib::Phone')

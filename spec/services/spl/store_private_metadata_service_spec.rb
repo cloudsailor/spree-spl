@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Spl::StorePrivateMetadataService do
+RSpec.describe Spl::StorePrivateMetadataService, type: :service do
   let(:private_metadata) do
     {
       'spl_url' => 'https://spl.test',

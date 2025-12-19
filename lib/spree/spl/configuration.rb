@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Spree
   module Spl
     class Configuration
@@ -13,8 +15,8 @@ module Spree
 
     def self.report_error(message, extra = {})
       config.error_reporter&.call(message, extra)
-    rescue => ex
-      Rails.logger.error("[SPL] error_reporter failed: #{ex.class}: #{ex.message}")
+    rescue StandardError => e
+      Rails.logger.error("[SPL] error_reporter failed: #{e.class}: #{e.message}")
     end
   end
 end
