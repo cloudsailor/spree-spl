@@ -38,6 +38,6 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   )
 
   ::Spree::Account::ProfileController.prepend(
-    ProfileControllerDecorator
+    Spl::Spree::Storefront::ProfileControllerDecorator
   )
 end
