@@ -4,6 +4,8 @@ require 'json'
 
 module Spl
   class GetCouponsService
+    include LoginCheckHelper
+
     class SplGetCouponError < StandardError; end
 
     def initialize(user, store)
@@ -13,6 +15,8 @@ module Spl
     end
 
     def call
+      return unless logged_user?
+
       body = prepare_body
       response = send_request(@find_coupons_url, body)
       response_body = JSON.parse(response.body)
@@ -35,6 +39,10 @@ module Spl
           oauthToken: @user.private_metadata['spl_access_token']
         }
       }
+    end
+
+    def logged_user?
+      LoginCheckHelper.logged?(@user)
     end
   end
 end

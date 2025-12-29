@@ -118,6 +118,14 @@ RSpec.describe Spl::GetCouponsService do
       end
     end
 
+    context 'when user is not logged-in ' do
+      let(:user)  { create(:user, private_metadata: nil) }
+
+      it 'does nothing' do
+        expect(service.call).to eq(nil)
+      end
+    end
+
     it 'sends a request with the correct body and URL' do
       allow(response_double).to receive(:body).and_return({ 'errorCode' => '0', 'response' => [] }.to_json)
       service.call

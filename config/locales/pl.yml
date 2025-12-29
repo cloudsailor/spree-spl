@@ -1,0 +1,12 @@
+pl:
+  order:
+    loyalty_card_missing: Brak karty lojalnościowej przypisanej do klienta
+  spl:
+    card_validation:
+      errors:
+        card_not_active: Karta jest nieaktywna
+        card_not_match: Karta nie pasuje do numeru klienta
+        wrong_owner: Karta przypisana do innego użytkownika
+    coupons:
+      find:
+        checkout_list: Twoje kupony lojalnościowe
