@@ -6,11 +6,12 @@ module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
 
-    def initialize(user, store, params)
+    def initialize(user, store, spl_auth_code)
       @register_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).register)
       @user = user
       @store = store
-      @params = params
+      @spl_auth_code = spl_auth_code
+      @phone = PhoneParserService.new(user.phone)
     end
 
     def call
@@ -24,7 +25,7 @@ module Spl
       raise SplRegisterAccountError, register_response_body['msg'] if register_response_body['errorCode'] != '0'
 
       spl_card = register_response_body.dig('response', 'cardNo')
-      update_account(spl_card, @params)
+      update_account(spl_card)
     end
 
     private
@@ -34,6 +35,7 @@ module Spl
     end
 
     def prepare_registration_body(access_token) # rubocop:disable Metrics/MethodLength
+      accept_yc_terms = @user.public_metadata['accept_yc_terms']
       {
         context: {
           oauthToken: access_token,
@@ -41,28 +43,26 @@ module Spl
         },
         person: {
           firstName: @user[:first_name],
-          lastName: @user[:first_name],
+          lastName: @user[:last_name],
           email: @user[:email],
-          mobileCountry: @params.dig('user', 'public_metadata', 'mobileCountry'),
-          mobile: @params.dig('user', 'public_metadata', 'phone_number'),
+          mobileCountry: @phone.country_code,
+          mobile: @phone.national_number,
           permissions: {
-            processData: @params.dig('user', 'public_metadata', 'splProcessData'),
-            operationalSms: @params.dig('user', 'public_metadata', 'operationalSms')
+            processData: accept_yc_terms,
+            operationalSms: accept_yc_terms
           }
         },
-        authCode: @params.dig('user', 'public_metadata', 'splAuthCode'),
+        authCode: @spl_auth_code,
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code']
       }
     end
 
-    def update_account(card_number, params)
-      mobile_country = params.dig('user', 'public_metadata', 'mobileCountry')
-      mobile_phone = params.dig('user', 'public_metadata', 'phone_number')
+    def update_account(card_number)
       @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number,
                                                                 spl_card_active: true,
-                                                                mobile_country: mobile_country,
-                                                                phone_number: mobile_phone))
+                                                                mobile_country: @phone.country_code,
+                                                                phone_number: @phone.national_number))
     end
   end
 end

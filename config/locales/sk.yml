@@ -2,8 +2,15 @@ sk:
   order:
     loyalty_card_missing: K objednávke nie je priradená žiadna vernostná karta
   spl:
+    user:
+      have_account: Do you have loyalty club account?
     card_validation:
       errors:
         card_not_active: Karta nie je aktívna
         card_not_match: Karta nezodpovedá číslu karty používateľa
         wrong_owner: Karta je priradená inému používateľovi
+  buttons:
+    connect_account: Connect loyalty account
+    send_log_in_code: Send one-time code for log in
+    send_registration_code: Send one-time code for registration
+    verify_button: Verify phone number

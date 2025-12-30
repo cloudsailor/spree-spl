@@ -1,0 +1,9 @@
+pl:
+  spl:
+    user:
+      have_account: Czy masz konto w klubie lojalnościowym?
+  buttons:
+    connect_account: Połącz z kontem lojalnościowym
+    send_log_in_code: Wyślij jednorazowy kod do logowania
+    send_registration_code: Wyślij jednorazowy kod do rejestracji
+    verify_button: Zweryfikuj numer telefonu

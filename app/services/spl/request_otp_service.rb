@@ -6,13 +6,13 @@ module Spl
   class RequestOtpService
     class SplRequestOtpError < StandardError; end
 
-    def initialize(date, store, params)
+    def initialize(date, mobile_country, phone_number, store)
       @date = date.to_i * 1000
       @store = store
       @request_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).request_otp)
-      @mobile_country = params[:mobile_country]
-      @phone_number = params[:phone_number]
-      @email = params[:email]
+      @mobile_country = mobile_country
+      @phone_number = phone_number
+      @email = nil
     end
 
     def call
@@ -23,7 +23,7 @@ module Spl
       request_otp_response = send_request(@request_otp_url, request_otp_body)
       request_otp_response_body = JSON.parse(request_otp_response.body)
       Rails.logger.debug request_otp_response_body
-      raise SplSendOtpCodeError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
+      raise SplRequestOtpError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
 
       request_otp_response_body
     end
