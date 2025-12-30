@@ -3,7 +3,7 @@
 require 'json'
 
 module Spl
-  class MeService
+  class MeService < BaseSplService
     class SplMeError < StandardError; end
 
     def initialize(user, store)
@@ -23,10 +23,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_me_body
       {

@@ -3,7 +3,7 @@
 require 'json'
 
 module Spl
-  class LoginAccountService
+  class LoginAccountService < BaseSplService
     class SplLoginAccountError < StandardError; end
 
     def initialize(user, store, params)
@@ -28,10 +28,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_login_body # rubocop:disable Metrics/MethodLength
       {

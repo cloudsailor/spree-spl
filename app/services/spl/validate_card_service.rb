@@ -6,7 +6,7 @@ require 'json'
 
 module Spl
   # Validates SPL card number
-  class ValidateCardService
+  class ValidateCardService < BaseSplService
     class SplCardValidationError < StandardError; end
 
     def initialize(card_number, user, store)
@@ -47,10 +47,6 @@ module Spl
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
       body = {}
 
-      Spl::SendRequestService.new(url, body).call
-    end
-
-    def send_request(url, body)
       Spl::SendRequestService.new(url, body).call
     end
 

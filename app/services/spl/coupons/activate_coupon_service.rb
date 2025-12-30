@@ -21,7 +21,6 @@ module Spl
         response_body = JSON.parse(response.body)
         Rails.logger.debug response_body
         raise ActivateCouponServiceError, response_body['msg'] if response_body['errorCode'] != '0'
-
         response_body['response']
       end
 
@@ -33,7 +32,7 @@ module Spl
             prgCode: @store.private_metadata['spl_prg_code'],
             oauthToken: @user.private_metadata['spl_access_token']
           },
-          coupon_code: @coupon_code
+          couponCode: @coupon_code
         }
       end
     end

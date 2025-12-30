@@ -3,7 +3,7 @@
 require 'json'
 
 module Spl
-  class RequestOtpService
+  class RequestOtpService < BaseSplService
     class SplRequestOtpError < StandardError; end
 
     def initialize(date, store, params)
@@ -23,16 +23,12 @@ module Spl
       request_otp_response = send_request(@request_otp_url, request_otp_body)
       request_otp_response_body = JSON.parse(request_otp_response.body)
       Rails.logger.debug request_otp_response_body
-      raise SplSendOtpCodeError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
+      raise SplRequestOtpError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
 
       request_otp_response_body
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_sms_otp_body(access_token)
       {

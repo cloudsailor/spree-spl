@@ -3,7 +3,7 @@
 require 'json'
 
 module Spl
-  class OauthTokenService
+  class OauthTokenService < BaseSplService
     class OauthTokenError < StandardError; end
 
     def initialize(date, store)
@@ -33,10 +33,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_oauth_token_body_with_signature
       {

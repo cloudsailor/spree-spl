@@ -5,7 +5,7 @@ require 'net/http'
 require 'json'
 
 module Spl
-  class SpartaLoyaltyService
+  class SpartaLoyaltyService < BaseSplService
     class SplSendRequestError < StandardError; end
 
     def initialize(order_token, card_number, line_items, date, products, check_only, store)
@@ -34,10 +34,6 @@ module Spl
     end
 
     private
-
-    def send_request(body)
-      Spl::SendRequestService.new(@url, body).call
-    end
 
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {

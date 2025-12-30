@@ -2,5 +2,16 @@
   <h2> <%= I18n.t('spl.coupons.find.checkout_list') if @coupons.present? %></h2>
   <% @coupons&.each do |coupon| %>
     <%= coupon["typeCustomerName"] %>
+    <% if coupon["couponType"]['autoLoad'] == 'A'%>
+      <% if coupon['autoLoad'] %>
+      <div> <h2> dezaktywuj </h2></div>
+      <% else %>
+        <%= button_to "Activate",
+                      activate_coupon_asd_path(order: @order, token: @order.token, coupon_code: coupon['code']),
+                      data: { turbo_method: :post },
+                      class: "min-h-full ml-3 btn-primary !px-4 !py-3" %>
+      <% end %>
+
+    <% end %>
   <% end %>
 </div>

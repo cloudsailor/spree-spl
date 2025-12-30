@@ -3,7 +3,7 @@
 require 'json'
 
 module Spl
-  class GetCouponsService
+  class GetCouponsService < BaseSplService
     class SplGetCouponError < StandardError; end
 
     def initialize(user, store)
@@ -24,16 +24,13 @@ module Spl
 
     private
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
-
     def prepare_body
       {
         context: {
           prgCode: @store.private_metadata['spl_prg_code'],
           oauthToken: @user.private_metadata['spl_access_token']
-        }
+        },
+        withArchival: true
       }
     end
   end
