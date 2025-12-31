@@ -5,7 +5,7 @@ module Spl
     module Storefront
       module CheckoutControllerDecorator
         def self.prepended(base)
-          base.before_action :load_user_coupons, except: [:activate_coupon, :deactivate_coupon]
+          base.before_action :load_user_coupons, except: %i[activate_coupon deactivate_coupon]
         end
 
         def activate_coupon
@@ -46,8 +46,8 @@ module Spl
           if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
             return true
           end
-          
-          Time.new(coupon['expirationDate']).future?
+
+          Time.zone.local(coupon['expirationDate']).future?
         rescue StandardError
           false
         end

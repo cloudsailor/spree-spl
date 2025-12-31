@@ -21,6 +21,7 @@ module Spl
         response_body = JSON.parse(response.body)
         Rails.logger.debug response_body
         raise ActivateCouponServiceError, response_body['msg'] if response_body['errorCode'] != '0'
+
         response_body['response']
       end
 
