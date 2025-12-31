@@ -5,20 +5,34 @@ module Spl
     module Storefront
       module CheckoutControllerDecorator
         def self.prepended(base)
-          base.before_action :load_user_coupons
+          base.before_action :load_user_coupons, except: [:activate_coupon, :deactivate_coupon]
         end
 
         def activate_coupon
-          debugger
-          Spl::Coupons::ActivateCouponService.new(current_user, current_store, params).call
+          Spl::Coupons::ActivateCouponService
+            .new(current_user, current_store, params)
+            .call
+
+          load_user_coupons
 
           respond_to do |format|
             format.turbo_stream
-            format.html { redirect_back fallback_location: checkout_path, notice: "Coupon activated" }
+            format.html { redirect_to checkout_path }
           end
         end
 
-        def deactivate_coupon; end
+        def deactivate_coupon
+          Spl::Coupons::DeactivateCouponService
+            .new(current_user, current_store, params)
+            .call
+
+          load_user_coupons
+
+          respond_to do |format|
+            format.turbo_stream
+            format.html { redirect_to checkout_path }
+          end
+        end
 
         private
 
@@ -29,7 +43,13 @@ module Spl
         end
 
         def active?(coupon)
-          coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && Time.new(coupon['expirationDate']).future?
+          if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
+            return true
+          end
+          
+          Time.new(coupon['expirationDate']).future?
+        rescue StandardError
+          false
         end
       end
     end
