@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplySpartaDiscountService
+  SPL_SOURCE_TYPE = 'SPL'
+
   def initialize(response, order)
     @basket = response['response']['basket']
     @line_items = order.line_items
@@ -34,14 +36,14 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
+    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: SPL_SOURCE_TYPE).present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def discounts_present?(line_item, label)
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
     return if adjustments.blank? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     existing_labels = adjustments.pluck(:label)
@@ -54,7 +56,7 @@ class ApplySpartaDiscountService
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
 
     line_item.adjustments.create(
-      source_type: 'SPL',
+      source_type: SPL_SOURCE_TYPE,
       adjustable: line_item,
       amount: amount,
       included: false,

@@ -19,7 +19,7 @@ describe Spree::CheckoutController, type: :controller do
   end
 
   let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
-  let(:user) { create(:user, public_metadata: { 'spl_no_card' => 'fake-no-card', 'spl_card_active' => 'true' }) }
+  let(:user) { create(:user, public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => 'true' }) }
 
   let(:order) do
     create(
@@ -28,7 +28,7 @@ describe Spree::CheckoutController, type: :controller do
       user: user,
       email: 'test@example.com',
       public_metadata: {
-        'spl_no_card' => 'fake-no-card',
+        'spl_no_card' => '1234567890123',
         'spl_card_active' => 'true'
       }
     )
@@ -74,6 +74,54 @@ describe Spree::CheckoutController, type: :controller do
         post :update, params: { state: 'address', token: order.token }
 
         expect(order.line_items.last.adjustments.last.amount).to eq(-5.0)
+      end
+    end
+
+    context 'when SPL API response has no line_items (unhappy path)' do
+      before do
+        stub_request(:any, /fake-spl\.example\.com/).to_return(
+          status: 200,
+          body: {
+            'errorCode' => '0',
+            'response' => {
+              'basket' => []
+            }
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+      end
+
+      it 'does NOT create SPL adjustments' do
+        expect do
+          post :update, params: { state: 'address', token: order.token }
+        end.not_to(change { order.line_items.first.adjustments.count })
+      end
+    end
+
+    context 'when SPL API response has no discounts (unhappy path)' do
+      before do
+        stub_request(:any, /fake-spl\.example\.com/).to_return(
+          status: 200,
+          body: {
+            'errorCode' => '0',
+            'response' => {
+              'basket' => order.line_items.map do |li|
+                {
+                  'pos' => li.id,
+                  'discounts' => [],
+                  'discountGross' => 0.0
+                }
+              end
+            }
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+      end
+
+      it 'does NOT create SPL adjustments' do
+        expect do
+          post :update, params: { state: 'address', token: order.token }
+        end.not_to(change { order.line_items.first.adjustments.count })
       end
     end
   end

@@ -16,7 +16,7 @@ class RemoveSpartaDiscountService
 
   def self.destroy_inactive_adjustments(adjustments, line_item, order)
     destroy_adjustments(adjustments, line_item, order)
-    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
+    adjustments.where(eligible: true).update_all(eligible: false, state: 'closed')
 
     line_item.reload
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
@@ -34,7 +34,7 @@ class RemoveSpartaDiscountService
   end
 
   private_class_method def self.destroy_adjustments(adjustments, line_item, order)
-    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
+    adjustments.where(eligible: true).update_all(eligible: false, state: 'closed')
 
     line_item.reload
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)

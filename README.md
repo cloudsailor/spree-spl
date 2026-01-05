@@ -14,13 +14,7 @@ _______
 _______
 _______
 
-After installation, add the following line to `LineItemsControllerDecorator#create`:
-
-```sh
-add_spl_discount_params_to_order(spree_current_user, @order)
-```
-
-Add the following line to `Spree::Adjustable::AdjustmentsUpdaterDecorator#persist_totals`:
+After installation, add the following line to `Spree::Adjustable::AdjustmentsUpdaterDecorator#persist_totals`:
 
 ```sh
 apply_spl_adjustments(attributes, totals)
