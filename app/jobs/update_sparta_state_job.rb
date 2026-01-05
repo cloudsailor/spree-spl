@@ -59,7 +59,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
   end
 
   def refund(order_token, basket, date, store, card_number)
-    body = build_refund_body(order_token, basket, date, card_number)
+    body = build_refund_body(order_token, basket, date, card_number, store)
     refund_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).sale_refund)
     response_body = send_request(refund_url, body)
     handle_response(response_body)
@@ -80,7 +80,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
       cardNo: card_number,
       documentNo: order_number,
       basket: basket,
-      signature: generate_signature(order_token, date_in_ms, card_number, order_number)
+      signature: generate_signature(order_token, store, date_in_ms, card_number, order_number)
     }
   end
 
@@ -96,7 +96,7 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
       no: order_token,
       prgCode: store.private_metadata['spl_prg_code'],
       orderNo: order_token,
-      signature: generate_signature('', date_in_ms)
+      signature: generate_signature('', store, date_in_ms)
     }
   end
 
