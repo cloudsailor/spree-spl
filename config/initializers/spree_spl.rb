@@ -52,4 +52,7 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   ::Spree::CheckoutHelper.prepend(
     CheckoutHelperDecorator
   )
+
+  ::Spree::Promotion::Rules::UserFromClub
+  Rails.application.config.spree.promotions.rules << Spree::Promotion::Rules::UserFromClub
 end
