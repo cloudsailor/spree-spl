@@ -2,7 +2,7 @@
 
 Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   ::Spree::Api::V2::Storefront::CartController.prepend(
-    CartControllerDecorator
+    Spl::Spree::Api::CartControllerDecorator
   )
 
   ::Spree::V2::Storefront::CartSerializer.prepend(
@@ -10,11 +10,11 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   )
 
   ::Spree::Api::V2::Storefront::CheckoutController.prepend(
-    CheckoutControllerDecorator
+    Spl::Spree::Api::CheckoutControllerDecorator
   )
 
   ::Spree::Api::V2::Storefront::AccountController.prepend(
-    AccountControllerDecorator
+    Spl::Spree::Api::AccountControllerDecorator
   )
 
   ::Spree::Adjustable::AdjustmentsUpdater.prepend(
@@ -38,15 +38,15 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   )
 
   ::Spree::CheckoutController.prepend(
-    CheckoutControllerDecorator
+    Spl::Spree::Storefront::CheckoutControllerDecorator
   )
 
   ::Spree::LineItemsController.prepend(
-    LineItemsControllerDecorator
+    Spl::Spree::Storefront::LineItemsControllerDecorator
   )
 
   ::Spree::Account::ProfileController.prepend(
-    ProfileControllerDecorator
+    Spl::Spree::Storefront::ProfileControllerDecorator
   )
 
   ::Spree::CheckoutHelper.prepend(
