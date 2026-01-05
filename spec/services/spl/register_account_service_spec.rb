@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spl::RegisterAccountService do
-  subject(:service) { described_class.new(user, store, spl_auth_code) }
+  subject(:service) { described_class.new(user, store, params) }
 
   let(:store) do
     create(
@@ -25,18 +25,20 @@ RSpec.describe Spl::RegisterAccountService do
       first_name: 'John',
       last_name: 'Doe',
       email: 'john@example.com',
-      public_metadata: { 'accept_yc_terms' => true }
+      public_metadata: { 'accept_yc_terms' => true },
+      private_metadata: {}
     )
   end
 
-  let(:spl_auth_code) { '123456' }
+  let(:params) { '123456' }
   let(:phone_parser) { instance_double(PhoneParserService, country_code: '+48', national_number: '500600700') }
-  let(:oauth_response) { { 'response' => { 'accessToken' => 'ACCESS_TOKEN' } } }
+  let(:oauth_response) { { 'response' => { 'accessToken' => 'ACCESS_TOKEN', 'refreshToken' => 'REFRESH_TOKEN' } } }
   let(:register_response_body) { { 'errorCode' => '0', 'response' => { 'cardNo' => 'CARD123' } } }
   let(:http_response) { instance_double(Net::HTTPResponse, body: register_response_body.to_json) }
   let(:send_request_service) { instance_double(Spl::SendRequestService, call: http_response) }
 
   before do
+    allow(PhoneParserService).to receive(:new).and_return(phone_parser)
     allow(Spl::OauthTokenService).to receive(:new).and_return(
       instance_double(Spl::OauthTokenService, annonymus_token: oauth_response)
     )
@@ -56,10 +58,16 @@ RSpec.describe Spl::RegisterAccountService do
         )
       end
 
+      xit 'updates user private_metadata with tokens' do
+        service.call
+
+        expect(user.private_metadata).to include('accessToken' => 'ACCESS_TOKEN', 'refreshToken' => 'REFRESH_TOKEN')
+      end
+
       xit 'sends correct payload to SendRequestService' do
         expect(Spl::SendRequestService).to receive(:new) do |url, body|
           expect(url.to_s).to include('register')
-          expect(body).to include(authCode: spl_auth_code, partnerCode: 'PARTNER', placeCode: 'PLACE')
+          expect(body).to include(authCode: params, partnerCode: 'PARTNER', placeCode: 'PLACE')
           expect(body[:context]).to include(oauthToken: 'ACCESS_TOKEN', prgCode: 'PRG')
           expect(body[:person][:permissions]).to eq(processData: true, operationalSms: true)
           expect(body[:person]).to include(
@@ -69,6 +77,7 @@ RSpec.describe Spl::RegisterAccountService do
             mobileCountry: '+48',
             mobile: '500600700'
           )
+          expect(body[:person][:permissions]).to eq(processData: true, operationalSms: true)
         end.and_return(send_request_service)
 
         service.call
@@ -94,7 +103,7 @@ RSpec.describe Spl::RegisterAccountService do
     end
 
     context 'when OTP code is not 6 characters' do
-      let(:spl_auth_code) { '123' }
+      let(:params) { '123' }
 
       xit 'still sends request to SPL (no local validation)' do
         expect(Spl::SendRequestService).to receive(:new).and_return(send_request_service)

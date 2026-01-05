@@ -6,13 +6,13 @@ module Spl
   class RequestOtpService
     class SplRequestOtpError < StandardError; end
 
-    def initialize(date, mobile_country, phone_number, store)
+    def initialize(date, store, params)
       @date = date.to_i * 1000
       @store = store
       @request_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).request_otp)
-      @mobile_country = mobile_country
-      @phone_number = phone_number
-      @email = nil
+      @mobile_country = params[:mobile_country]
+      @phone_number = params[:phone_number]
+      @email = params[:email]
     end
 
     def call

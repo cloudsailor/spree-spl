@@ -42,10 +42,156 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     user.errors.clear
   end
 
+  describe '#validate_login_code_request (before_action logic)' do
+    context 'when YC terms are not accepted' do
+      let(:terms_accepted) { 'false' }
+
+      xit 'adds error and renders 422 (does not touch OTP service)' do
+        expect(Spl::SendOtpService).not_to receive(:new)
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        controller.send(:validate_login_code_request)
+        expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.must_accept_yc_terms'))
+      end
+    end
+
+    context 'when phone is invalid' do
+      let(:phone_valid) { false }
+
+      xit 'adds phone error and renders 422 (does not touch OTP service)' do
+        expect(Spl::SendOtpService).not_to receive(:new)
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        controller.send(:validate_login_code_request)
+        expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.invalid_phone'))
+      end
+    end
+
+    context 'when everything is valid' do
+      it 'does not render and does not add errors' do
+        expect(controller).not_to receive(:render)
+        controller.send(:validate_login_code_request)
+        expect(user.errors).to be_empty
+      end
+    end
+  end
+
+  describe '#login_code (service + success/rescue)' do
+    context 'when OTP service raises SplSendOtpError' do
+      xit 'renders 422 and shows translated message as base error' do
+        service_instance = instance_double('Spl::SendOtpService')
+
+        payload = {
+          'errorCode' => 'TEMPORARY_BLOCKED',
+          'validationMessages' => nil,
+          'fieldValidationMessages' => nil,
+          'response' => nil,
+          'msg' => 'Temporarily blocked (too much attempts)'
+        }
+
+        expect(Spl::SendOtpService).to receive(:new)
+          .with(kind_of(DateTime), '+48', '500600700', store)
+          .and_return(service_instance)
+
+        expect(service_instance).to receive(:call).and_raise(Spl::SendOtpService::SplSendOtpError.new(payload.inspect))
+
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+
+        controller.login_code
+
+        expect(user.errors.full_messages.join(' '))
+          .to include(I18n.t('spl.errors.temporary_blocked'))
+      end
+    end
+
+    context 'when OTP is sent successfully' do
+      it 'calls OTP service, updates accept_yc_terms in public_metadata, and renders 200' do
+        service_instance = instance_double('Spl::SendOtpService')
+
+        expect(Spl::SendOtpService).to receive(:new)
+          .with(kind_of(DateTime), '+48', '500600700', store)
+          .and_return(service_instance)
+        expect(service_instance).to receive(:call)
+        expect(controller).to receive(:render).with(hash_including(status: :ok))
+        controller.login_code
+        expect(user.reload.public_metadata['accept_yc_terms']).to eq(true)
+      end
+    end
+  end
+
+  describe '#connect_loyalty_account (service + success/rescue)' do
+    let(:service_params) { { user: { spl_auth_code: '123456' } } }
+
+    before do
+      allow(controller).to receive(:params).and_return(service_params)
+    end
+
+    context 'when account is connected successfully' do
+      xit 'calls LoginAccountService and AssignSpartaCardNumberService, then redirects with notice' do
+        login_service  = instance_double(Spl::LoginAccountService)
+        assign_service = instance_double(AssignSpartaCardNumberService)
+
+        expect(Spl::LoginAccountService).to receive(:new)
+          .with(user, store, service_params)
+          .and_return(login_service)
+        expect(login_service).to receive(:call)
+
+        expect(AssignSpartaCardNumberService).to receive(:new)
+          .with(user, store)
+          .and_return(assign_service)
+        expect(assign_service).to receive(:call)
+
+        expect(controller).to receive(:redirect_to).with(
+          spree.edit_account_profile_path,
+          hash_including(notice: Spree.t(:successfully_updated, resource: Spree.t(:account)))
+        )
+
+        controller.connect_loyalty_account
+      end
+    end
+
+    shared_examples 'renders connect error' do |error_class|
+      xit "renders 422 and adds translated base error for #{error_class}" do
+        payload = {
+          'errorCode' => 'TEMPORARY_BLOCKED',
+          'validationMessages' => nil,
+          'fieldValidationMessages' => nil,
+          'response' => nil,
+          'msg' => 'Temporarily blocked (too much attempts)'
+        }
+
+        phone_obj = double('Phone', e164: '+48500600700')
+        allow(user).to receive(:phone).and_return(phone_obj)
+
+        login_service = instance_double(Spl::LoginAccountService)
+        allow(Spl::LoginAccountService).to receive(:new).and_return(login_service)
+        allow(login_service).to receive(:call)
+          .and_raise(error_class.new(payload.inspect))
+
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+
+        controller.connect_loyalty_account
+
+        expect(user.errors.full_messages.join(' '))
+          .to include(I18n.t('spl.errors.temporary_blocked'))
+      end
+    end
+
+    context 'when LoginAccountService raises' do
+      include_examples 'renders connect error', Spl::LoginAccountService::SplLoginAccountError
+    end
+
+    context 'when AssignSpartaCardNumberService raises' do
+      include_examples 'renders connect error', AssignSpartaCardNumberService::AssignSpartaCardNumberError
+    end
+
+    context 'when MeService raises' do
+      include_examples 'renders connect error', Spl::MeService::SplMeError
+    end
+  end
+
   describe '#registration_code (service + success/rescue)' do
     before do
-      allow(controller).to receive(:login_code_params).and_return(
-        ActionController::Parameters.new(phone: phone_value, accept_yc_terms: terms_accepted).permit!
+      allow(controller).to receive(:params).and_return(
+        ActionController::Parameters.new(user: { phone: phone_value, accept_yc_terms: terms_accepted })
       )
     end
 
@@ -53,9 +199,12 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
       xit 'calls RequestOtpService, updates user, and renders 200' do
         service_instance = instance_double(Spl::RequestOtpService)
 
-        expect(Spl::RequestOtpService).to receive(:new)
-          .with(kind_of(DateTime), '+48', '500600700', store)
-          .and_return(service_instance)
+        expect(Spl::RequestOtpService).to receive(:new) do |date, passed_store, passed_params|
+          expect(date).to be_a(DateTime)
+          expect(passed_store).to eq(store)
+          expect(passed_params['mobile_country']).to eq('+48')
+          expect(passed_params['phone_number']).to eq('500600700')
+        end.and_return(service_instance)
 
         expect(service_instance).to receive(:call)
         expect(controller).to receive(:render).with(hash_including(status: :ok))

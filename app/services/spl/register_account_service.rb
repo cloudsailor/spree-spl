@@ -6,11 +6,11 @@ module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
 
-    def initialize(user, store, spl_auth_code)
+    def initialize(user, store, params)
       @register_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).register)
       @user = user
       @store = store
-      @spl_auth_code = spl_auth_code
+      @params = params
       @phone = PhoneParserService.new(user.phone)
     end
 
@@ -25,7 +25,7 @@ module Spl
       raise SplRegisterAccountError, register_response_body['msg'] if register_response_body['errorCode'] != '0'
 
       spl_card = register_response_body.dig('response', 'cardNo')
-      update_account(spl_card)
+      update_account(spl_card, oauth_response_body)
     end
 
     private
@@ -52,17 +52,22 @@ module Spl
             operationalSms: accept_yc_terms
           }
         },
-        authCode: @spl_auth_code,
+        authCode: @params,
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code']
       }
     end
 
-    def update_account(card_number)
+    def update_account(card_number, oauth_response_body)
+      @user.private_metadata ||= {} if @user.private_metadata.blank?
       @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number,
                                                                 spl_card_active: true,
                                                                 mobile_country: @phone.country_code,
-                                                                phone_number: @phone.national_number))
+                                                                phone_number: @phone.national_number),
+                   private_metadata: @user.private_metadata.merge(
+                     accessToken: oauth_response_body.dig('response', 'accessToken'),
+                     refreshToken: oauth_response_body.dig('response', 'refreshToken')
+                   ))
     end
   end
 end
