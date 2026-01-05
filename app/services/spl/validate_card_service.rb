@@ -45,13 +45,18 @@ module Spl
 
     def verify_card_request
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
-      body = {}
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
 
-      Spl::SendRequestService.new(url, body).call
+      request = build_post_request(url, body(@card_number, DateTime.current))
+      http.request(request).body
     end
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
+    def build_post_request(url, body)
+      request = Net::HTTP::Post.new(url)
+      request['Content-Type'] = 'application/json'
+      request.body = body.to_json
+      request
     end
 
     def body(card_number, date) # rubocop: disable Metrics/MethodLength
@@ -79,7 +84,7 @@ module Spl
     end
 
     def cards_assigned_user(card_number)
-      Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }
+      Spree::User.find { |u| u.public_metadata&.dig('spl_no_card') == card_number }
     end
 
     def card_assigned_to_different_user(card_assignment)
