@@ -12,7 +12,6 @@ module Spl
         def activate_coupon
           Spl::Coupons::ActivateCouponService.new(@order.user, @order.store, params[:coupon_code]).call
           load_user_coupons
-
         ensure
           respond_to do |format|
             format.turbo_stream
@@ -25,7 +24,6 @@ module Spl
             .new(@order.user, @order.store, params[:coupon_code])
             .call
           load_user_coupons
-
         ensure
           respond_to do |format|
             format.turbo_stream

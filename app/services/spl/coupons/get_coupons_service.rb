@@ -38,7 +38,9 @@ module Spl
       end
 
       def active?(coupon)
-        return true if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
+        if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
+          return true
+        end
 
         Time.zone.local(coupon['expirationDate']).future?
       rescue StandardError
