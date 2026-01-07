@@ -115,7 +115,7 @@ module Spl
             partial: 'spl/loyalty_connect_form',
             locals: { user: try_spree_current_user }
           ),
-                 status: :unprocessable_entity
+                 status: :unprocessable_content
         end
 
         def render_login_code_success(phone)
@@ -139,7 +139,7 @@ module Spl
               phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
             }
           ),
-                 status: :unprocessable_entity
+                 status: :unprocessable_content
         end
 
         def send_otp(phone, store)
