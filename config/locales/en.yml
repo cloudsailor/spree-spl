@@ -32,3 +32,6 @@ en:
     connect_account: Connect loyalty account
     send_code: Send one-time code
     verify_button: Verify phone number
+    user:
+      card_number: The club card number has been assigned to the account
+      card_active: SPL card activation

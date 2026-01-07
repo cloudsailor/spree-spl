@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplySpartaDiscountService
+  SPL_SOURCE_TYPE = 'SPL'
+
   def initialize(response, order)
     @basket = response['response']['basket']
     @line_items = order.line_items
@@ -22,6 +24,7 @@ class ApplySpartaDiscountService
       update_sparta_adjustment(line_item, label, amount)
       create_sparta_adjustment(order, amount, label, line_item)
     end
+    RemoveSpartaDiscountService.destroy_not_spl_adjustments(order)
   end
 
   private
@@ -33,14 +36,14 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
+    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: SPL_SOURCE_TYPE).present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def discounts_present?(line_item, label)
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
     return if adjustments.blank? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     existing_labels = adjustments.pluck(:label)
@@ -52,9 +55,8 @@ class ApplySpartaDiscountService
   def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
 
-    remove_spree_promotions_adjustments(line_item)
     line_item.adjustments.create(
-      source_type: 'SPL',
+      source_type: SPL_SOURCE_TYPE,
       adjustable: line_item,
       amount: amount,
       included: false,
@@ -70,13 +72,6 @@ class ApplySpartaDiscountService
     return if amount.zero? || adjustments.find_by(label: label).nil?
     return if adjustments.find_by(label: label, amount: amount).present?
 
-    remove_spree_promotions_adjustments(line_item)
     adjustments.find_by(label: label).update(amount: amount)
-  end
-
-  def remove_spree_promotions_adjustments(line_item)
-    return unless line_item.adjustments.where.not(source_type: 'SPL').any?
-
-    line_item.adjustments.where.not(source_type: 'SPL').destroy_all
   end
 end
