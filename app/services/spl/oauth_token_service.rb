@@ -8,7 +8,7 @@ module Spl
 
     def initialize(date, store)
       @date = date.to_i * 1000
-      @store = store
+      @env = Spl::StorePrivateMetadataService.all(store)
       @token_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).oauth_token)
     end
 
@@ -41,10 +41,10 @@ module Spl
     def prepare_oauth_token_body_with_signature
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
-        apiToken: @store.private_metadata['spl_api_token'],
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
         signature: generate_signature,
         date: @date,
         grantType: 'signature'
@@ -54,10 +54,10 @@ module Spl
     def prepare_oauth_token_body_with_oauth_code(auth_code)
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
-        apiToken: @store.private_metadata['spl_api_token'],
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
         oauthCode: auth_code,
         grantType: 'authorization_code'
       }
@@ -65,8 +65,8 @@ module Spl
 
     def generate_signature
       Spl::ClientSignatureService.new(@date,
-                                      @store.private_metadata['spl_api_token'],
-                                      @store.private_metadata['spl_signature_seed']).call
+                                      @env['spl_api_token'],
+                                      @env['spl_signature_seed']).call
     end
   end
 end

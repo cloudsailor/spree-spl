@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe AssignSpartaCardNumberService do
+RSpec.describe AssignSpartaCardNumberService, type: :service do
   let(:country) { create(:country) }
   let(:store) { create(:store, default_country: country) }
   let(:user)  { create(:user, public_metadata: initial_public_metadata) }
@@ -47,18 +47,13 @@ RSpec.describe AssignSpartaCardNumberService do
 
   describe '#call' do
     context 'when main card is active and belongs to the user' do
-      let(:initial_public_metadata) do
-        { 'spl_no_card' => '5100179585157' }
-      end
+      let(:initial_public_metadata) { { 'spl_no_card' => '5100179585157' } }
 
       it 'assigns card number and marks card as active in public_metadata' do
-        expect do
-          service.call
-        end.to change { user.reload.public_metadata }.from(
-          { 'spl_no_card' => '5100179585157' }
-        ).to(
-          { 'spl_no_card' => '5100179585157', 'spl_card_active' => true }
-        )
+        expect { service.call }
+          .to change { user.reload.public_metadata }
+          .from({ 'spl_no_card' => '5100179585157' })
+          .to({ 'spl_no_card' => '5100179585157', 'spl_card_active' => true })
       end
     end
 
