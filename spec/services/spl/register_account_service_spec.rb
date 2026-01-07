@@ -52,9 +52,7 @@ RSpec.describe Spl::RegisterAccountService do
 
         expect(user.public_metadata).to include(
           'spl_no_card' => 'CARD123',
-          'spl_card_active' => true,
-          'mobile_country' => '+48',
-          'phone_number' => '500600700'
+          'spl_card_active' => true
         )
       end
 
