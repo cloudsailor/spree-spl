@@ -22,7 +22,8 @@ group :test do
   gem 'observer'
   gem 'rails-controller-testing'
   gem 'spree', '> 5.0'
-  gem 'spree_storefront'
+  gem 'spree_storefront', '> 5.0'
+  gem 'webmock'
 end
 
 gem 'sprockets-rails', '~> 3.5'
