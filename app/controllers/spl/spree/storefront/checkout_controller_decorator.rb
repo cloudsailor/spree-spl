@@ -5,6 +5,7 @@ module Spl
     module Storefront
       module CheckoutControllerDecorator
         def self.prepended(base)
+          base.before_action :promotion_switcher
           base.before_action :load_user_coupons, except: %i[activate_coupon deactivate_coupon]
         end
 
@@ -35,6 +36,10 @@ module Spl
         end
 
         private
+
+        def promotion_switcher
+          PromotionSwitcherService.new(@order, request.url.include?('confirm')).call
+        end
 
         def load_user_coupons
           @coupons = Spl::GetCouponsService.new(@order.user, @order.store).call&.filter do |coupon|

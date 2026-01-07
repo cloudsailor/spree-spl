@@ -10,3 +10,6 @@ en:
     coupons:
       find:
         checkout_list: Your SPL coupons
+    user:
+      card_number: The club card number has been assigned to the account
+      card_active: SPL card activation

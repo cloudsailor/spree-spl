@@ -4,6 +4,8 @@ module Spl
   module Spree
     module Api
       module CartControllerDecorator
+        include BooleanHelper
+
         def create
           add_spl_discount_params_to_order(spree_current_user)
 
@@ -79,10 +81,6 @@ module Spl
 
           order.update(public_metadata: order.public_metadata.merge(spl_card_active: true))
           promotion_switcher(order, true)
-        end
-
-        def cast_boolean(value)
-          ActiveModel::Type::Boolean.new.cast(value)
         end
       end
     end

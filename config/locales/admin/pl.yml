@@ -1,0 +1,6 @@
+pl:
+  spree:
+    promotion_rule_types:
+      user_from_club:
+        description: Użytkownik posiada ważną aktywną kartę lojalnościową
+        name: Członek klubu lojalnościowego

@@ -21,3 +21,7 @@ Metrics/ParameterLists:
 Lint/MissingSuper:
   Exclude:
     - app/services/**/*
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
