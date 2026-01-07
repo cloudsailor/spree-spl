@@ -46,7 +46,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.must_accept_yc_terms'))
       end
@@ -57,7 +57,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds phone error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.invalid_phone'))
       end
@@ -91,7 +91,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
         expect(service_instance).to receive(:call).and_raise(Spl::SendOtpService::SplSendOtpError.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.login_code
 
@@ -164,7 +164,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(login_service).to receive(:call)
           .and_raise(error_class.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.connect_loyalty_account
 
@@ -194,7 +194,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     context 'when OTP request succeeds' do
-      xit 'calls RequestOtpService, updates user, and renders 200' do
+      it 'calls RequestOtpService, updates user, and renders 200' do
         service_instance = instance_double(Spl::RequestOtpService)
 
         expect(Spl::RequestOtpService).to receive(:new) do |date, passed_store, passed_params|
@@ -215,7 +215,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     shared_examples 'registration_code error' do |error_class|
-      xit "renders 422 and adds translated base error for #{error_class}" do
+      it "renders 422 and adds translated base error for #{error_class}" do
         payload = {
           'errorCode' => 'TEMPORARY_BLOCKED',
           'msg' => 'Temporarily blocked'
@@ -226,7 +226,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(Spl::RequestOtpService).to receive(:new).and_return(service_instance)
         allow(service_instance).to receive(:call).and_raise(error_class.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.registration_code
 
@@ -252,7 +252,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     context 'when registration succeeds' do
-      xit 'calls RegisterAccountService and redirects with notice' do
+      it 'calls RegisterAccountService and redirects with notice' do
         service_instance = instance_double(Spl::RegisterAccountService)
 
         expect(Spl::RegisterAccountService).to receive(:new)
@@ -271,7 +271,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     shared_examples 'register_loyalty_account error' do |error_class|
-      xit "renders 422 and adds translated base error for #{error_class}" do
+      it "renders 422 and adds translated base error for #{error_class}" do
         payload = {
           'errorCode' => 'TEMPORARY_BLOCKED',
           'msg' => 'Temporarily blocked'
@@ -285,7 +285,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(Spl::RegisterAccountService).to receive(:new).and_return(service_instance)
         allow(service_instance).to receive(:call).and_raise(error_class.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.register_loyalty_account
 

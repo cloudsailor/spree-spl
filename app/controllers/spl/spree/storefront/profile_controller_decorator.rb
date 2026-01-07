@@ -50,69 +50,22 @@ module Spl
 
         private
 
+        def validate_spl_no_card
+          metadata = user_params[:public_metadata]
+          return unless metadata&.[](:spl_no_card)
+
+          update_order(metadata[:spl_no_card], metadata[:spl_card_active])
+          validate_card(metadata)
+        rescue ::Spl::ValidateCardService::SplCardValidationError => e
+          handle_validation_error(e)
+        end
+
         def validate_login_code_request
           clear_errors
           validate_yc_terms
           validate_phone
 
           render_login_code_error if try_spree_current_user.errors.any?
-        end
-
-        def validate_yc_terms
-          return if yc_terms_accepted?
-
-          try_spree_current_user.errors.add(:base, I18n.t('spl.user.errors.must_accept_yc_terms'))
-        end
-
-        def validate_phone
-          return if phone_parser.valid?
-
-          try_spree_current_user.errors.add(:phone, I18n.t('spl.user.errors.invalid_phone'))
-        end
-
-        def yc_terms_accepted?
-          ActiveModel::Type::Boolean.new.cast(login_code_params[:accept_yc_terms])
-        end
-
-        def phone_parser
-          @phone_parser ||= PhoneParserService.new(login_code_params[:phone])
-        end
-
-        def clear_errors
-          try_spree_current_user.errors.clear
-        end
-
-        def render_login_code_error
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: 'spl/loyalty_connect_form',
-            locals: { user: try_spree_current_user }
-          ),
-                 status: :unprocessable_content
-        end
-
-        def render_login_code_success(phone, partial)
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: "spl/#{partial}",
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :ok
-        end
-
-        def render_connect_loyalty_account_error(phone, partial)
-          render turbo_stream: turbo_stream.replace(
-            partial,
-            partial: "spl/#{partial}",
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :unprocessable_content
         end
 
         def send_otp(phone, store)
@@ -122,45 +75,6 @@ module Spl
         def request_otp(phone, store, params)
           params.merge!(mobile_country: phone.country_code, phone_number: phone.national_number)
           Spl::RequestOtpService.new(DateTime.current, store, params).call
-        end
-
-        def update_user_after_otp_request
-          try_spree_current_user.update!(
-            phone: login_code_params[:phone],
-            public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
-          )
-        end
-
-        def handle_spl_error(error)
-          payload = Spl::ErrorPayloadParser.parse(error.message) || error
-          msg = Spl::ErrorTranslator.translate(payload)
-
-          clear_errors
-          try_spree_current_user.errors.add(:base, msg)
-        end
-
-        def assign_card_number(user, store, params)
-          Spl::LoginAccountService.new(user, store, params).call
-          AssignSpartaCardNumberService.new(user, store).call
-        end
-
-        def login_code_params
-          params.require(:user).permit(:phone, :accept_yc_terms)
-        end
-
-        def user_params
-          params.require(:user).permit(:first_name, :last_name, :phone, :email,
-                                       public_metadata: %i[spl_card_active spl_no_card])
-        end
-
-        def validate_spl_no_card
-          metadata = user_params[:public_metadata]
-          return unless metadata&.[](:spl_no_card)
-
-          update_order(metadata[:spl_no_card], metadata[:spl_card_active])
-          validate_card(metadata)
-        rescue ::Spl::ValidateCardService::SplCardValidationError => e
-          handle_validation_error(e)
         end
 
         def validate_card(metadata)
@@ -193,14 +107,6 @@ module Spl
           value.present? && cast_boolean(value)
         end
 
-        def validate_login_code_request
-          clear_errors
-          validate_yc_terms
-          validate_phone
-
-          render_login_code_error if try_spree_current_user.errors.any?
-        end
-
         def validate_yc_terms
           return if yc_terms_accepted?
 
@@ -225,19 +131,22 @@ module Spl
           try_spree_current_user.errors.clear
         end
 
-        def render_login_code_error
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: 'spl/loyalty_connect_form',
-            locals: { user: try_spree_current_user }
-          ),
-                 status: :unprocessable_content
+        def update_user_after_otp_request
+          try_spree_current_user.update!(
+            phone: login_code_params[:phone],
+            public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
+          )
         end
 
-        def render_login_code_success(phone)
+        def assign_card_number(user, store, params)
+          Spl::LoginAccountService.new(user, store, params).call
+          AssignSpartaCardNumberService.new(user, store).call
+        end
+
+        def render_login_code_success(phone, partial)
           render turbo_stream: turbo_stream.replace(
             'loyalty_connect_form',
-            partial: 'spl/otp_code_form',
+            partial: "spl/#{partial}",
             locals: {
               user: try_spree_current_user,
               phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
@@ -246,27 +155,16 @@ module Spl
                  status: :ok
         end
 
-        def render_connect_loyalty_account_error(phone)
+        def render_connect_loyalty_account_error(phone, partial)
           render turbo_stream: turbo_stream.replace(
-            'otp_code_form',
-            partial: 'spl/otp_code_form',
+            partial,
+            partial: "spl/#{partial}",
             locals: {
               user: try_spree_current_user,
               phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
             }
           ),
                  status: :unprocessable_content
-        end
-
-        def send_otp(phone, store)
-          Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, store).call
-        end
-
-        def update_user_after_otp_request
-          try_spree_current_user.update!(
-            phone: login_code_params[:phone],
-            public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
-          )
         end
 
         def handle_spl_error(error)
@@ -277,13 +175,22 @@ module Spl
           try_spree_current_user.errors.add(:base, msg)
         end
 
-        def assign_card_number(user, store, params)
-          Spl::LoginAccountService.new(user, store, params).call
-          AssignSpartaCardNumberService.new(user, store).call
+        def render_login_code_error
+          render turbo_stream: turbo_stream.replace(
+            'loyalty_connect_form',
+            partial: 'spl/loyalty_connect_form',
+            locals: { user: try_spree_current_user }
+          ),
+                 status: :unprocessable_content
         end
 
         def login_code_params
           params.require(:user).permit(:phone, :accept_yc_terms)
+        end
+
+        def user_params
+          params.require(:user).permit(:first_name, :last_name, :phone, :email,
+                                       public_metadata: %i[spl_card_active spl_no_card])
         end
       end
     end

@@ -47,7 +47,7 @@ RSpec.describe Spl::RegisterAccountService do
 
   describe '#call' do
     context 'when registration succeeds' do
-      xit 'updates user public_metadata with SPL card data' do
+      it 'updates user public_metadata with SPL card data' do
         service.call
 
         expect(user.public_metadata).to include(
@@ -56,13 +56,13 @@ RSpec.describe Spl::RegisterAccountService do
         )
       end
 
-      xit 'updates user private_metadata with tokens' do
+      it 'updates user private_metadata with tokens' do
         service.call
 
         expect(user.private_metadata).to include('accessToken' => 'ACCESS_TOKEN', 'refreshToken' => 'REFRESH_TOKEN')
       end
 
-      xit 'sends correct payload to SendRequestService' do
+      it 'sends correct payload to SendRequestService' do
         expect(Spl::SendRequestService).to receive(:new) do |url, body|
           expect(url.to_s).to include('register')
           expect(body).to include(authCode: params, partnerCode: 'PARTNER', placeCode: 'PLACE')
@@ -85,13 +85,13 @@ RSpec.describe Spl::RegisterAccountService do
     context 'when SPL returns errorCode != 0' do
       let(:register_response_body) { { 'errorCode' => 'TEMPORARY_BLOCKED', 'msg' => 'Temporarily blocked' } }
 
-      xit 'raises SplRegisterAccountError with SPL message' do
+      it 'raises SplRegisterAccountError with SPL message' do
         expect do
           service.call
         end.to raise_error(Spl::RegisterAccountService::SplRegisterAccountError, 'Temporarily blocked')
       end
 
-      xit 'does not update user public_metadata' do
+      it 'does not update user public_metadata' do
         expect do
           service.call
         rescue StandardError
@@ -103,7 +103,7 @@ RSpec.describe Spl::RegisterAccountService do
     context 'when OTP code is not 6 characters' do
       let(:params) { '123' }
 
-      xit 'still sends request to SPL (no local validation)' do
+      it 'still sends request to SPL (no local validation)' do
         expect(Spl::SendRequestService).to receive(:new).and_return(send_request_service)
 
         service.call
@@ -116,11 +116,11 @@ RSpec.describe Spl::RegisterAccountService do
         allow(PhoneParserService).to receive(:new).with(nil).and_raise(StandardError, 'Phone missing')
       end
 
-      xit 'raises error before sending request' do
+      it 'raises error before sending request' do
         expect { service.call }.to raise_error(StandardError, 'Phone missing')
       end
 
-      xit 'does not send request to SPL' do
+      it 'does not send request to SPL' do
         expect(Spl::SendRequestService).not_to receive(:new)
         expect { service.call }.to raise_error(StandardError)
       end
