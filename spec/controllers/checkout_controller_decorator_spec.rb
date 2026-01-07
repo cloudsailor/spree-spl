@@ -5,17 +5,17 @@ require 'rails_helper'
 RSpec.describe Spree::CheckoutController, type: :controller do
   let(:store) do
     create(:store, private_metadata: {
-      'spl_url' => 'https://fake-spl.example.com',
-      'spl_mode' => 'test',
-      'spl_pos_key' => 'fake-pos-key',
-      'spl_api_user' => 'fake-api-user',
-      'spl_prg_code' => 'fake-prg-code',
-      'spl_sale_url' => 'https://fake-spl.example.com/sale',
-      'spl_api_token' => 'fake-token',
-      'spl_place_code' => 'fake-place',
-      'spl_partner_code' => 'fake-partner',
-      'spl_signature_seed' => 'fake-seed'
-    })
+             'spl_url' => 'https://fake-spl.example.com',
+             'spl_mode' => 'test',
+             'spl_pos_key' => 'fake-pos-key',
+             'spl_api_user' => 'fake-api-user',
+             'spl_prg_code' => 'fake-prg-code',
+             'spl_sale_url' => 'https://fake-spl.example.com/sale',
+             'spl_api_token' => 'fake-token',
+             'spl_place_code' => 'fake-place',
+             'spl_partner_code' => 'fake-partner',
+             'spl_signature_seed' => 'fake-seed'
+           })
   end
 
   let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
