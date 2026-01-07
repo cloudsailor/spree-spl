@@ -8,11 +8,11 @@ module Spl
       class ActivateCouponServiceError < StandardError; end
       include SplServiceHelper
 
-      def initialize(user, store, params)
+      def initialize(user, store, coupon_code)
         @store = store
         @activate_coupons_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).coupon_activate)
         @user = user
-        @coupon_code = params[:coupon_code]
+        @coupon_code = coupon_code
       end
 
       def call

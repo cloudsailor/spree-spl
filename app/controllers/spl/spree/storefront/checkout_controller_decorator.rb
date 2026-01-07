@@ -10,12 +10,10 @@ module Spl
         end
 
         def activate_coupon
-          Spl::Coupons::ActivateCouponService
-            .new(current_user, current_store, params)
-            .call
-
+          Spl::Coupons::ActivateCouponService.new(@order.user, @order.store, params[:coupon_code]).call
           load_user_coupons
 
+        ensure
           respond_to do |format|
             format.turbo_stream
             format.html { redirect_to checkout_path }
@@ -24,11 +22,11 @@ module Spl
 
         def deactivate_coupon
           Spl::Coupons::DeactivateCouponService
-            .new(current_user, current_store, params)
+            .new(@order.user, @order.store, params[:coupon_code])
             .call
-
           load_user_coupons
 
+        ensure
           respond_to do |format|
             format.turbo_stream
             format.html { redirect_to checkout_path }
@@ -42,19 +40,7 @@ module Spl
         end
 
         def load_user_coupons
-          @coupons = Spl::GetCouponsService.new(@order.user, @order.store).call&.filter do |coupon|
-            active?(coupon)
-          end
-        end
-
-        def active?(coupon)
-          if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
-            return true
-          end
-
-          Time.zone.local(coupon['expirationDate']).future?
-        rescue StandardError
-          false
+          @coupons = Spl::Coupons::GetCouponsService.new(@order.user, @order.store).call
         end
       end
     end
