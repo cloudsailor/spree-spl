@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe RemoveSpartaDiscountService do
+RSpec.describe RemoveSpartaDiscountService, type: :service do
   let(:country) { create(:country) }
   let(:store)    { create(:store, default_country: country) }
   let(:order)    { create(:order, store: store) }
@@ -106,7 +106,7 @@ RSpec.describe RemoveSpartaDiscountService do
 
     let(:relation) { line_item1.adjustments.where(source_type: 'SPL') }
 
-    it 'marks eligible SPL adjustments as ineligible & closed, recalculates cart, then destroys all given adjustments' do # rubocop:disable Layout/LineLength
+    it 'marks eligible SPL adjustments as ineligible & closed, recalculates cart, then destroys all given adjustments' do
       expect(line_item1.adjustments.where(source_type: 'SPL').count).to eq(2)
       expect(FakeCartRecalculateService).to receive(:call).with(order: order, line_item: line_item1).twice
 

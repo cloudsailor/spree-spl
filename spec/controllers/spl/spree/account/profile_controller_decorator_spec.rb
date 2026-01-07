@@ -4,9 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Spree::Account::ProfileController, type: :controller do
   before do
-    unless defined?(Spl::SendOtpService::SplSendOtpError)
-      stub_const('Spl::SendOtpService::SplSendOtpError', Class.new(StandardError))
-    end
+    stub_const('Spl::SendOtpService::SplSendOtpError', Class.new(StandardError)) unless defined?(Spl::SendOtpService::SplSendOtpError)
   end
 
   let(:country) { create(:country) }
@@ -46,7 +44,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     context 'when YC terms are not accepted' do
       let(:terms_accepted) { 'false' }
 
-      xit 'adds error and renders 422 (does not touch OTP service)' do
+      it 'adds error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
         expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
         controller.send(:validate_login_code_request)
@@ -57,7 +55,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     context 'when phone is invalid' do
       let(:phone_valid) { false }
 
-      xit 'adds phone error and renders 422 (does not touch OTP service)' do
+      it 'adds phone error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
         expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
         controller.send(:validate_login_code_request)
@@ -76,7 +74,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
   describe '#login_code (service + success/rescue)' do
     context 'when OTP service raises SplSendOtpError' do
-      xit 'renders 422 and shows translated message as base error' do
+      it 'renders 422 and shows translated message as base error' do
         service_instance = instance_double('Spl::SendOtpService')
 
         payload = {
@@ -125,7 +123,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     context 'when account is connected successfully' do
-      xit 'calls LoginAccountService and AssignSpartaCardNumberService, then redirects with notice' do
+      it 'calls LoginAccountService and AssignSpartaCardNumberService, then redirects with notice' do
         login_service  = instance_double(Spl::LoginAccountService)
         assign_service = instance_double(AssignSpartaCardNumberService)
 
@@ -149,7 +147,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
     end
 
     shared_examples 'renders connect error' do |error_class|
-      xit "renders 422 and adds translated base error for #{error_class}" do
+      it "renders 422 and adds translated base error for #{error_class}" do
         payload = {
           'errorCode' => 'TEMPORARY_BLOCKED',
           'validationMessages' => nil,
