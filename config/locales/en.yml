@@ -36,6 +36,3 @@ en:
     send_log_in_code: Send one-time code for log in
     send_registration_code: Send one-time code for registration
     verify_button: Verify phone number
-    user:
-      card_number: The club card number has been assigned to the account
-      card_active: SPL card activation

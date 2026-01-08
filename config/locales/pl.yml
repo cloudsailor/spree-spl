@@ -34,6 +34,4 @@ pl:
       send_log_in_code: Wyślij jednorazowy kod do logowania
       send_registration_code: Wyślij jednorazowy kod do rejestracji
       verify_button: Zweryfikuj numer telefonu
-      user:
-        card_number: Numer karty klubowej został przypisany do konta
-        card_active: Aktywacja karty SPL
+
