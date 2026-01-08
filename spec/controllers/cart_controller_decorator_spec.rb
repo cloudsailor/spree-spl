@@ -21,7 +21,7 @@ RSpec.describe Spree::Api::V2::Storefront::CartController, type: :controller do
       let(:user_metadata) do
         {
           'spl_no_card' => '0123456789123',
-          'spl_card_active' => 'true'
+          'spl_card_active' => true
         }
       end
 

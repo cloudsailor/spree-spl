@@ -3,11 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Spree::OrderUpdater, type: :model do
-  before(:all) do
-    # Ensure decorator is applied, but harmless if already prepended by Rails
-    Spree::OrderUpdater.prepend(OrderUpdaterDecorator) unless Spree::OrderUpdater < OrderUpdaterDecorator
-  end
-
   let(:store) { Spree::Store.default || create(:store, default: true) }
 
   let!(:order) do
@@ -36,7 +31,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:payment_state) { 'paid' }
 
       it "calls UpdateSpartaStateJob with 'D'" do
-        updater.update
+        updater.send(:preform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token,
@@ -51,7 +46,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state) { 'canceled' }
 
       it "calls UpdateSpartaStateJob with 'C'" do
-        updater.update
+        updater.send(:preform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token,
@@ -67,7 +62,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state)   { 'canceled' }
 
       it 'calls the job twice with both states' do
-        updater.update
+        updater.send(:preform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token, 'D', order.number, order.store
@@ -84,7 +79,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state)   { 'complete' }
 
       it 'does not call UpdateSpartaStateJob' do
-        updater.update
+        updater.send(:preform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).not_to have_received(:perform_later)
       end
