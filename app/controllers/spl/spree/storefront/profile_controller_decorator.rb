@@ -54,7 +54,7 @@ module Spl
 
         def disactivated_card?
           value = user_params.dig(:public_metadata, :spl_card_active)
-          value.present? && cast_boolean(value)
+          cast_boolean(value)
         end
       end
     end
