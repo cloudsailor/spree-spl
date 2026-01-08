@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class PromotionSwitcherService
+  include BooleanHelper
+
   def initialize(order, check_only)
     @check_only = check_only
     @line_items = order.line_items
@@ -41,9 +43,5 @@ class PromotionSwitcherService
 
   def remove_sparta_discount(order)
     RemoveSpartaDiscountService.destroy_all_sparta_adjustments(order)
-  end
-
-  def cast_boolean(value)
-    ActiveModel::Type::Boolean.new.cast(value)
   end
 end

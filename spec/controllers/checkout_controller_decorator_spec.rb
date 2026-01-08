@@ -2,148 +2,126 @@
 
 require 'rails_helper'
 
-RSpec.describe Spree::Api::V2::Storefront::CheckoutController, type: :controller do
-  describe 'private methods' do
-    let(:order) { create(:order) }
+describe Spree::CheckoutController, type: :controller do
+  let(:store) do
+    create(:store, private_metadata: {
+             'spl_url' => 'https://fake-spl.example.com',
+             'spl_mode' => 'test',
+             'spl_pos_key' => 'fake-pos-key',
+             'spl_api_user' => 'fake-api-user',
+             'spl_prg_code' => 'fake-prg-code',
+             'spl_sale_url' => 'https://fake-spl.example.com/sale',
+             'spl_api_token' => 'fake-token',
+             'spl_place_code' => 'fake-place',
+             'spl_partner_code' => 'fake-partner',
+             'spl_signature_seed' => 'fake-seed'
+           })
+  end
 
-    describe '#promotions_and_spl_adjustment_present?' do
-      context 'when order has no promotions and no line items' do
-        it 'returns false' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(false)
-        end
+  let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
+  let(:user) { create(:user, public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => 'true' }) }
+
+  let(:order) do
+    create(
+      :order_with_totals,
+      store: store,
+      user: user,
+      email: 'test@example.com',
+      public_metadata: {
+        'spl_no_card' => '1234567890123',
+        'spl_card_active' => 'true'
+      }
+    )
+  end
+
+  before do
+    allow(controller).to receive_messages(current_store: store, try_spree_current_user: user, spree_current_user: user,
+                                          spree_signup_path: '/signup', spree_login_path: '/login')
+
+    stub_request(:any, /fake-spl\.example\.com/).to_return(
+      status: 200,
+      body: {
+        'errorCode' => '0',
+        'response' => {
+          'basket' => order.line_items.map do |li|
+            {
+              'pos' => li.id,
+              'discounts' => [
+                {
+                  'name' => 'TEST'
+                }
+              ],
+              'discountGross' => 5.0
+            }
+          end
+        }
+      }.to_json,
+      headers: { 'Content-Type' => 'application/json' }
+    )
+
+    allow_any_instance_of(Spree::Order).to receive(:recalculate).and_return(true)
+  end
+
+  describe '#promotion_switcher' do
+    context 'creates a new SPL adjustment' do
+      it 'with SPL source_type' do
+        post :update, params: { state: 'address', token: order.token }
+
+        expect(order.line_items.last.adjustments.last.source_type).to eq('SPL')
       end
 
-      context 'when order has promotions but no line items' do
-        before { create(:promotion, orders: [order]) }
+      it 'with amount from discountGross' do
+        post :update, params: { state: 'address', token: order.token }
 
-        it 'returns false' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(false)
-        end
-      end
-
-      context 'when order has line items but no promotions' do
-        let!(:line_item) { create(:line_item, order: order) }
-
-        before do
-          create(
-            :adjustment,
-            adjustable: line_item,
-            source_type: 'SPL',
-            amount: 10,
-            order:
-          )
-        end
-
-        it 'returns false' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(false)
-        end
-      end
-
-      context 'when order has promotions and line items but adjustments are not SPL' do
-        let!(:promotion) { create(:promotion, orders: [order]) }
-        let!(:line_item) { create(:line_item, order: order) }
-
-        before do
-          create(
-            :adjustment,
-            adjustable: line_item,
-            source_type: 'Promotion', # not SPL
-            amount: 10,
-            order:
-          )
-        end
-
-        it 'returns false' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(false)
-        end
-      end
-
-      context 'when order has promotions and SPL adjustment on at least one line item' do
-        let!(:promotion) { create(:promotion, orders: [order]) }
-        let!(:line_item1) { create(:line_item, order: order) }
-        let!(:line_item2) { create(:line_item, order: order) }
-
-        before do
-          create(
-            :adjustment,
-            adjustable: line_item2,
-            source_type: 'SPL',
-            amount: 5,
-            order:
-          )
-        end
-
-        it 'returns true' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(true)
-        end
-      end
-
-      context 'when SPL adjustment exists but is soft-deleted or zero amount' do
-        let!(:promotion) { create(:promotion, orders: [order]) }
-        let!(:line_item) { create(:line_item, order: order) }
-
-        before do
-          create(
-            :adjustment,
-            adjustable: line_item,
-            source_type: 'SPL',
-            amount: 0,
-            order:
-          )
-        end
-
-        it 'still returns true (presence-based check)' do
-          expect(
-            controller.send(:promotions_and_spl_adjustment_present?, order)
-          ).to eq(true)
-        end
+        expect(order.line_items.last.adjustments.last.amount).to eq(-5.0)
       end
     end
 
-    describe '#promotion_switcher' do
-      let(:service) { instance_double(PromotionSwitcherService, call: true) }
-      context 'when check_only is true' do
-        it 'calls PromotionSwitcherService with check_only=true' do
-          expect(PromotionSwitcherService)
-            .to receive(:new).with(order, true)
-                             .and_return(service)
-
-          controller.send(:promotion_switcher, order, true)
-        end
+    context 'when SPL API response has no line_items (unhappy path)' do
+      before do
+        stub_request(:any, /fake-spl\.example\.com/).to_return(
+          status: 200,
+          body: {
+            'errorCode' => '0',
+            'response' => {
+              'basket' => []
+            }
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
       end
 
-      context 'when check_only is false' do
-        it 'calls PromotionSwitcherService with check_only=false' do
-          expect(PromotionSwitcherService)
-            .to receive(:new).with(order, false)
-                             .and_return(service)
+      it 'does NOT create SPL adjustments' do
+        expect do
+          post :update, params: { state: 'address', token: order.token }
+        end.not_to(change { order.line_items.first.adjustments.count })
+      end
+    end
 
-          controller.send(:promotion_switcher, order, false)
-        end
+    context 'when SPL API response has no discounts (unhappy path)' do
+      before do
+        stub_request(:any, /fake-spl\.example\.com/).to_return(
+          status: 200,
+          body: {
+            'errorCode' => '0',
+            'response' => {
+              'basket' => order.line_items.map do |li|
+                {
+                  'pos' => li.id,
+                  'discounts' => [],
+                  'discountGross' => 0.0
+                }
+              end
+            }
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
       end
 
-      context 'when service raises an error' do
-        before do
-          allow(PromotionSwitcherService)
-            .to receive(:new)
-            .and_raise(StandardError.new('unhandled error'))
-        end
-
-        it 'lets the error raise' do
-          expect do
-            controller.send(:promotion_switcher, order, true)
-          end.to raise_error(StandardError, 'unhandled error')
-        end
+      it 'does NOT create SPL adjustments' do
+        expect do
+          post :update, params: { state: 'address', token: order.token }
+        end.not_to(change { order.line_items.first.adjustments.count })
       end
     end
   end

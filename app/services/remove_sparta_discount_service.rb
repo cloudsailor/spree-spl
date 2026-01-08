@@ -16,7 +16,7 @@ class RemoveSpartaDiscountService
 
   def self.destroy_inactive_adjustments(adjustments, line_item, order)
     destroy_adjustments(adjustments, line_item, order)
-    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
+    adjustments.where(eligible: true).update_all(eligible: false, state: 'closed')
 
     line_item.reload
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
@@ -24,8 +24,17 @@ class RemoveSpartaDiscountService
     adjustments.destroy_all
   end
 
+  def self.destroy_not_spl_adjustments(order)
+    return unless order.line_items.any? { |line_item| line_item.adjustments.exists?(source_type: 'SPL') }
+
+    order.line_items.each do |line_item|
+      adjustments_to_remove = line_item.adjustments.reject { |adj| adj.source_type == 'SPL' }
+      adjustments_to_remove.each(&:destroy)
+    end
+  end
+
   private_class_method def self.destroy_adjustments(adjustments, line_item, order)
-    adjustments.where(eligible: true).update_all(eligible: false, state: 'close')
+    adjustments.where(eligible: true).update_all(eligible: false, state: 'closed')
 
     line_item.reload
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
