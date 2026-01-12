@@ -3,8 +3,9 @@
 require 'json'
 
 module Spl
-  class MeService < BaseSplService
+  class MeService
     class SplMeError < StandardError; end
+    include SplServiceHelper
 
     def initialize(user, store)
       @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)

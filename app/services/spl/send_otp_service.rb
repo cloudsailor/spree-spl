@@ -3,8 +3,9 @@
 require 'json'
 
 module Spl
-  class SendOtpService < BaseSplService
+  class SendOtpService
     class SplSendOtpError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, mobile_country, phone_number, store)
       @date = date.to_i * 1000

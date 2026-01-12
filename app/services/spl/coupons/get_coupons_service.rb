@@ -4,8 +4,9 @@ require 'json'
 
 module Spl
   module Coupons
-    class GetCouponsService < BaseSplService
+    class GetCouponsService
       class SplGetCouponError < StandardError; end
+      include SplServiceHelper
 
       def initialize(user, store)
         @store = store
@@ -38,13 +39,14 @@ module Spl
       end
 
       def active?(coupon)
-        if coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && coupon['expirationDate'].nil?
-          return true
-        end
+        coupon['used'] != true && coupon['usageTemporaryBlocked'] != true && correct_time?(coupon['expirationDate']) &&
+          coupon['usageDisabled'] != true
+      end
 
-        Time.zone.local(coupon['expirationDate']).future?
-      rescue StandardError
-        false
+      def correct_time?(date)
+        return Time.zone.parse(date).future? unless date.nil?
+
+        true
       end
     end
   end

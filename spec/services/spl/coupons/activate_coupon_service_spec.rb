@@ -5,13 +5,12 @@ require 'rails_helper'
 RSpec.describe Spl::Coupons::ActivateCouponService do
   subject(:service) { described_class.new(user, store, params) }
 
-  # Spree factories where possible
-  let(:store) { build_stubbed(:store) }
-  let(:user)  { build_stubbed(:user) }
+  let(:user)  { create(:user) }
+  let(:store) { Spree::Store.default }
 
   let(:spl_url)      { 'https://spl.example.test' }
   let(:prg_code)     { 'PRG123' }
-  let(:access_token) { 'token_abc' }
+  let(:access_token) { 'LPUXLUZYZ9JN8XLXSSCTZA4Y5LEFEX' }
 
   let(:coupon_code) { 'ABC123' }
   let(:params) { coupon_code  }

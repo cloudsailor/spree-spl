@@ -4,11 +4,10 @@
 
     <% @coupons&.each do |coupon| %>
       <%= coupon["typeCustomerName"] %>
-
       <% if coupon.dig("couponType", "autoLoad") == "A" %>
         <% if coupon["autoLoad"] %>
           <%= button_to "Deactivate",
-                        deactivate_coupon_asd_path(
+                        deactivate_coupon_coupons_path(
                           order: @order,
                           token: @order.token,
                           coupon_code: coupon["code"]
@@ -18,7 +17,7 @@
                         class: "min-h-full ml-3 btn-primary !px-4 !py-3" %>
         <% else %>
           <%= button_to "Activate",
-                        activate_coupon_asd_path(
+                        activate_coupon_coupons_path(
                           order: @order,
                           token: @order.token,
                           coupon_code: coupon["code"]

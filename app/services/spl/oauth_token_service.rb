@@ -3,8 +3,9 @@
 require 'json'
 
 module Spl
-  class OauthTokenService < BaseSplService
+  class OauthTokenService
     class OauthTokenError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, store)
       @date = date.to_i * 1000

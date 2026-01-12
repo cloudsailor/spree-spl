@@ -6,8 +6,9 @@ require 'json'
 
 module Spl
   # Validates SPL card number
-  class ValidateCardService < BaseSplService
+  class ValidateCardService
     class SplCardValidationError < StandardError; end
+    include SplServiceHelper
 
     def initialize(card_number, user, store)
       @card_number = card_number

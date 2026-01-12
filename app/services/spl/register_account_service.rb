@@ -3,8 +3,9 @@
 require 'json'
 
 module Spl
-  class RegisterAccountService < BaseSplService
+  class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
+    include SplServiceHelper
 
     def initialize(user, store, params)
       @register_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).register)

@@ -3,8 +3,9 @@
 require 'json'
 
 module Spl
-  class RequestOtpService < BaseSplService
+  class RequestOtpService
     class SplRequestOtpError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, store, params)
       @date = date.to_i * 1000

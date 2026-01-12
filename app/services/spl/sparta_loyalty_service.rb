@@ -5,8 +5,9 @@ require 'net/http'
 require 'json'
 
 module Spl
-  class SpartaLoyaltyService < BaseSplService
+  class SpartaLoyaltyService
     class SplSendRequestError < StandardError; end
+    include SplServiceHelper
 
     def initialize(order_token, card_number, line_items, date, products, check_only, store)
       @order_token = order_token
@@ -22,7 +23,7 @@ module Spl
     def call
       Rails.logger.debug 'SPL LOYALTY SERVICE START'
       basket_body = prepare_basket_body
-      response = send_request(basket_body)
+      response = send_request(@url, basket_body)
       return unless response.is_a?(Net::HTTPSuccess)
 
       response_body = JSON.parse(response.body)
