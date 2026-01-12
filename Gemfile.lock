@@ -10,8 +10,8 @@ PATH
       rspec-rails
       rspec-retry
       rubocop-rspec
-      spree (~> 5.2)
-      spree_api (~> 5.2)
+      spree (~> 5.1, >= 5.1.4)
+      spree_api (~> 5.1, >= 5.1.4)
       spree_auth_devise
       spree_dev_tools
 
