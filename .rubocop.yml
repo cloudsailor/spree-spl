@@ -25,3 +25,4 @@ Lint/MissingSuper:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+    - spree-spl.gemspec
