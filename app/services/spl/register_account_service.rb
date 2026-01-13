@@ -22,7 +22,7 @@ module Spl
       register_response = send_request(@register_url, register_body)
       register_response_body = JSON.parse(register_response.body)
       Rails.logger.debug register_response_body
-      raise SplRegisterAccountError, register_response_body['msg'] if register_response_body['errorCode'] != '0'
+      raise SplRegisterAccountError, register_response_body if register_response_body['errorCode'] != '0'
 
       spl_card = register_response_body.dig('response', 'cardNo')
       update_account(spl_card, oauth_response_body)
