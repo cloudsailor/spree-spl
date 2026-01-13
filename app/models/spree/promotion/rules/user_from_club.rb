@@ -18,6 +18,8 @@ module Spree
         private
 
         def user_card_active?(order)
+          return false if order.user&.public_metadata.blank?
+
           order.user.public_metadata['spl_card_active'] == 'true'
         end
 
