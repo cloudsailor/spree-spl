@@ -16,6 +16,8 @@ module Spl
     end
 
     def call
+      return if @user&.public_metadata.blank?
+
       @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
@@ -92,6 +94,8 @@ module Spl
     end
 
     def user_have_different_card
+      return if @user&.public_metadata.blank?
+
       @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
     end
   end
