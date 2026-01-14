@@ -125,4 +125,50 @@ describe Spree::CheckoutController, type: :controller do
       end
     end
   end
+
+  describe '#add_spl_discount_params_to_order (via promotion_switcher)' do
+    let(:original_metadata) { order.public_metadata.deep_dup }
+
+    context 'when URL includes confirm and user has SPL metadata' do
+      it 'copies SPL metadata from user to order with boolean casting' do
+        order.update!(public_metadata: {})
+
+        expect do
+          post :update, params: { state: 'confirm', token: order.token }
+        end.to change {
+          order.reload.public_metadata
+        }.from({}).to({ 'spl_no_card' => '1234567890123', 'spl_card_active' => true })
+      end
+    end
+
+    context 'when user is nil' do
+      before { allow(controller).to receive(:spree_current_user).and_return(nil) }
+
+      it 'does not modify order public_metadata' do
+        post :update, params: { state: 'confirm', token: order.token }
+
+        expect(order.reload.public_metadata).to eq(original_metadata)
+      end
+    end
+
+    context 'when user does not have SPL metadata' do
+      let(:user) { create(:user, public_metadata: {}) }
+
+      it 'does not modify order public_metadata' do
+        post :update, params: { state: 'confirm', token: order.token }
+
+        expect(order.reload.public_metadata).to eq(original_metadata)
+      end
+    end
+
+    context 'when URL does NOT include confirm' do
+      it 'does not modify order public_metadata' do
+        order.update!(public_metadata: {})
+
+        post :update, params: { state: 'address', token: order.token }
+
+        expect(order.reload.public_metadata).to eq({})
+      end
+    end
+  end
 end
