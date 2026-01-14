@@ -24,13 +24,17 @@ module Spl
           update_order(metadata[:spl_no_card], metadata[:spl_card_active])
           validate_card(metadata)
         rescue ::Spl::ValidateCardService::SplCardValidationError => e
-          flash[:error] = e.message
+          handle_validation_error(e)
         end
 
         def validate_card(metadata)
           return unless disactivated_card?
 
           ::Spl::ValidateCardService.new(metadata[:spl_no_card], spree_current_user, current_store).call
+        end
+
+        def handle_validation_error(error)
+          flash[:error] = error.message
         end
 
         def update_order(spl_card, active)
