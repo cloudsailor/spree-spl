@@ -7,8 +7,6 @@ module Spree
 
       def set_spree_adjustments
         adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
-
-        @adjustable.adjustments.destroy_all if adjustable.public_metadata[:spl_card_active]
       end
 
       def shipment_with_adjustments?

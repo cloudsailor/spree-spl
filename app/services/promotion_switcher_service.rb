@@ -10,10 +10,7 @@ class PromotionSwitcherService
   end
 
   def call # rubocop:disable Metrics/AbcSize
-    return unless order.public_metadata.key?(:spl_card_active)
-
-    apply_sparta_discount(order, check_only) if cast_boolean(order.public_metadata[:spl_card_active])
-    remove_sparta_discount(order) unless cast_boolean(order.public_metadata[:spl_card_active])
+    apply_sparta_discount(order, check_only)
   ensure
     order.reload
   end
@@ -23,10 +20,11 @@ class PromotionSwitcherService
   attr_accessor :check_only, :line_items, :order
 
   def apply_sparta_discount(order, check_only)
-    return unless order.line_items.any? && order.public_metadata['spl_no_card'].present?
+    return unless order.line_items.any?
 
+    card_number = prepare_card_number_if_exist(order.public_metadata)
     spl_response = Spl::SpartaLoyaltyService.new(order.token,
-                                                 order.public_metadata['spl_no_card'],
+                                                 card_number,
                                                  order.line_items,
                                                  DateTime.current,
                                                  order.products,
@@ -43,5 +41,13 @@ class PromotionSwitcherService
 
   def remove_sparta_discount(order)
     RemoveSpartaDiscountService.destroy_all_sparta_adjustments(order)
+  end
+
+  def prepare_card_number_if_exist(metadata)
+    if cast_boolean(metadata[:spl_card_active])
+      metadata['spl_no_card']
+    else
+      ''
+    end
   end
 end
