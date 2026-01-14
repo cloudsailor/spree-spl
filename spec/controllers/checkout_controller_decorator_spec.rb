@@ -134,7 +134,7 @@ describe Spree::CheckoutController, type: :controller do
         order.update!(public_metadata: {})
 
         expect do
-          post :update, params: { state: 'confirm', token: order.token }
+          post :update, params: { state: 'payment', token: order.token }
         end.to change {
           order.reload.public_metadata
         }.from({}).to({ 'spl_no_card' => '1234567890123', 'spl_card_active' => true })
@@ -145,7 +145,7 @@ describe Spree::CheckoutController, type: :controller do
       before { allow(controller).to receive(:spree_current_user).and_return(nil) }
 
       it 'does not modify order public_metadata' do
-        post :update, params: { state: 'confirm', token: order.token }
+        post :update, params: { state: 'address', token: order.token }
 
         expect(order.reload.public_metadata).to eq(original_metadata)
       end
@@ -155,17 +155,17 @@ describe Spree::CheckoutController, type: :controller do
       let(:user) { create(:user, public_metadata: {}) }
 
       it 'does not modify order public_metadata' do
-        post :update, params: { state: 'confirm', token: order.token }
+        post :update, params: { state: 'address', token: order.token }
 
         expect(order.reload.public_metadata).to eq(original_metadata)
       end
     end
 
-    context 'when URL does NOT include confirm' do
+    context 'when URL include confirm' do
       it 'does not modify order public_metadata' do
         order.update!(public_metadata: {})
 
-        post :update, params: { state: 'address', token: order.token }
+        post :update, params: { state: 'confirm', token: order.token }
 
         expect(order.reload.public_metadata).to eq({})
       end
@@ -175,7 +175,7 @@ describe Spree::CheckoutController, type: :controller do
       before { order.update!(public_metadata: { 'spl_no_card' => '0987654321123', 'spl_card_active' => false }) }
 
       it 'overwrites SPL keys' do
-        post :update, params: { state: 'confirm', token: order.token }
+        post :update, params: { state: 'payment', token: order.token }
 
         expect(order.reload.public_metadata).to eq({ 'spl_no_card' => '1234567890123', 'spl_card_active' => true })
       end

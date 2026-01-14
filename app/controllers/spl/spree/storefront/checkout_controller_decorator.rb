@@ -14,7 +14,7 @@ module Spl
 
         def promotion_switcher
           PromotionSwitcherService.new(@order, request.url.include?('confirm')).call
-          add_spl_discount_params_to_order(spree_current_user) if request.url.include?('confirm')
+          add_spl_discount_params_to_order(spree_current_user) if checkout_state_allowed?
         end
 
         def add_spl_discount_params_to_order(user)
@@ -27,6 +27,10 @@ module Spl
               'spl_card_active' => cast_boolean(user.public_metadata['spl_card_active'])
             }
           ))
+        end
+
+        def checkout_state_allowed?
+          %w[cart address delivery payment].include?(request.path.split('/').last)
         end
       end
     end
