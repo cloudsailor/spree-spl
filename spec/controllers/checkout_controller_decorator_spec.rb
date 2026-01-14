@@ -170,5 +170,15 @@ describe Spree::CheckoutController, type: :controller do
         expect(order.reload.public_metadata).to eq({})
       end
     end
+
+    context 'when order already has SPL metadata and it gets overwritten' do
+      before { order.update!(public_metadata: { 'spl_no_card' => '0987654321123', 'spl_card_active' => false }) }
+
+      it 'overwrites SPL keys' do
+        post :update, params: { state: 'confirm', token: order.token }
+
+        expect(order.reload.public_metadata).to eq({ 'spl_no_card' => '1234567890123', 'spl_card_active' => true })
+      end
+    end
   end
 end
