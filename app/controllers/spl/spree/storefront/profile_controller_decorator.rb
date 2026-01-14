@@ -7,7 +7,7 @@ module Spl
         include BooleanHelper
 
         def self.prepended(base)
-          base.before_action :validate_spl_no_card, only: :update
+          base.after_action :validate_spl_no_card, only: :update
         end
 
         private
