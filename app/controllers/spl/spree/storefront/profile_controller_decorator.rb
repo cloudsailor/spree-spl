@@ -147,7 +147,7 @@ module Spl
         end
 
         def update_user_after_otp_request
-          try_spree_current_user.update!(
+          try_spree_current_user.update(
             phone: login_code_params[:phone],
             public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
           )
