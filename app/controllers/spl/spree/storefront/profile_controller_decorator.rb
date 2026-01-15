@@ -13,8 +13,8 @@ module Spl
         private
 
         def user_params
-          params.require(:user).permit(:first_name, :last_name, :phone, :email,
-                                       public_metadata: %i[spl_card_active spl_no_card])
+          params.expect(user: [:first_name, :last_name, :phone, :email,
+                               { public_metadata: %i[spl_card_active spl_no_card] }])
         end
 
         def validate_spl_no_card
@@ -54,7 +54,7 @@ module Spl
 
         def disactivated_card?
           value = user_params.dig(:public_metadata, :spl_card_active)
-          value.present? && cast_boolean(value)
+          cast_boolean(value)
         end
       end
     end

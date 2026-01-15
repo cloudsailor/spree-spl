@@ -16,6 +16,8 @@ module Spl
     end
 
     def call
+      return if @user&.public_metadata.blank?
+
       @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
@@ -84,7 +86,7 @@ module Spl
     end
 
     def cards_assigned_user(card_number)
-      Spree::User.find { |u| u.public_metadata&.dig('spl_no_card') == card_number }
+      ::Spree::User.find { |u| u.public_metadata&.dig('spl_no_card') == card_number }
     end
 
     def card_assigned_to_different_user(card_assignment)
@@ -92,6 +94,8 @@ module Spl
     end
 
     def user_have_different_card
+      return if @user&.public_metadata.blank?
+
       @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
     end
   end
