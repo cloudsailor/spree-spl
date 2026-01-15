@@ -39,10 +39,6 @@ class PromotionSwitcherService
     ApplySpartaDiscountService.new(spl_response, order).call
   end
 
-  def remove_sparta_discount(order)
-    RemoveSpartaDiscountService.destroy_all_sparta_adjustments(order)
-  end
-
   def prepare_card_number_if_exist(metadata)
     if cast_boolean(metadata[:spl_card_active])
       metadata['spl_no_card']
