@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rails_helper"
+require 'rails_helper'
 
 RSpec.describe Spree::Payment, type: :model do
   let(:store) { Spree::Store.default || create(:store, default: true) }
@@ -9,11 +9,11 @@ RSpec.describe Spree::Payment, type: :model do
 
   subject(:payment) { described_class.new(order: order) }
 
-  describe "#promotion_switcher (private)" do
+  describe '#promotion_switcher (private)' do
     let(:service_result) { :some_result }
     let(:service_instance) { instance_double(PromotionSwitcherService, call: service_result) }
 
-    it "initializes PromotionSwitcherService with order + check_only and calls it" do
+    it 'initializes PromotionSwitcherService with order + check_only and calls it' do
       allow(PromotionSwitcherService).to receive(:new).and_return(service_instance)
 
       result = payment.send(:promotion_switcher, order, true)
@@ -23,7 +23,7 @@ RSpec.describe Spree::Payment, type: :model do
       expect(result).to eq(service_result)
     end
 
-    it "passes false correctly as check_only flag" do
+    it 'passes false correctly as check_only flag' do
       allow(PromotionSwitcherService).to receive(:new).and_return(service_instance)
 
       payment.send(:promotion_switcher, order, false)
@@ -32,7 +32,7 @@ RSpec.describe Spree::Payment, type: :model do
     end
   end
 
-  describe "#preform_update_sparta_state_job (private)" do
+  describe '#preform_update_sparta_state_job (private)' do
     it "enqueues UpdateSpartaStateJob with token, state 'D', number, store" do
       allow(UpdateSpartaStateJob).to receive(:perform_later)
 
@@ -40,7 +40,7 @@ RSpec.describe Spree::Payment, type: :model do
 
       expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
         order.token,
-        "D",
+        'D',
         order.number,
         order.store
       )

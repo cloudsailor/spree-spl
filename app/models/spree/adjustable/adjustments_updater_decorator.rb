@@ -4,10 +4,11 @@ module Spree
   module Adjustable
     module AdjustmentsUpdaterDecorator
       SPL_SOURCE_TYPE = 'SPL'
+
       private
 
       def set_spree_adjustments
-        adjustable = @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
+        @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
       end
 
       def line_item_with_spl_adjustments?
@@ -15,7 +16,9 @@ module Spree
       end
 
       def recalculate_spl_adjustments(attributes, totals)
-        sparta_adjustments = @adjustable.adjustments.select { |adj| adj.source_type == SPL_SOURCE_TYPE && adj.eligible? }
+        sparta_adjustments = @adjustable.adjustments.select do |adj|
+          adj.source_type == SPL_SOURCE_TYPE && adj.eligible?
+        end
         total_adjustment_amount = sparta_adjustments.sum(&:amount)
         assign_spl_totals(attributes, total_adjustment_amount, Time.current)
         @adjustable.update_columns(totals)
