@@ -10,7 +10,7 @@ module PaymentDecorator
     PromotionSwitcherService.new(order, check_only).call
   end
 
-  def update_sparta_state
+  def preform_update_sparta_state_job
     return unless order.public_metadata.key?(:spl_no_card) && order.public_metadata.key?(:spl_card_active)
     return unless order.public_metadata['spl_card_active']
 
