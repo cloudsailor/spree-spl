@@ -6,7 +6,7 @@ PATH
       deface
       faraday
       openssl
-      rails (~> 7.0)
+      rails (>= 7.0, < 8.3)
       rspec-rails
       rspec-retry
       rubocop-rspec
