@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Spl::SpartaLoyaltyService do
+RSpec.describe Spl::SpartaLoyaltyService, type: :service do
   let(:country) { create(:country) }
 
   let(:store) do
@@ -25,7 +25,7 @@ RSpec.describe Spl::SpartaLoyaltyService do
 
   let(:order_token) { 'ORDER123' }
   let(:card_number) { '5100179585157' }
-  let(:date)        { Time.zone.parse('2025-01-01 12:00:00') }
+  let(:date)        { DateTime.parse('2025-01-01 12:00:00') }
   let(:check_only)  { true }
   let(:product1) { create(:product) }
   let(:variant1) do

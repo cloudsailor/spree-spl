@@ -23,7 +23,7 @@ class AssignSpartaCardNumberService
     if card_data['status'] != 'A'
       raise AssignSpartaCardNumberError, I18n.t('spl.card_validation.errors.card_not_active')
     end
-    unless cards_assigned_user(card_data['no'])
+    if card_assigned_to_other_user?(card_data['no'])
       raise AssignSpartaCardNumberError, I18n.t('spl.card_validation.errors.wrong_owner')
     end
 
@@ -31,7 +31,11 @@ class AssignSpartaCardNumberService
                                                               spl_card_active: true))
   end
 
-  def cards_assigned_user(card_number)
-    Spree::User.exists?(["id = ? AND public_metadata ->> 'spl_no_card' = ?", @user.id, card_number])
+  def card_assigned_to_other_user?(card_number)
+    Spree::User.where(
+      "id != ? AND public_metadata ->> 'spl_no_card' = ?",
+      @user.id,
+      card_number
+    ).exists?
   end
 end
