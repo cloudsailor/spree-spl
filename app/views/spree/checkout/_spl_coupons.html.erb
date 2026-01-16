@@ -6,7 +6,7 @@
       <%= coupon["typeCustomerName"] %>
       <% if coupon.dig("couponType", "autoLoad") == "A" %>
         <% if coupon["autoLoad"] %>
-          <%= button_to "Deactivate",
+          <%= button_to I18n.t('spl.coupons.deactivate'),
                         deactivate_coupon_coupons_path(
                           order: @order,
                           token: @order.token,
@@ -16,7 +16,7 @@
                         data: { turbo: true },
                         class: "min-h-full ml-3 btn-primary !px-4 !py-3" %>
         <% else %>
-          <%= button_to "Activate",
+          <%= button_to I18n.t('spl.coupons.activate'),
                         activate_coupon_coupons_path(
                           order: @order,
                           token: @order.token,
