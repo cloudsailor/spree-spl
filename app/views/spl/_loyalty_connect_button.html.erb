@@ -1,0 +1,21 @@
+<button type="button"
+        class="btn-primary w-full mb-6"
+        id="loyalty-connect-toggle">
+  <%= I18n.t('buttons.connect_account') %>
+</button>
+
+<div id="loyalty-connect-container" class="mt-3" hidden>
+  <%= render 'spl/loyalty_connect_form' %>
+</div>
+
+<script>
+  document.addEventListener("click", function(e) {
+    const btn = e.target.closest("#loyalty-connect-toggle");
+    if (!btn) return;
+
+    const container = document.getElementById("loyalty-connect-container");
+    if (!container) return;
+
+    container.hidden = !container.hidden;
+  });
+</script>

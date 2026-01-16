@@ -8,7 +8,7 @@ module OrderUpdaterDecorator
     UpdateSpartaStateJob.perform_later(order.token, 'C', order.number, order.store) if order.state == 'canceled'
   end
 
-  def check_spl_adjustments # rubocop:disable Metrics/MethodLength
+  def check_spl_adjustments
     if order.public_metadata['spl_card_active'] == true
       updated_any_adjustment = false
       order.adjustments.each do |adjustment|

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe PromotionSwitcherService do
+RSpec.describe PromotionSwitcherService, type: :service do
   let(:country) { create(:country) }
   let(:store) { create(:store, default_country: country) }
   let(:order) do
@@ -99,7 +99,7 @@ RSpec.describe PromotionSwitcherService do
         sparta_service_double = instance_double(Spl::SpartaLoyaltyService)
         apply_service_double  = instance_double(ApplySpartaDiscountService)
 
-        expect(Spl::SpartaLoyaltyService).to receive(:new) do |token, card_no, line_items, date, products, chk, store_arg| # rubocop:disable Layout/LineLength
+        expect(Spl::SpartaLoyaltyService).to receive(:new) do |token, card_no, line_items, date, products, chk, store_arg|
           expect(token).to eq(order.token)
           expect(card_no).to eq('5100179585157')
           expect(line_items).to match_array(order.line_items)

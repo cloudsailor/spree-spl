@@ -2,6 +2,13 @@ pl:
   order:
     loyalty_card_missing: Do zamówienia nie przypisano karty lojalnościowej
   spl:
+    user:
+      accept_yc_terms_label: Akceptuje regulamin
+      sent_to: Wysłano kod na numer %{phone}
+      code_label: Jednorazowy kod
+      errors:
+        must_accept_yc_terms: Musisz zaakceptować regulamin klubu lojalnościowego
+        invalid_phone: Podaj poprawny numer telefonu
     card_validation:
       errors:
         card_not_active: Karta nie jest aktywna
@@ -12,6 +19,22 @@ pl:
         checkout_list: Your SPL coupons
       activate: Aktywuj
       deactivate: Dezaktywuj
+    errors:
+      generic: Nie udało się połączyć konta lojalnościowego. Spróbuj ponownie.
+      auth_temporary_blocked: Zbyt wiele nieudanych prób. Spróbuj ponownie później.
+      auth_failed: Uwierzytelnienie nie powiodło się.
+      token_expired: Twoja sesja wygasła. Zaloguj się ponownie.
+      not_authorized: Nie masz uprawnień do wykonania tej operacji.
+      coupon_cannot_be_modified: Ten kupon nie może zostać zmodyfikowany.
+      coupon_expired: Ten kupon wygasł.
+      coupon_is_not_valid: Ten kupon jest nieprawidłowy.
+      coupon_already_used: Ten kupon został już wykorzystany.
+      temporary_blocked: Tymczasowo zablokowano z powodu zbyt wielu prób. Spróbuj ponownie później.
+      person_not_found: Nie znaleziono użytkownika
+  buttons:
+    connect_account: Połącz z kontem lojalnościowym
+    send_code: Wyślij jednorazowy kod
+    verify_button: Zweryfikuj numer telefonu
     user:
       card_number: Numer karty klubowej został przypisany do konta
       card_active: Aktywacja karty SPL

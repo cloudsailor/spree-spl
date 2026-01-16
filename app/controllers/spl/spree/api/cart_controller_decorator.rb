@@ -18,7 +18,7 @@ module Spl
           super
         end
 
-        def update_spl_card_activate # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+        def update_spl_card_activate # rubocop:disable Metrics/AbcSize
           spree_authorize! :update, spree_current_order, order_token
 
           if params.dig('public_metadata', 'spl_card_active').nil?

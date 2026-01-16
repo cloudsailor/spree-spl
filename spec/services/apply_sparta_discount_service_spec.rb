@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ApplySpartaDiscountService do
+RSpec.describe ApplySpartaDiscountService, type: :service do
   let(:country) { create(:country) }
   let(:store)    { create(:store, default_country: country) }
   let(:order)    { create(:order, store: store) }
