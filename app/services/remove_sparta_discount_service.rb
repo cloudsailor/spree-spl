@@ -25,10 +25,10 @@ class RemoveSpartaDiscountService
   end
 
   def self.destroy_not_spl_adjustments(order)
-    return unless order.line_items.any? { |line_item| line_item.adjustments.exists?(source_type: 'SPL') }
+    return unless order.line_items.any? { |line_item| line_item.adjustments.exists?(source_type: SPL_SOURCE_TYPE) }
 
     order.line_items.each do |line_item|
-      adjustments_to_remove = line_item.adjustments.reject { |adj| adj.source_type == 'SPL' }
+      adjustments_to_remove = line_item.adjustments.reject { |adj| adj.source_type == SPL_SOURCE_TYPE }
       adjustments_to_remove.each(&:destroy)
     end
   end

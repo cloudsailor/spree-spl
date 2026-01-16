@@ -13,7 +13,7 @@ module Spl
         private
 
         def promotion_switcher
-          PromotionSwitcherService.new(@order, request.url.include?('confirm')).call
+          PromotionSwitcherService.new(@order, checkout_state_allowed?).call
           add_spl_discount_params_to_order(spree_current_user) if checkout_state_allowed?
         end
 
