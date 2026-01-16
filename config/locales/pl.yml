@@ -31,5 +31,6 @@ pl:
     send_code: Wyślij jednorazowy kod
     verify_button: Zweryfikuj numer telefonu
     user:
-      card_number: Numer karty klubowej został przypisany do konta
-      card_active: Aktywacja karty SPL
+    coupons:
+      find:
+        checkout_list: Twoje kupony lojalnościowe

@@ -14,6 +14,9 @@ sk:
         card_not_active: Karta nie je aktívna
         card_not_match: Karta nezodpovedá číslu karty používateľa
         wrong_owner: Karta je priradená inému používateľovi
+    coupons:
+      find:
+        checkout_list: Your SPL coupons
     profile:
       connect_button: Connect to your loyalty account
     errors:

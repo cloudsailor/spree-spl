@@ -14,6 +14,9 @@ cs:
         card_not_active: Karta není aktivní
         card_not_match: Karta neodpovídá číslu karty uživatele
         wrong_owner: Karta je přiřazena jinému uživateli
+    coupons:
+      find:
+        checkout_list: Your SPL coupons
     profile:
       connect_button: Connect to your loyalty account
     errors:
