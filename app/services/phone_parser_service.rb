@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PhoneParserService
-  COUNTRY_CODE_REGEX = /\A\+\d{1,3}\d+\z/.freeze
+  COUNTRY_CODE_REGEX = /\A\+\d{1,3}\d+\z/
 
   attr_reader :raw, :phone
 
@@ -32,7 +32,7 @@ class PhoneParserService
 
   def e164
     return unless valid?
-    
+
     phone.e164
   end
 

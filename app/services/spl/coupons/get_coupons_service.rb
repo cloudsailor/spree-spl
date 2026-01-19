@@ -31,12 +31,10 @@ module Spl
       rescue SplGetCouponError => e
         raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
 
-        if refresh_user_token(@user)
-          retry_counter += 1
-          retry
-        else
-          raise e
-        end
+        raise e unless refresh_user_token(@user)
+
+        retry_counter += 1
+        retry
       end
 
       private

@@ -14,7 +14,7 @@ module SplServiceHelper
 
     response = Spl::OauthTokenService.refresh_token(@user.private_metadata['spl_refresh_token'])
 
-    user.update!(private_metadata: { spl_access_token: response.dig('access_token'),
-                                      spl_refresh_token: response.dig('refresh_token') })
+    user.update!(private_metadata: { spl_access_token: response['access_token'],
+                                     spl_refresh_token: response['refresh_token'] })
   end
 end

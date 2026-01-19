@@ -17,6 +17,6 @@ module ErrorHandlingHelper
   end
 
   def token_expired?(err_msg)
-    'TOKEN_EXPIRED' == err_msg
+    err_msg == 'TOKEN_EXPIRED'
   end
 end

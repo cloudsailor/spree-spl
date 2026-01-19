@@ -41,7 +41,7 @@ module Spl
       raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
 
       response_body['response']
-      end
+    end
 
     private
 

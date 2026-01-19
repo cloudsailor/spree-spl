@@ -30,7 +30,7 @@ module Spl
 
     private
 
-    def prepare_login_body # rubocop:disable Metrics/MethodLength
+    def prepare_login_body
       {
         context: {
           prgCode: @env['spl_prg_code']
