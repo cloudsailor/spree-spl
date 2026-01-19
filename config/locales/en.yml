@@ -12,6 +12,9 @@ en:
       errors:
         must_accept_yc_terms: You must accept the loyalty club terms and conditions to continue
         invalid_phone: Podaj poprawny numer telefonu
+      coupons:
+        find:
+          checkout_list: Your SPL coupons
     card_validation:
       errors:
         card_not_active: Card is not active

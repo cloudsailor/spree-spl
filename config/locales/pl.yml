@@ -12,6 +12,9 @@ pl:
       errors:
         must_accept_yc_terms: Musisz zaakceptować regulamin klubu lojalnościowego
         invalid_phone: Podaj poprawny numer telefonu
+      coupons:
+        find:
+          checkout_list: Twoje kupony lojalnościowe
     card_validation:
       errors:
         card_not_active: Karta nie jest aktywna
@@ -30,8 +33,8 @@ pl:
       temporary_blocked: Tymczasowo zablokowano z powodu zbyt wielu prób. Spróbuj ponownie później.
       person_not_found: Nie znaleziono użytkownika
   buttons:
-      connect_account: Połącz z kontem lojalnościowym
-      send_log_in_code: Wyślij jednorazowy kod do logowania
-      send_registration_code: Wyślij jednorazowy kod do rejestracji
-      verify_button: Zweryfikuj numer telefonu
+    connect_account: Połącz z kontem lojalnościowym
+    send_log_in_code: Wyślij jednorazowy kod do logowania
+    send_registration_code: Wyślij jednorazowy kod do rejestracji
+    verify_button: Zweryfikuj numer telefonu
 

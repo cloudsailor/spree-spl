@@ -1,0 +1,6 @@
+<div id='checkout-coupons'>
+  <h2> <%= I18n.t('spl.coupons.find.checkout_list') if @coupons.present? %></h2>
+  <% @coupons&.each do |coupon| %>
+    <%= coupon["typeCustomerName"] %>
+  <% end %>
+</div>

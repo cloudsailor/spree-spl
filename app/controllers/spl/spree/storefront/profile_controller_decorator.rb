@@ -167,6 +167,17 @@ module Spl
                  status: :unprocessable_content
         end
 
+        def send_otp(phone, store)
+          Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, store).call
+        end
+
+        def update_user_after_otp_request
+          try_spree_current_user.update(
+            phone: login_code_params[:phone],
+            public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
+          )
+        end
+
         def handle_spl_error(error)
           payload = Spl::ErrorPayloadParser.parse(error.message) || error
           msg = Spl::ErrorTranslator.translate(payload)

@@ -17,6 +17,10 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     Spl::Spree::Api::AccountControllerDecorator
   )
 
+  ::Spree::CheckoutController.prepend(
+    Spl::Spree::Storefront::CheckoutControllerDecorator
+  )
+
   ::Spree::Adjustable::AdjustmentsUpdater.prepend(
     Spree::Adjustable::AdjustmentsUpdaterDecorator
   )

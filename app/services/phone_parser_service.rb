@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
 class PhoneParserService
-  attr_reader :phone
+  COUNTRY_CODE_REGEX = /\A\+\d{1,3}\d+\z/
+
+  attr_reader :raw, :phone
 
   def initialize(raw_phone)
-    @phone = Phonelib.parse(raw_phone)
+    @raw = raw_phone.to_s.strip
+    @phone = Phonelib.parse(@raw)
   end
 
-  delegate :valid?, to: :phone
+  def valid?
+    country_code? && phone.valid?
+  end
+
+  def country_code?
+    raw.match?(COUNTRY_CODE_REGEX)
+  end
 
   def country_code
     return unless valid?
