@@ -5,6 +5,7 @@ module Spl
     module Storefront
       module ProfileControllerDecorator
         include BooleanHelper
+        include ProfileControllerHelper
 
         def self.prepended(base)
           base.before_action :validate_spl_no_card, only: :update
@@ -14,10 +15,10 @@ module Spl
         def login_code
           send_otp(phone_parser, current_store)
           update_user_after_otp_request
-          render_login_code_success(phone_parser, 'otp_code_form')
+          render_login_code_success(try_spree_current_user, phone_parser, 'otp_code_form')
         rescue Spl::SendOtpService::SplSendOtpError => e
           handle_spl_error(e)
-          render_login_code_error
+          render_login_code_error(try_spree_current_user)
         end
 
         def connect_loyalty_account
@@ -27,16 +28,16 @@ module Spl
         rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
                Spl::MeService::SplMeError => e
           handle_spl_error(e)
-          render_connect_loyalty_account_error(try_spree_current_user.phone, 'otp_code_form')
+          render_connect_loyalty_account_error(try_spree_current_user, try_spree_current_user.phone, 'otp_code_form')
         end
 
         def registration_code
           request_otp(phone_parser, current_store, params['user'])
           update_user_after_otp_request
-          render_login_code_success(phone_parser, 'otp_registration_form')
+          render_login_code_success(try_spree_current_user, phone_parser, 'otp_registration_form')
         rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
           handle_spl_error(e)
-          render_login_code_error
+          render_login_code_error(try_spree_current_user)
         end
 
         def register_loyalty_account
@@ -45,7 +46,8 @@ module Spl
                       notice: ::Spree.t(:successfully_updated, resource: ::Spree.t(:account))
         rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
           handle_spl_error(e)
-          render_connect_loyalty_account_error(try_spree_current_user.phone, 'otp_registration_form')
+          user = try_spree_current_user
+          render_connect_loyalty_account_error(user, user.phone, 'otp_registration_form')
         end
 
         private
@@ -65,11 +67,7 @@ module Spl
           validate_yc_terms
           validate_phone
 
-          render_login_code_error if try_spree_current_user.errors.any?
-        end
-
-        def send_otp(phone, store)
-          Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, store).call
+          render_login_code_error(try_spree_current_user) if try_spree_current_user.errors.any?
         end
 
         def request_otp(phone, store, params)
@@ -131,40 +129,9 @@ module Spl
           try_spree_current_user.errors.clear
         end
 
-        def update_user_after_otp_request
-          try_spree_current_user.update!(
-            phone: login_code_params[:phone],
-            public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
-          )
-        end
-
         def assign_card_number(user, store, params)
           Spl::LoginAccountService.new(user, store, params).call
           AssignSpartaCardNumberService.new(user, store).call
-        end
-
-        def render_login_code_success(phone, partial)
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: "spl/#{partial}",
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :ok
-        end
-
-        def render_connect_loyalty_account_error(phone, partial)
-          render turbo_stream: turbo_stream.replace(
-            partial,
-            partial: "spl/#{partial}",
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :unprocessable_content
         end
 
         def send_otp(phone, store)
@@ -180,19 +147,10 @@ module Spl
 
         def handle_spl_error(error)
           payload = Spl::ErrorPayloadParser.parse(error.message) || error
-          msg = Spl::ErrorTranslator.translate(payload)
+          msg = Spl::ErrorTranslator.translate(payload || { errorCode: I18n.t('spl.errors.unknow_error') })
 
           clear_errors
           try_spree_current_user.errors.add(:base, msg)
-        end
-
-        def render_login_code_error
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: 'spl/loyalty_connect_form',
-            locals: { user: try_spree_current_user }
-          ),
-                 status: :unprocessable_content
         end
 
         def login_code_params

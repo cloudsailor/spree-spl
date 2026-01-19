@@ -32,6 +32,7 @@ pl:
       coupon_already_used: Ten kupon został już wykorzystany.
       temporary_blocked: Tymczasowo zablokowano z powodu zbyt wielu prób. Spróbuj ponownie później.
       person_not_found: Nie znaleziono użytkownika
+      unknow_error: NIEZNANY_BŁĄD
   buttons:
     connect_account: Połącz z kontem lojalnościowym
     send_log_in_code: Wyślij jednorazowy kod do logowania

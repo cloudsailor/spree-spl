@@ -34,6 +34,7 @@ sk:
       coupon_already_used: This coupon has already been used.
       temporary_blocked: Temporarily blocked due to too many attempts. Please try again later.
       person_not_found: Person not found.
+      unknow_error: NEZNÁMA_CHYBA
   buttons:
     connect_account: Connect loyalty account
     send_log_in_code: Send one-time code for log in

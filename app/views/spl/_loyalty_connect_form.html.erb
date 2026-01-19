@@ -64,26 +64,3 @@
     <% end %>
   </div>
 <% end %>
-
-<script>
-    document.addEventListener("turbo:load", () => {
-        const checkbox = document.getElementById("has_account_checkbox")
-        const loginForm = document.getElementById("login_form")
-        const registrationForm = document.getElementById("registration_form")
-
-        if (!checkbox) return
-
-        const toggleForms = () => {
-            if (checkbox.checked) {
-                loginForm.classList.remove("hidden")
-                registrationForm.classList.add("hidden")
-            } else {
-                loginForm.classList.add("hidden")
-                registrationForm.classList.remove("hidden")
-            }
-        }
-
-        toggleForms()
-        checkbox.addEventListener("change", toggleForms)
-    })
-</script>
