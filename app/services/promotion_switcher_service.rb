@@ -40,10 +40,6 @@ class PromotionSwitcherService
   end
 
   def prepare_card_number_if_exist(metadata)
-    if cast_boolean(metadata[:spl_card_active])
-      metadata['spl_no_card']
-    else
-      ''
-    end
+    cast_boolean(metadata[:spl_card_active]) ? metadata['spl_no_card'] : ''
   end
 end
