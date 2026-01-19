@@ -14,13 +14,12 @@ module Spl
         @deactivate_coupons_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).coupon_deactivate)
         @user = user
         @coupon_code = coupon_code
+        @retry_counter = 0
       end
 
       def call
         return unless @user.present? && @user.private_metadata.present?
 
-        retry_counter ||= 0
-        body = prepare_body
         response = send_request(@deactivate_coupons_url, body)
         response_body = JSON.parse(response.body)
         Rails.logger.debug response_body
@@ -28,17 +27,15 @@ module Spl
 
         response_body['response']
       rescue DeactivateCouponServiceError => e
-        raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
+        raise e unless token_refresh_needed(response_body, @user)
 
-        raise e unless refresh_user_token(@user)
-
-        retry_counter += 1
+        @retry_counter += 1
         retry
       end
 
       private
 
-      def prepare_body
+      def body
         {
           context: {
             prgCode: @store.private_metadata['spl_prg_code'],

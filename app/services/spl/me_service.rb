@@ -18,7 +18,6 @@ module Spl
       return unless @user.present? && @user.private_metadata.present?
 
       retry_counter ||= 0
-      body = prepare_me_body
       response = send_request(@me_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
@@ -26,9 +25,7 @@ module Spl
 
       response_body
     rescue SplMeError => e
-      raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
-
-      raise e unless refresh_user_token(@user)
+      raise e unless token_refresh_needed(response_body, @user)
 
       retry_counter += 1
       retry
@@ -36,7 +33,7 @@ module Spl
 
     private
 
-    def prepare_me_body
+    def body
       {
         context: {
           prgCode: @env['spl_prg_code'],

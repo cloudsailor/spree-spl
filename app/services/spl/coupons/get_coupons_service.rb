@@ -13,33 +13,28 @@ module Spl
         @store = store
         @find_coupons_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).coupon_find)
         @user = user
+        @retry_counter = 0
       end
 
       def call
         return unless @user.present? && @user.private_metadata.present?
 
-        retry_counter ||= 0
-        body = prepare_body
         response = send_request(@find_coupons_url, body)
         response_body = JSON.parse(response.body)
         Rails.logger.debug response_body
         raise SplGetCouponError, response_body['msg'] if response_body['errorCode'] != '0'
 
-        response_body['response']&.filter do |coupon|
-          active?(coupon)
-        end
+        filtered_coupons(response_body)
       rescue SplGetCouponError => e
-        raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
+        raise e unless token_refresh_needed(response_body, @user)
 
-        raise e unless refresh_user_token(@user)
-
-        retry_counter += 1
+        @retry_counter += 1
         retry
       end
 
       private
 
-      def prepare_body
+      def body
         {
           context: {
             prgCode: @store.private_metadata['spl_prg_code'],
@@ -47,6 +42,12 @@ module Spl
           },
           withArchival: true
         }
+      end
+
+      def filtered_coupons(response_body)
+        response_body['response']&.filter do |coupon|
+          active?(coupon)
+        end
       end
 
       def active?(coupon)

@@ -11,10 +11,10 @@ class PhoneParserService
   end
 
   def valid?
-    has_country_code? && phone.valid?
+    country_code? && phone.valid?
   end
 
-  def has_country_code?
+  def country_code?
     raw.match?(COUNTRY_CODE_REGEX)
   end
 
