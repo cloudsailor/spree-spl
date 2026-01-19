@@ -33,6 +33,16 @@ module Spl
       response_body['response']
     end
 
+    def self.refresh_token(refresh_token)
+      body = prepare_refresh_token_body(refresh_token)
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
+
+      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+
+      response_body['response']
+      end
+
     private
 
     def prepare_oauth_token_body_with_signature
@@ -57,6 +67,18 @@ module Spl
         apiToken: @env['spl_api_token'],
         oauthCode: auth_code,
         grantType: 'authorization_code'
+      }
+    end
+
+    def prepare_refresh_token_body(refresh_token)
+      {
+        context: {
+          prgCode: @env['spl_prg_code']
+        },
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
+        refreshToken: refresh_token,
+        grantType: 'refresh_token'
       }
     end
 

@@ -46,7 +46,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.must_accept_yc_terms'))
       end
@@ -57,7 +57,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds phone error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.invalid_phone'))
       end
@@ -91,7 +91,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
         expect(service_instance).to receive(:call).and_raise(Spl::SendOtpService::SplSendOtpError.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.login_code
 
@@ -164,7 +164,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(login_service).to receive(:call)
           .and_raise(error_class.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.connect_loyalty_account
 

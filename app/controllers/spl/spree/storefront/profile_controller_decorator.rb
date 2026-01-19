@@ -5,6 +5,7 @@ module Spl
     module Storefront
       module ProfileControllerDecorator
         include BooleanHelper
+        include ErrorHandlingHelper
 
         def self.prepended(base)
           base.before_action :validate_spl_no_card, only: :update
@@ -105,10 +106,6 @@ module Spl
           @phone_parser ||= PhoneParserService.new(login_code_params[:phone])
         end
 
-        def clear_errors
-          try_spree_current_user.errors.clear
-        end
-
         def render_login_code_error
           render turbo_stream: turbo_stream.replace(
             'loyalty_connect_form',
@@ -151,14 +148,6 @@ module Spl
             phone: login_code_params[:phone],
             public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
           )
-        end
-
-        def handle_spl_error(error)
-          payload = Spl::ErrorPayloadParser.parse(error.message) || error
-          msg = Spl::ErrorTranslator.translate(payload)
-
-          clear_errors
-          try_spree_current_user.errors.add(:base, msg)
         end
 
         def assign_card_number(user, store, params)

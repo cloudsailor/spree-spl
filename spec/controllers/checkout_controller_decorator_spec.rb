@@ -108,6 +108,11 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
 
   describe '#activate_coupon' do
     let(:activate) { instance_double(Spl::Coupons::ActivateCouponService, call: true) }
+
+    before do
+      allow(instance_of(Spl::Coupons::ActivateCouponService)).to receive(:try_spree_current_user).and_return(user)
+    end
+
     context 'when coupon is valid' do
       it 'calls ActivateCouponService, reloads coupons, and redirects (HTML)' do
         expect(Spl::Coupons::ActivateCouponService)
@@ -126,8 +131,6 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
     end
 
     context 'when coupon is invalid' do
-      before { allow(activate).to receive(:call).and_raise(Spl::Coupons::ActivateCouponService::ActivateCouponServiceError) }
-
       it 'still redirects even if ActivateCouponService raises' do
         expect(Spl::Coupons::ActivateCouponService).to receive(:new).with(user, store, 'YOLO_90').and_return(activate)
         expect(activate).to receive(:call).and_raise(Spl::Coupons::ActivateCouponService::ActivateCouponServiceError,
@@ -144,6 +147,10 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
   end
 
   describe '#deactivate_coupon' do
+    before do
+      allow(instance_of(Spl::Coupons::ActivateCouponService)).to receive(:try_spree_current_user).and_return(user)
+    end
+
     it 'calls DeactivateCouponService, reloads coupons, and redirects (HTML)' do
       deactivate = instance_double('Spl::Coupons::DeactivateCouponService', call: true)
       expect(Spl::Coupons::DeactivateCouponService)

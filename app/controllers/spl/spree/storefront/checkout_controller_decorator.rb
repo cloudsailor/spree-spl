@@ -4,6 +4,8 @@ module Spl
   module Spree
     module Storefront
       module CheckoutControllerDecorator
+        include ErrorHandlingHelper
+
         def self.prepended(base)
           base.before_action :promotion_switcher
           base.before_action :load_user_coupons, except: %i[activate_coupon deactivate_coupon]
@@ -12,6 +14,8 @@ module Spl
         def activate_coupon
           Spl::Coupons::ActivateCouponService.new(@order.user, @order.store, params[:coupon_code]).call
           load_user_coupons
+        rescue => e
+          handle_spl_error(e)
         ensure
           respond_to do |format|
             format.turbo_stream
@@ -24,6 +28,8 @@ module Spl
             .new(@order.user, @order.store, params[:coupon_code])
             .call
           load_user_coupons
+        rescue  => e
+          handle_spl_error(e)
         ensure
           respond_to do |format|
             format.turbo_stream

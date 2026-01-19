@@ -6,6 +6,7 @@ module Spl
   class MeService
     class SplMeError < StandardError; end
     include SplServiceHelper
+    include ErrorHandlingHelper
 
     def initialize(user, store)
       @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)
@@ -14,6 +15,9 @@ module Spl
     end
 
     def call
+      return unless @user.present? && @user.private_metadata.present?
+
+      retry_counter ||= 0
       body = prepare_me_body
       response = send_request(@me_url, body)
       response_body = JSON.parse(response.body)
@@ -21,6 +25,15 @@ module Spl
       raise SplMeError, response_body if response_body['errorCode'] != '0'
 
       response_body
+    rescue SplMeError => e
+      raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
+
+      if refresh_user_token(@user)
+        retry_counter += 1
+        retry
+      else
+        raise e
+      end
     end
 
     private

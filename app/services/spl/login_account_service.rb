@@ -57,10 +57,10 @@ module Spl
 
     def get_access_token(access_token)
       token_body = Spl::OauthTokenService.new(DateTime.current, @store).authorization_code_token(access_token)
-      add_loyalty_tokents_to_user(token_body['accessToken'], token_body['refreshToken'])
+      add_loyalty_tokens_to_user(token_body['accessToken'], token_body['refreshToken'])
     end
 
-    def add_loyalty_tokents_to_user(access_token, refresh_token)
+    def add_loyalty_tokens_to_user(access_token, refresh_token)
       @user.update!(private_metadata: { spl_access_token: access_token,
                                         spl_refresh_token: refresh_token })
     end

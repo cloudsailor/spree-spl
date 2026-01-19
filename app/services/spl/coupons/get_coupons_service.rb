@@ -7,6 +7,7 @@ module Spl
     class GetCouponsService
       class SplGetCouponError < StandardError; end
       include SplServiceHelper
+      include ErrorHandlingHelper
 
       def initialize(user, store)
         @store = store
@@ -15,6 +16,9 @@ module Spl
       end
 
       def call
+        return unless @user.present? && @user.private_metadata.present?
+
+        retry_counter ||= 0
         body = prepare_body
         response = send_request(@find_coupons_url, body)
         response_body = JSON.parse(response.body)
@@ -23,6 +27,15 @@ module Spl
 
         response_body['response']&.filter do |coupon|
           active?(coupon)
+        end
+      rescue SplGetCouponError => e
+        raise e unless token_expired?(response_body['errorCode']) && retry_counter < 1
+
+        if refresh_user_token(@user)
+          retry_counter += 1
+          retry
+        else
+          raise e
         end
       end
 
