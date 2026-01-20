@@ -2,24 +2,13 @@
 
 module Spl
   module Spree
-    module Storefront
-      module CheckoutControllerDecorator
-        include BooleanHelper
-
+    module Admin
+      module PaymentsControllerDecorator
         def self.prepended(base)
-          base.before_action :promotion_switcher
-          base.after_action :preform_update_sparta_state_job, only: [:confirm, :complete]
+          base.after_action :preform_update_sparta_state_job, only: :capture
         end
 
         private
-
-        def promotion_switcher
-          PromotionSwitcherService.new(@order, checkout_state_allowed?).call
-        end
-
-        def checkout_state_allowed?
-          %w[cart address delivery payment].include?(request.path.split('/').last)
-        end
 
         def preform_update_sparta_state_job # rubocop:disable Metrics/AbcSize
           UpdateSpartaStateJob.perform_later(@order.token, 'D', @order.number, @order.store) if @order.payment_state == 'paid'

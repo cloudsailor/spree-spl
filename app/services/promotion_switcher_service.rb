@@ -14,8 +14,6 @@ class PromotionSwitcherService
 
     apply_sparta_discount(order, check_only) if cast_boolean(order.public_metadata[:spl_card_active])
     remove_sparta_discount(order) unless cast_boolean(order.public_metadata[:spl_card_active])
-  rescue StandardError
-    order.reload
   end
 
   private
