@@ -8,19 +8,25 @@ module Spl
       desc 'Install SPL Stimulus controller'
 
       def copy_stimulus_controller
-        copy_file('login_spl_controller.js', 'app/javascript/controllers/login_spl_controller.js')
+        destination = 'app/javascript/controllers/login_spl_controller.js'
+
+        if File.exist?(destination)
+          say_status :skip, "#{destination} already exists", :yellow
+        else
+          copy_file 'login_spl_controller.js', destination
+          say_status :create, destination, :green
+        end
       end
 
       def ensure_controllers_autoload
         controllers_index = 'app/javascript/controllers/index.js'
 
-        return unless File.exist?(controllers_index)
+        unless File.exist?(controllers_index)
+          say_status :warning, 'Stimulus controllers index.js not found', :yellow
+          return
+        end
 
-        content = File.read(controllers_index)
-
-        return if content.include?('login_spl')
-
-        say_status :info, 'Stimulus controllers are auto-loaded, nothing to register', :blue
+        say_status :info, 'Stimulus controllers are auto-loaded', :blue
       end
     end
   end
