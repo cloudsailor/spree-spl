@@ -13,8 +13,8 @@ module Spl
         private
 
         def user_params
-          params.expect(user: [:first_name, :last_name, :phone, :email,
-                               { public_metadata: %i[spl_card_active spl_no_card] }])
+          params.require(:user).permit(:first_name, :last_name, :phone, :email,
+                                       public_metadata: %i[spl_card_active spl_no_card])
         end
 
         def validate_spl_no_card
