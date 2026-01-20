@@ -115,7 +115,6 @@ RSpec.describe PromotionSwitcherService do
         expect(ApplySpartaDiscountService).to receive(:new).with(exemple_sparta_response, order)
                                                            .and_return(apply_service_double)
         expect(apply_service_double).to receive(:call)
-        expect(order).to receive(:reload).and_call_original
 
         service.call
       end

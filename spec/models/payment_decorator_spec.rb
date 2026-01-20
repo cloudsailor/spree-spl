@@ -114,9 +114,9 @@ RSpec.describe Spree::Payment, type: :model do
     end
   end
 
-  describe '#update_sparta_state (private)' do
+  describe '#preform_update_sparta_state_job (private)' do
     def run_update_sparta_state
-      decorated_payment.send(:update_sparta_state)
+      decorated_payment.send(:preform_update_sparta_state_job)
     end
 
     context 'when both keys exist and spl_card_active is true (symbol keys)' do
