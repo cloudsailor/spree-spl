@@ -109,6 +109,7 @@ RSpec.describe Spl::Coupons::GetCouponsService do
 
       before do
         allow(response_double).to receive(:body).and_return(error_response_body.to_json)
+        service.instance_variable_set(:@retry_counter, 0)
       end
 
       it 'raises SplGetCouponError with message' do

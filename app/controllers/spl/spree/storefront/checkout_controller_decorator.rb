@@ -16,6 +16,7 @@ module Spl
           load_user_coupons
         rescue StandardError => e
           handle_spl_error(e)
+          raise e
         ensure
           respond_to do |format|
             format.turbo_stream
@@ -30,6 +31,7 @@ module Spl
           load_user_coupons
         rescue StandardError => e
           handle_spl_error(e)
+          raise e
         ensure
           respond_to do |format|
             format.turbo_stream
@@ -45,6 +47,9 @@ module Spl
 
         def load_user_coupons
           @coupons = Spl::Coupons::GetCouponsService.new(@order.user, @order.store).call
+        rescue
+          handle_spl_error(e)
+          raise e
         end
       end
     end

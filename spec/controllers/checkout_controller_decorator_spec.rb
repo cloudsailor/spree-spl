@@ -110,7 +110,7 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
     let(:activate) { instance_double(Spl::Coupons::ActivateCouponService, call: true) }
 
     before do
-      allow(instance_of(Spl::Coupons::ActivateCouponService)).to receive(:try_spree_current_user).and_return(user)
+      allow(controller).to receive(:try_spree_current_user).and_return(user)
     end
 
     context 'when coupon is valid' do
@@ -148,7 +148,7 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
 
   describe '#deactivate_coupon' do
     before do
-      allow(instance_of(Spl::Coupons::ActivateCouponService)).to receive(:try_spree_current_user).and_return(user)
+      allow(controller).to receive(:try_spree_current_user).and_return(user)
     end
 
     it 'calls DeactivateCouponService, reloads coupons, and redirects (HTML)' do

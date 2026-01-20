@@ -18,7 +18,7 @@ module SplServiceHelper
                                      spl_refresh_token: response['refresh_token'] })
   end
 
-  def token_refresh_needed(response_body, retry_counter)
+  def token_refresh_needed(response_body, retry_counter, user)
     token_expired?(response_body['errorCode']) && retry_counter < 1 && refresh_user_token(user)
   end
 end
