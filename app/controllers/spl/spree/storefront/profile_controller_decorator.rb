@@ -7,7 +7,7 @@ module Spl
         include BooleanHelper
 
         def self.prepended(base)
-          base.before_action :validate_spl_no_card, only: :update
+          base.after_action :validate_spl_no_card, only: :update
         end
 
         private
@@ -35,7 +35,6 @@ module Spl
 
         def handle_validation_error(error)
           flash[:error] = error.message
-          render :edit, status: :unprocessable_content
         end
 
         def update_order(spl_card, active)
