@@ -9,7 +9,7 @@ class PromotionSwitcherService
     @order = order
   end
 
-  def call # rubocop:disable Metrics/AbcSize
+  def call
     return unless order.public_metadata.key?(:spl_card_active)
 
     apply_sparta_discount(order, check_only) if cast_boolean(order.public_metadata[:spl_card_active])
