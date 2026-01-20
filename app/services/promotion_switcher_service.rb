@@ -11,7 +11,6 @@ class PromotionSwitcherService
 
   def call
     apply_sparta_discount(order, check_only)
-  ensure
     order.reload
   end
 
