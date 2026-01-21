@@ -7,6 +7,7 @@ module Spl
     class SplMeError < StandardError; end
     include SplServiceHelper
     include ErrorHandlingHelper
+    include LoginCheckHelper
 
     def initialize(user, store)
       @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)
@@ -16,6 +17,7 @@ module Spl
 
     def call
       return unless @user.present? && @user.private_metadata.present?
+      return unless logged_user?(@user)
 
       retry_counter ||= 0
       response = send_request(@me_url, body)

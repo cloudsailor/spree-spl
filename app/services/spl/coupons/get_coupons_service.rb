@@ -8,6 +8,7 @@ module Spl
       class SplGetCouponError < StandardError; end
       include SplServiceHelper
       include ErrorHandlingHelper
+      include LoginCheckHelper
 
       def initialize(user, store)
         @store = store
@@ -18,6 +19,7 @@ module Spl
 
       def call
         return unless @user.present? && @user.private_metadata.present?
+        return unless logged_user?(@user)
 
         response = send_request(@find_coupons_url, body)
         response_body = JSON.parse(response.body)
