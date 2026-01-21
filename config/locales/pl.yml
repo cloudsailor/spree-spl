@@ -16,7 +16,7 @@ pl:
         wrong_owner: Karta przypisana innemu użytkownikowi
     coupons:
       find:
-        checkout_list: Your SPL coupons
+        checkout_list: Twoje kupony lojalnościowe
       activate: Aktywuj
       deactivate: Dezaktywuj
     errors:
