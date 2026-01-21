@@ -10,7 +10,7 @@ class ApplySpartaDiscountService
     @response = response
   end
 
-  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity
+  def call # rubocop:disable Metrics/AbcSize
     return unless response_valid?
 
     line_items.each do |line_item|
