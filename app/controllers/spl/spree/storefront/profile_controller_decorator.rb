@@ -41,7 +41,7 @@ module Spl
         end
 
         def register_loyalty_account
-          Spl::RegisterAccountService.new(spree_current_user, current_store, params['user']['spl_auth_code']).call
+          Spl::RegisterAccountService.new(try_spree_current_user, current_store, params['user']['spl_auth_code']).call
           redirect_to spree.edit_account_profile_path,
                       notice: ::Spree.t(:successfully_updated, resource: ::Spree.t(:account))
         rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
@@ -78,7 +78,7 @@ module Spl
         def validate_card(metadata)
           return unless disactivated_card?
 
-          ::Spl::ValidateCardService.new(metadata[:spl_no_card], spree_current_user, current_store).call
+          ::Spl::ValidateCardService.new(metadata[:spl_no_card], try_spree_current_user, current_store).call
         end
 
         def handle_validation_error(error)
@@ -87,7 +87,7 @@ module Spl
         end
 
         def update_order(spl_card, active)
-          current_order = spree_current_user.orders.last
+          current_order = try_spree_current_user.orders.last
           return unless %w[cart address delivery payment].include?(current_order.state)
 
           current_order.update(
