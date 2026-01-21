@@ -7,14 +7,14 @@ module Spl
         include BooleanHelper
 
         def self.prepended(base)
-          base.before_action :validate_spl_no_card, only: :update
+          base.after_action :validate_spl_no_card, only: :update
         end
 
         private
 
         def user_params
-          params.expect(user: [:first_name, :last_name, :phone, :email,
-                               { public_metadata: %i[spl_card_active spl_no_card] }])
+          params.require(:user).permit(:first_name, :last_name, :phone, :email,
+                                       public_metadata: %i[spl_card_active spl_no_card])
         end
 
         def validate_spl_no_card
@@ -35,7 +35,6 @@ module Spl
 
         def handle_validation_error(error)
           flash[:error] = error.message
-          render :edit, status: :unprocessable_content
         end
 
         def update_order(spl_card, active)

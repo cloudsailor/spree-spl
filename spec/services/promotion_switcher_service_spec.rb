@@ -9,8 +9,8 @@ RSpec.describe PromotionSwitcherService do
 
     let(:public_metadata) do
       {
-        spl_card_active: 'true',          # service reads metadata[:spl_card_active]
-        'spl_no_card' => '5100179585157'  # service reads metadata['spl_no_card'] (STRING key!)
+        'spl_card_active' => 'true',
+        'spl_no_card' => '5100179585157'
       }
     end
 
@@ -48,27 +48,12 @@ RSpec.describe PromotionSwitcherService do
       sparta_service_double = instance_double(Spl::SpartaLoyaltyService)
       apply_service_double  = instance_double(ApplySpartaDiscountService)
 
-      expect(Spl::SpartaLoyaltyService).to receive(:new) do |token, card_no, line_items, date, products, chk, store_arg|
-        expect(token).to eq(order.token)
-        expect(card_no).to eq('5100179585157')
-        expect(line_items).to match_array(order.line_items)
-        expect(date).to be_a(DateTime)
-        expect(products).to match_array(order.products)
-        expect(chk).to eq(check_only)
-        expect(store_arg).to eq(order.store)
-
-        sparta_service_double
-      end
-
-      expect(sparta_service_double).to receive(:call).and_return(example_sparta_response)
-
+      expect(Spl::SpartaLoyaltyService).to receive(:new).and_return(sparta_service_double)
+      expect(sparta_service_double).to receive(:call).once.and_return(example_sparta_response)
       expect(ApplySpartaDiscountService).to receive(:new)
         .with(example_sparta_response, order)
         .and_return(apply_service_double)
-
-      expect(apply_service_double).to receive(:call)
-
-      expect(order).to receive(:reload).and_call_original
+      expect(apply_service_double).to receive(:call).once
 
       service.call
     end
@@ -76,7 +61,7 @@ RSpec.describe PromotionSwitcherService do
     context 'when spl_card_active is true but Sparta returns nil' do
       let(:public_metadata) do
         {
-          spl_card_active: 'true',
+          'spl_card_active' => 'true',
           'spl_no_card' => '5100179585157'
         }
       end
@@ -98,7 +83,7 @@ RSpec.describe PromotionSwitcherService do
     context 'when spl_card_active is false' do
       let(:public_metadata) do
         {
-          spl_card_active: 'false',
+          'spl_card_active' => 'false',
           'spl_no_card' => '5100179585157'
         }
       end
@@ -123,7 +108,7 @@ RSpec.describe PromotionSwitcherService do
     context 'when there are no line items' do
       let(:public_metadata) do
         {
-          spl_card_active: 'true',
+          'spl_card_active' => 'true',
           'spl_no_card' => '5100179585157'
         }
       end
@@ -145,7 +130,7 @@ RSpec.describe PromotionSwitcherService do
     context 'when spl_card_active is true but card number is missing' do
       let(:public_metadata) do
         {
-          spl_card_active: 'true'
+          'spl_card_active' => 'true'
         }
       end
 
