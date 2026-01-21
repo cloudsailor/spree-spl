@@ -5,12 +5,12 @@ module Spl
     module Admin
       module PaymentsControllerDecorator
         def self.prepended(base)
-          base.after_action :preform_update_sparta_state_job, only: :capture
+          base.after_action :perform_update_sparta_state_job, only: :capture
         end
 
         private
 
-        def preform_update_sparta_state_job
+        def perform_update_sparta_state_job
           if @order.payment_state == 'paid'
             UpdateSpartaStateJob.perform_later(@order.token, 'D', @order.number, @order.store)
           end
