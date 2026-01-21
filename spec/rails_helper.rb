@@ -61,6 +61,9 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   config.before(:suite) do
+    Money.default_currency = Money::Currency.new(
+      ENV.fetch('DEFAULT_CURRENCY', Spree::Config[:currency] || 'PLN')
+    )
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end
