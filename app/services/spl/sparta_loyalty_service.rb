@@ -43,7 +43,7 @@ module Spl
       {
         ver: 4,
         apiUser: @store.private_metadata['spl_api_user'],
-        # apiToken: @store.private_metadata['spl_api_token'],
+        apiToken: @store.private_metadata['spl_api_token'],
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code'],
         mode: @store.private_metadata['spl_mode'],
