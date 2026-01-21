@@ -47,7 +47,7 @@ module Spl
 
         def load_user_coupons
           @coupons = Spl::Coupons::GetCouponsService.new(@order.user, @order.store).call
-        rescue StandardError
+        rescue StandardError => e
           handle_spl_error(e)
           raise e
         end

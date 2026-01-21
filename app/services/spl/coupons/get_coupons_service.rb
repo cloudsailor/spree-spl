@@ -28,7 +28,7 @@ module Spl
 
         filtered_coupons(response_body)
       rescue SplGetCouponError => e
-        raise e unless token_refresh_needed(response_body, @retry_counter, @user)
+        raise e unless token_refresh_needed(response_body, @retry_counter, @user, @store)
 
         @retry_counter += 1
         retry

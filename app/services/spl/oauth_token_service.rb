@@ -33,8 +33,8 @@ module Spl
       response_body['response']
     end
 
-    def self.refresh_token(refresh_token)
-      body = prepare_refresh_token_body(refresh_token)
+    def refresh_token(token)
+      body = prepare_refresh_token_body(token)
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
@@ -70,14 +70,14 @@ module Spl
       }
     end
 
-    def prepare_refresh_token_body(refresh_token)
+    def prepare_refresh_token_body(token)
       {
         context: {
           prgCode: @env['spl_prg_code']
         },
         apiUser: @env['spl_api_user'],
         apiToken: @env['spl_api_token'],
-        refreshToken: refresh_token,
+        refreshToken: token,
         grantType: 'refresh_token'
       }
     end
