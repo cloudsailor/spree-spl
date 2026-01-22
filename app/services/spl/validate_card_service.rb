@@ -18,12 +18,11 @@ module Spl
     def call
       return if @user&.public_metadata.blank?
 
-      spl_card_active = @user.public_metadata['spl_card_active']
       @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
       check_for_errors(response_body)
-      @user.public_metadata['spl_card_active'] = spl_card_active
+      @user.public_metadata['spl_card_active'] = true
       true
     rescue StandardError
       @user.save
