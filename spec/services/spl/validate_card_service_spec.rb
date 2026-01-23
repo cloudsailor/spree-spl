@@ -25,6 +25,17 @@ RSpec.describe Spl::ValidateCardService do
       expect(user.public_metadata['spl_card_active']).to eq(original_value)
     end
 
+    context 'when spl_card_active is nil' do
+      let(:user) { create(:user, public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => nil }) }
+
+      it 'sets spl_card_active to true after successful validation' do
+        service.call
+
+        user.reload
+        expect(user.public_metadata['spl_card_active']).to eq(true)
+      end
+    end
+
     context 'when API returns error' do
       before do
         allow(service).to receive(:verify_card_request).and_return({ errorCode: '1', msg: 'Invalid card' }.to_json)
