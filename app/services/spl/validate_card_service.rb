@@ -103,7 +103,7 @@ module Spl
 
     def update_user_after_check(spl_card_active)
       @user.public_metadata['spl_card_active'] = spl_card_active.nil? || spl_card_active
-      @user.save
+      @user.save if @user.changed?
     end
   end
 end
