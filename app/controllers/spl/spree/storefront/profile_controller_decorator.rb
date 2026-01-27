@@ -88,6 +88,7 @@ module Spl
 
         def update_order(spl_card, active)
           current_order = try_spree_current_user.orders.last
+          return if current_order.nil?
           return unless %w[cart address delivery payment].include?(current_order.state)
 
           current_order.update(

@@ -59,8 +59,8 @@ module Spl
       @user.private_metadata ||= {} if @user.private_metadata.blank?
       @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number, spl_card_active: true),
                    private_metadata: @user.private_metadata.merge(
-                     accessToken: oauth_response_body.dig('response', 'accessToken'),
-                     refreshToken: oauth_response_body.dig('response', 'refreshToken')
+                     spl_access_token: oauth_response_body.dig('response', 'accessToken'),
+                     spl_refresh_token: oauth_response_body.dig('response', 'refreshToken')
                    ))
     end
   end
