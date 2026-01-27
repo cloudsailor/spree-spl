@@ -129,39 +129,6 @@ module Spl
           try_spree_current_user.errors.clear
         end
 
-        def render_login_code_error
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: 'spl/loyalty_connect_form',
-            locals: { user: try_spree_current_user }
-          ),
-                 status: :unprocessable_content
-        end
-
-        def render_login_code_success(phone)
-          render turbo_stream: turbo_stream.replace(
-            'loyalty_connect_form',
-            partial: 'spl/otp_code_form',
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :ok
-        end
-
-        def render_connect_loyalty_account_error(phone)
-          render turbo_stream: turbo_stream.replace(
-            'otp_code_form',
-            partial: 'spl/otp_code_form',
-            locals: {
-              user: try_spree_current_user,
-              phone_e164: phone.respond_to?(:e164) ? phone.e164 : nil
-            }
-          ),
-                 status: :unprocessable_content
-        end
-
         def send_otp(phone, store)
           Spl::SendOtpService.new(DateTime.current, phone.country_code, phone.national_number, store).call
         end
@@ -171,14 +138,6 @@ module Spl
             phone: login_code_params[:phone],
             public_metadata: (try_spree_current_user.public_metadata || {}).merge('accept_yc_terms' => true)
           )
-        end
-
-        def handle_spl_error(error)
-          payload = Spl::ErrorPayloadParser.parse(error.message) || error
-          msg = Spl::ErrorTranslator.translate(payload || { errorCode: I18n.t('spl.errors.unknow_error') })
-
-          clear_errors
-          try_spree_current_user.errors.add(:base, msg)
         end
 
         def assign_card_number(user, store, params)
