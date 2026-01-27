@@ -46,7 +46,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.must_accept_yc_terms'))
       end
@@ -57,7 +57,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
       it 'adds phone error and renders 422 (does not touch OTP service)' do
         expect(Spl::SendOtpService).not_to receive(:new)
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
         controller.send(:validate_login_code_request)
         expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.user.errors.invalid_phone'))
       end
@@ -91,7 +91,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
         expect(service_instance).to receive(:call).and_raise(Spl::SendOtpService::SplSendOtpError.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.login_code
 
@@ -164,7 +164,7 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(login_service).to receive(:call)
           .and_raise(error_class.new(payload.inspect))
 
-        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_entity))
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
 
         controller.connect_loyalty_account
 
@@ -183,6 +183,122 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
 
     context 'when MeService raises' do
       include_examples 'renders connect error', Spl::MeService::SplMeError
+    end
+  end
+
+  describe '#registration_code (service + success/rescue)' do
+    before do
+      allow(controller).to receive(:params).and_return(
+        ActionController::Parameters.new(user: { phone: phone_value, accept_yc_terms: terms_accepted })
+      )
+    end
+
+    context 'when OTP request succeeds' do
+      it 'calls RequestOtpService, updates user, and renders 200' do
+        service_instance = instance_double(Spl::RequestOtpService)
+
+        expect(Spl::RequestOtpService).to receive(:new) do |date, passed_store, passed_params|
+          expect(date).to be_a(DateTime)
+          expect(passed_store).to eq(store)
+          expect(passed_params['mobile_country']).to eq('+48')
+          expect(passed_params['phone_number']).to eq('500600700')
+        end.and_return(service_instance)
+
+        expect(service_instance).to receive(:call)
+        expect(controller).to receive(:render).with(hash_including(status: :ok))
+
+        controller.registration_code
+
+        expect(user.reload.phone).to eq(phone_value)
+        expect(user.public_metadata['accept_yc_terms']).to eq(true)
+      end
+    end
+
+    shared_examples 'registration_code error' do |error_class|
+      it "renders 422 and adds translated base error for #{error_class}" do
+        payload = {
+          'errorCode' => 'TEMPORARY_BLOCKED',
+          'msg' => 'Temporarily blocked'
+        }
+
+        service_instance = instance_double(Spl::RequestOtpService)
+
+        allow(Spl::RequestOtpService).to receive(:new).and_return(service_instance)
+        allow(service_instance).to receive(:call).and_raise(error_class.new(payload.inspect))
+
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
+
+        controller.registration_code
+
+        expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.errors.temporary_blocked'))
+      end
+    end
+
+    context 'when RequestOtpService raises error' do
+      include_examples 'registration_code error', Spl::RequestOtpService::SplRequestOtpError
+    end
+
+    context 'when OauthTokenService raises error' do
+      include_examples 'registration_code error', Spl::OauthTokenService::OauthTokenError
+    end
+  end
+
+  describe '#register_loyalty_account (service + success/rescue)' do
+    let(:params_hash) { { 'user' => { 'spl_auth_code' => '123456' } } }
+
+    before do
+      allow(controller).to receive(:params).and_return(params_hash)
+      allow(controller).to receive(:spree_current_user).and_return(user)
+    end
+
+    context 'when registration succeeds' do
+      it 'calls RegisterAccountService and redirects with notice' do
+        service_instance = instance_double(Spl::RegisterAccountService)
+
+        expect(Spl::RegisterAccountService).to receive(:new)
+          .with(user, store, '123456')
+          .and_return(service_instance)
+
+        expect(service_instance).to receive(:call)
+
+        expect(controller).to receive(:redirect_to).with(
+          spree.edit_account_profile_path,
+          hash_including(notice: Spree.t(:successfully_updated, resource: Spree.t(:account)))
+        )
+
+        controller.register_loyalty_account
+      end
+    end
+
+    shared_examples 'register_loyalty_account error' do |error_class|
+      it "renders 422 and adds translated base error for #{error_class}" do
+        payload = {
+          'errorCode' => 'TEMPORARY_BLOCKED',
+          'msg' => 'Temporarily blocked'
+        }
+
+        phone_obj = double('Phone', e164: '+48500600700')
+        allow(user).to receive(:phone).and_return(phone_obj)
+
+        service_instance = instance_double(Spl::RegisterAccountService)
+
+        allow(Spl::RegisterAccountService).to receive(:new).and_return(service_instance)
+        allow(service_instance).to receive(:call).and_raise(error_class.new(payload.inspect))
+
+        expect(controller).to receive(:render).with(hash_including(status: :unprocessable_content))
+
+        controller.register_loyalty_account
+
+        expect(user.errors.full_messages.join(' ')).to include(I18n.t('spl.errors.temporary_blocked'))
+      end
+    end
+
+    context 'when RegisterAccountService raises error' do
+      include_examples 'register_loyalty_account error', Spl::RegisterAccountService::SplRegisterAccountError
+    end
+
+    context 'when OauthTokenService raises error' do
+      include_examples 'register_loyalty_account error', Spl::OauthTokenService::OauthTokenError
     end
   end
 end

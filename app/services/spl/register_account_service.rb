@@ -11,6 +11,7 @@ module Spl
       @user = user
       @store = store
       @params = params
+      @phone = PhoneParserService.new(user.phone)
     end
 
     def call
@@ -21,10 +22,10 @@ module Spl
       register_response = send_request(@register_url, register_body)
       register_response_body = JSON.parse(register_response.body)
       Rails.logger.debug register_response_body
-      raise SplRegisterAccountError, register_response_body['msg'] if register_response_body['errorCode'] != '0'
+      raise SplRegisterAccountError, register_response_body if register_response_body['errorCode'] != '0'
 
       spl_card = register_response_body.dig('response', 'cardNo')
-      update_account(spl_card, @params)
+      update_account(spl_card, oauth_response_body)
     end
 
     private
@@ -34,6 +35,7 @@ module Spl
     end
 
     def prepare_registration_body(access_token) # rubocop:disable Metrics/MethodLength
+      accept_yc_terms = @user.public_metadata['accept_yc_terms']
       {
         context: {
           oauthToken: access_token,
@@ -41,28 +43,28 @@ module Spl
         },
         person: {
           firstName: @user[:first_name],
-          lastName: @user[:first_name],
+          lastName: @user[:last_name],
           email: @user[:email],
-          mobileCountry: @params.dig('user', 'public_metadata', 'mobileCountry'),
-          mobile: @params.dig('user', 'public_metadata', 'phone_number'),
+          mobileCountry: @phone.country_code,
+          mobile: @phone.national_number,
           permissions: {
-            processData: @params.dig('user', 'public_metadata', 'splProcessData'),
-            operationalSms: @params.dig('user', 'public_metadata', 'operationalSms')
+            processData: accept_yc_terms,
+            operationalSms: accept_yc_terms
           }
         },
-        authCode: @params.dig('user', 'public_metadata', 'splAuthCode'),
+        authCode: @params,
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code']
       }
     end
 
-    def update_account(card_number, params)
-      mobile_country = params.dig('user', 'public_metadata', 'mobileCountry')
-      mobile_phone = params.dig('user', 'public_metadata', 'phone_number')
-      @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number,
-                                                                spl_card_active: true,
-                                                                mobile_country: mobile_country,
-                                                                phone_number: mobile_phone))
+    def update_account(card_number, oauth_response_body)
+      @user.private_metadata ||= {} if @user.private_metadata.blank?
+      @user.update(public_metadata: @user.public_metadata.merge(spl_no_card: card_number, spl_card_active: true),
+                   private_metadata: @user.private_metadata.merge(
+                     accessToken: oauth_response_body.dig('response', 'accessToken'),
+                     refreshToken: oauth_response_body.dig('response', 'refreshToken')
+                   ))
     end
   end
 end
