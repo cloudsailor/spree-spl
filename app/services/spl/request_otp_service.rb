@@ -24,7 +24,7 @@ module Spl
       request_otp_response = send_request(@request_otp_url, request_otp_body)
       request_otp_response_body = JSON.parse(request_otp_response.body)
       Rails.logger.debug request_otp_response_body
-      raise SplRequestOtpError, request_otp_response_body['msg'] if request_otp_response_body['errorCode'] != '0'
+      raise SplRequestOtpError, request_otp_response_body if request_otp_response_body['errorCode'] != '0'
 
       request_otp_response_body
     end

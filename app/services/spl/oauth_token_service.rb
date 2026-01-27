@@ -18,7 +18,7 @@ module Spl
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
 
       response_body
     end
@@ -28,7 +28,7 @@ module Spl
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
 
       response_body['response']
     end
@@ -38,7 +38,7 @@ module Spl
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
 
       response_body['response']
     end

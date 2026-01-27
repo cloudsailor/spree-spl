@@ -43,7 +43,7 @@ module Spl
         apiToken: @store.private_metadata['spl_api_token'],
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code'],
-        mode: @store.private_metadata['spl_mode'],
+        # mode: @store.private_metadata['spl_mode'],
         date: @date,
         no: @order_token,
         orderNo: @order_token,
