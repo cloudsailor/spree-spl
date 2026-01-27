@@ -46,13 +46,6 @@ RSpec.describe Spree::Account::ProfileController, type: :controller do
         allow(service_double).to receive(:call).and_raise(Spl::ValidateCardService::SplCardValidationError.new('Invalid'))
       end
 
-      it 'renders edit with status 422' do
-        put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123', spl_card_active: 'true' } } }
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(response).to render_template(:edit)
-      end
-
       it 'sets flash error message' do
         put :update, params: { user: { public_metadata: { spl_no_card: '1234567890123', spl_card_active: 'true' } } }
 

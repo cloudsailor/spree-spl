@@ -83,7 +83,6 @@ module Spl
 
         def handle_validation_error(error)
           flash[:error] = error.message
-          render :edit, status: :unprocessable_content
         end
 
         def update_order(spl_card, active)
@@ -102,7 +101,7 @@ module Spl
 
         def disactivated_card?
           value = user_params.dig(:public_metadata, :spl_card_active)
-          value.present? && cast_boolean(value)
+          cast_boolean(value)
         end
 
         def validate_yc_terms
