@@ -16,6 +16,10 @@ Spree::Core::Engine.add_routes do
       end
     end
   end
+  resource :checkout, as: 'coupons', controller: :checkout, only: %i[show create update] do
+    post :activate_coupon, to: 'checkout#activate_coupon'
+    post :deactivate_coupon, to: 'checkout#deactivate_coupon'
+  end
   namespace :account do
     resource :profile, controller: :profile, only: [:edit, :update] do
       patch :registration_code

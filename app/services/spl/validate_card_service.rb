@@ -47,6 +47,7 @@ module Spl
                                                                                                  'status') != 'A'
     end
 
+    # @todo: refactor this and build_post_request method usages to use Spl::SendRequestService instead
     def verify_card_request
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
       http = Net::HTTP.new(url.host, url.port)

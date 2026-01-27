@@ -20,7 +20,7 @@ RSpec.describe PhoneParserService, type: :service do
     end
 
     it 'delegates to the parsed phone object' do
-      expect(described_class.new('anything')).to be_valid
+      expect(described_class.new('+48500600700')).to be_valid
     end
   end
 

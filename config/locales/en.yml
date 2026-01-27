@@ -11,15 +11,17 @@ en:
       code_label: One-time code
       errors:
         must_accept_yc_terms: You must accept the loyalty club terms and conditions to continue
-        invalid_phone: Podaj poprawny numer telefonu
-      coupons:
-        find:
-          checkout_list: Your SPL coupons
+        invalid_phone: Invalid phone number
     card_validation:
       errors:
         card_not_active: Card is not active
         card_not_match: Card doesnt match user's card number
         wrong_owner: Card assigned to a different user
+    coupons:
+      find:
+        checkout_list: Your SPL coupons
+      activate: Activate
+      deactivate: Deactivate
     profile:
       connect_button: Connect to your loyalty account
     errors:

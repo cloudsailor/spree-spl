@@ -20,6 +20,11 @@ pl:
         card_not_active: Karta nie jest aktywna
         card_not_match: Karta nie jest zgodna z numerem karty użytkownika
         wrong_owner: Karta przypisana innemu użytkownikowi
+    coupons:
+      find:
+        checkout_list: Twoje kupony lojalnościowe
+      activate: Aktywuj
+      deactivate: Dezaktywuj
     errors:
       generic: Nie udało się połączyć konta lojalnościowego. Spróbuj ponownie.
       auth_temporary_blocked: Zbyt wiele nieudanych prób. Spróbuj ponownie później.

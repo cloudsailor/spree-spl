@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Spl::GetCouponsService do
+RSpec.describe Spl::Coupons::GetCouponsService do
   let(:user)  { create(:user, private_metadata: { 'spl_access_token' => 'LPUXLUZYZ9JN8XLXSSCTZA4Y5LEFEX' }) }
   let(:store) { Spree::Store.default }
   let(:service) { described_class.new(user, store) }
@@ -14,7 +14,8 @@ RSpec.describe Spl::GetCouponsService do
       context: {
         prgCode: 'prg-2',
         oauthToken: 'LPUXLUZYZ9JN8XLXSSCTZA4Y5LEFEX' # real exammple token
-      }
+      },
+      withArchival: true
     }
   end
   let(:request_service) { instance_double(Spl::SendRequestService) }
@@ -38,7 +39,7 @@ RSpec.describe Spl::GetCouponsService do
           'response' => [
             {
               'code' => '9004850879237',
-              'expirationDate' => '2026-01-01T23:59:59.999+01:00',
+              'expirationDate' => nil,
               'valid' => true,
               'type' => '90_CRAZY',
               'typeId' => '67583a525012cbcf734c281a',
@@ -108,11 +109,12 @@ RSpec.describe Spl::GetCouponsService do
 
       before do
         allow(response_double).to receive(:body).and_return(error_response_body.to_json)
+        service.instance_variable_set(:@retry_counter, 0)
       end
 
       it 'raises SplGetCouponError with message' do
         expect { service.call }.to raise_error(
-          Spl::GetCouponsService::SplGetCouponError,
+          Spl::Coupons::GetCouponsService::SplGetCouponError,
           'Token expired'
         )
       end

@@ -5,6 +5,7 @@ require 'json'
 module Spl
   class RequestOtpService
     class SplRequestOtpError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, store, params)
       @date = date.to_i * 1000
@@ -29,10 +30,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_sms_otp_body(access_token)
       {

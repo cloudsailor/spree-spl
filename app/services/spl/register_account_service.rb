@@ -5,6 +5,7 @@ require 'json'
 module Spl
   class RegisterAccountService
     class SplRegisterAccountError < StandardError; end
+    include SplServiceHelper
 
     def initialize(user, store, params)
       @register_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).register)
@@ -29,10 +30,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_registration_body(access_token) # rubocop:disable Metrics/MethodLength
       accept_yc_terms = @user.public_metadata['accept_yc_terms']

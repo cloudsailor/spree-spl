@@ -30,6 +30,14 @@ module Spl
       "#{coupon_base}/find"
     end
 
+    def coupon_activate
+      "#{coupon_base}/activate"
+    end
+
+    def coupon_deactivate
+      "#{coupon_base}/deactivate"
+    end
+
     ## Authentication and Authorization
 
     def check_card

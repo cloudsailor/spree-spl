@@ -5,6 +5,7 @@ require 'json'
 module Spl
   class LoginAccountService
     class SplLoginAccountError < StandardError; end
+    include SplServiceHelper
 
     def initialize(user, store, params)
       @login_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).login)
@@ -28,10 +29,6 @@ module Spl
     end
 
     private
-
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
 
     def prepare_login_body
       {
@@ -60,10 +57,10 @@ module Spl
 
     def get_access_token(access_token)
       token_body = Spl::OauthTokenService.new(DateTime.current, @store).authorization_code_token(access_token)
-      add_loyalty_tokents_to_user(token_body['accessToken'], token_body['refreshToken'])
+      add_loyalty_tokens_to_user(token_body['accessToken'], token_body['refreshToken'])
     end
 
-    def add_loyalty_tokents_to_user(access_token, refresh_token)
+    def add_loyalty_tokens_to_user(access_token, refresh_token)
       @user.update!(private_metadata: { spl_access_token: access_token,
                                         spl_refresh_token: refresh_token })
     end

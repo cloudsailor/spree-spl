@@ -1,6 +1,32 @@
-<div id='checkout-coupons'>
-  <h2> <%= I18n.t('spl.coupons.find.checkout_list') if @coupons.present? %></h2>
-  <% @coupons&.each do |coupon| %>
-    <%= coupon["typeCustomerName"] %>
-  <% end %>
-</div>
+<turbo-frame id="checkout_coupons">
+  <div id="checkout-coupons">
+    <h2><%= I18n.t('spl.coupons.find.checkout_list') if @coupons.present? %></h2>
+
+    <% @coupons&.each do |coupon| %>
+      <%= coupon["typeCustomerName"] %>
+      <% if coupon.dig("couponType", "autoLoad") == "A" %>
+        <% if coupon["autoLoad"] %>
+          <%= button_to I18n.t('spl.coupons.deactivate'),
+                        deactivate_coupon_coupons_path(
+                          order: @order,
+                          token: @order.token,
+                          coupon_code: coupon["code"]
+                        ),
+                        method: :post,
+                        data: { turbo: true },
+                        class: "min-h-full ml-3 btn-primary !px-4 !py-3" %>
+        <% else %>
+          <%= button_to I18n.t('spl.coupons.activate'),
+                        activate_coupon_coupons_path(
+                          order: @order,
+                          token: @order.token,
+                          coupon_code: coupon["code"]
+                        ),
+                        method: :post,
+                        data: { turbo: true },
+                        class: "min-h-full ml-3 btn-primary !px-4 !py-3" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</turbo-frame>

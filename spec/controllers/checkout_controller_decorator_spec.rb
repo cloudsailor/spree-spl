@@ -2,170 +2,184 @@
 
 require 'rails_helper'
 
-RSpec.describe Spree::CheckoutController, type: :controller do
-  let(:store) do
-    create(:store, private_metadata: {
-             'spl_url' => 'https://fake-spl.example.com',
-             'spl_mode' => 'test',
-             'spl_pos_key' => 'fake-pos-key',
-             'spl_api_user' => 'fake-api-user',
-             'spl_prg_code' => 'fake-prg-code',
-             'spl_sale_url' => 'https://fake-spl.example.com/sale',
-             'spl_api_token' => 'fake-token',
-             'spl_place_code' => 'fake-place',
-             'spl_partner_code' => 'fake-partner',
-             'spl_signature_seed' => 'fake-seed'
-           })
-  end
+RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :controller do
+  controller(ActionController::Base) do
+    before_action :set_order
 
-  let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
-  let(:user) { create(:user, public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => 'true' }) }
+    def checkout_path
+      '/checkout'
+    end
 
-  let(:order) do
-    create(
-      :order_with_totals,
-      store: store,
-      user: user,
-      email: 'test@example.com',
-      public_metadata: {
-        'spl_no_card' => '1234567890123',
-        'spl_card_active' => 'true'
-      }
-    )
+    def show
+      render plain: 'ok'
+    end
+
+    # Provided by decorator; defined here so Rails can dispatch
+
+    private
+
+    def set_order
+      @order = Spree::Order.first
+    end
   end
 
   before do
-    allow(controller).to receive_messages(current_store: store, try_spree_current_user: user, spree_current_user: user,
-                                          spree_signup_path: '/signup', spree_login_path: '/login')
+    controller.class.prepend described_class
+    routes.draw do
+      get  '/checkout', to: 'anonymous#show'
+      post '/checkout/activate_coupon', to: 'anonymous#activate_coupon'
+      post '/checkout/deactivate_coupon', to: 'anonymous#deactivate_coupon'
+    end
+    allow(request).to receive(:url).and_return('http://test.host/checkout')
+  end
 
-    stub_request(:any, /fake-spl\.example\.com/).to_return(
-      status: 200,
-      body: {
-        'errorCode' => '0',
-        'response' => {
-          'basket' => order.line_items.map do |li|
-            {
-              'pos' => li.id,
-              'discounts' => [
-                {
-                  'name' => 'TEST'
-                }
-              ],
-              'discountGross' => 5.0
-            }
-          end
-        }
-      }.to_json,
-      headers: { 'Content-Type' => 'application/json' }
-    )
+  let(:country) { create(:country) }
+  let!(:store) { create(:store, default_country: country) }
 
-    allow_any_instance_of(Spree::Order).to receive(:recalculate).and_return(true)
+  let!(:user)  { create(:user) }
+  let!(:order) do
+    create(:order,
+           store: store,
+           user: user)
   end
 
   describe '#promotion_switcher' do
-    context 'creates a new SPL adjustment' do
-      it 'with SPL source_type' do
-        post :update, params: { state: 'address', token: order.token }
+    it "calls PromotionSwitcherService with confirm=false when URL does not include 'confirm'" do
+      switcher = instance_double('PromotionSwitcherService', call: true)
+      expect(PromotionSwitcherService).to receive(:new).with(order, false).and_return(switcher)
 
-        expect(order.line_items.last.adjustments.last.source_type).to eq('SPL')
-      end
+      allow(Spl::Coupons::GetCouponsService)
+        .to receive(:new).with(user, store)
+                         .and_return(instance_double('Spl::Coupons::GetCouponsService', call: []))
 
-      it 'with amount from discountGross' do
-        post :update, params: { state: 'address', token: order.token }
-
-        expect(order.line_items.last.adjustments.last.amount).to eq(-5.0)
-      end
+      get :show
+      expect(response).to have_http_status(:ok)
     end
 
-    context 'when SPL API response has no line_items (unhappy path)' do
-      before do
-        stub_request(:any, /fake-spl\.example\.com/).to_return(
-          status: 200,
-          body: {
-            'errorCode' => '0',
-            'response' => {
-              'basket' => []
-            }
-          }.to_json,
-          headers: { 'Content-Type' => 'application/json' }
-        )
-      end
+    it "calls PromotionSwitcherService with confirm=true when URL includes 'confirm'" do
+      allow_any_instance_of(ActionDispatch::Request)
+        .to receive(:url)
+        .and_return('http://test.host/checkout/confirm')
 
-      it 'does NOT create SPL adjustments' do
-        expect do
-          post :update, params: { state: 'address', token: order.token }
-        end.not_to(change { order.line_items.first.adjustments.count })
-      end
-    end
+      switcher = instance_double('PromotionSwitcherService', call: true)
+      expect(PromotionSwitcherService).to receive(:new).with(order, true).and_return(switcher)
 
-    context 'when SPL API response has no discounts (unhappy path)' do
-      before do
-        stub_request(:any, /fake-spl\.example\.com/).to_return(
-          status: 200,
-          body: {
-            'errorCode' => '0',
-            'response' => {
-              'basket' => order.line_items.map do |li|
-                {
-                  'pos' => li.id,
-                  'discounts' => [],
-                  'discountGross' => 0.0
-                }
-              end
-            }
-          }.to_json,
-          headers: { 'Content-Type' => 'application/json' }
-        )
-      end
+      allow(Spl::Coupons::GetCouponsService)
+        .to receive(:new).with(user, store)
+                         .and_return(instance_double('Spl::Coupons::GetCouponsService', call: []))
 
-      it 'does NOT create SPL adjustments' do
-        expect do
-          post :update, params: { state: 'address', token: order.token }
-        end.not_to(change { order.line_items.first.adjustments.count })
-      end
+      get :show
+      expect(response).to have_http_status(:ok)
     end
   end
 
   describe '#load_user_coupons' do
-    let!(:order)   { create(:order) }
-    let!(:service) { instance_double(Spl::GetCouponsService) }
+    it 'loads coupons for user/store and assigns @coupons' do
+      allow(PromotionSwitcherService)
+        .to receive(:new)
+        .and_return(instance_double('PromotionSwitcherService', call: true))
+
+      coupons_service = instance_double('Spl::Coupons::GetCouponsService', call: %w[c1 c2])
+      expect(Spl::Coupons::GetCouponsService)
+        .to receive(:new).with(user, store).and_return(coupons_service)
+
+      get :show
+
+      expect(response).to have_http_status(:ok)
+      expect(assigns(:coupons)).to eq(%w[c1 c2])
+    end
+
+    it 'does not run load_user_coupons as a before_action for activate_coupon' do
+      allow(PromotionSwitcherService)
+        .to receive(:new)
+        .and_return(instance_double('PromotionSwitcherService', call: true))
+
+      # This will still be called (inside #activate_coupon), but we can ensure it is not called twice.
+      coupons_service = instance_double('Spl::Coupons::GetCouponsService', call: [])
+      expect(Spl::Coupons::GetCouponsService).to receive(:new).with(user, store).once.and_return(coupons_service)
+
+      allow(Spl::Coupons::ActivateCouponService)
+        .to receive(:new)
+        .and_return(instance_double('Spl::Coupons::ActivateCouponService', call: true))
+
+      post :activate_coupon, params: { coupon_code: 'YOLO_90' }, format: :html
+    end
+  end
+
+  describe '#activate_coupon' do
+    let(:activate) { instance_double(Spl::Coupons::ActivateCouponService, call: true) }
 
     before do
-      allow(controller).to receive(:order).and_return(order)
-      controller.instance_variable_set(:@order, order)
-      allow(Spl::GetCouponsService).to receive(:new)
-        .with(order.user, order.store)
-        .and_return(service)
+      allow(controller).to receive(:try_spree_current_user).and_return(user)
     end
 
-    subject(:load_user_coupons) { controller.send(:load_user_coupons) }
+    context 'when coupon is valid' do
+      it 'calls ActivateCouponService, reloads coupons, and redirects (HTML)' do
+        expect(Spl::Coupons::ActivateCouponService)
+          .to receive(:new).with(user, store, 'YOLO_90').and_return(activate)
 
-    context 'when the service returns coupons' do
-      let(:coupons) { %w[COUP1 COUP2] }
+        coupons_service = instance_double('Spl::Coupons::GetCouponsService', call: %w[YOLO_90])
+        expect(Spl::Coupons::GetCouponsService)
+          .to receive(:new).with(user, store).and_return(coupons_service)
 
-      before { allow(service).to receive(:call).and_return(coupons) }
+        post :activate_coupon, params: { coupon_code: 'YOLO_90' }, format: :html
 
-      it 'sets @coupons' do
-        load_user_coupons
-        expect(assigns(:coupons)).to eq(coupons)
+        expect(assigns(:coupons)).to eq(%w[YOLO_90])
+        expect(response).to have_http_status(:found)
+        expect(response.location).to include('/checkout')
       end
     end
 
-    context 'when the service returns an empty array' do
-      before { allow(service).to receive(:call).and_return([]) }
+    context 'when coupon is invalid' do
+      it 'still redirects even if ActivateCouponService raises' do
+        expect(Spl::Coupons::ActivateCouponService).to receive(:new).with(user, store, 'YOLO_90').and_return(activate)
+        expect(activate).to receive(:call).and_raise(Spl::Coupons::ActivateCouponService::ActivateCouponServiceError,
+                                                     'some error')
 
-      it 'sets @coupons to an empty array' do
-        load_user_coupons
-        expect(assigns(:coupons)).to eq([])
+        expect do
+          post :activate_coupon, params: { coupon_code: 'YOLO_90' }, format: :html
+        end.to raise_error('some error')
+
+        expect(response).to have_http_status(:found)
+        expect(response.location).to include('/checkout')
       end
     end
+  end
 
-    context 'when the service raises an error' do
-      before { allow(service).to receive(:call).and_raise(StandardError.new('fail')) }
+  describe '#deactivate_coupon' do
+    before do
+      allow(controller).to receive(:try_spree_current_user).and_return(user)
+    end
 
-      it 'propagates the error' do
-        expect { load_user_coupons }.to raise_error(StandardError, 'fail')
-      end
+    it 'calls DeactivateCouponService, reloads coupons, and redirects (HTML)' do
+      deactivate = instance_double('Spl::Coupons::DeactivateCouponService', call: true)
+      expect(Spl::Coupons::DeactivateCouponService)
+        .to receive(:new).with(user, store, 'YOLO_90').and_return(deactivate)
+
+      coupons_service = instance_double('Spl::Coupons::GetCouponsService', call: %w[YOLO_90])
+      expect(Spl::Coupons::GetCouponsService)
+        .to receive(:new).with(user, store).and_return(coupons_service)
+
+      post :deactivate_coupon, params: { coupon_code: 'YOLO_90' }, format: :html
+
+      expect(assigns(:coupons)).to eq(%w[YOLO_90])
+      expect(response).to have_http_status(:found)
+      expect(response.location).to include('/checkout')
+    end
+
+    it 'still redirects even if DeactivateCouponService raises' do
+      deactivate = instance_double('Spl::Coupons::DeactivateCouponService')
+      expect(Spl::Coupons::DeactivateCouponService).to receive(:new).with(user, store, 'YOLO_90').and_return(deactivate)
+      expect(deactivate).to receive(:call).and_raise(
+        Spl::Coupons::DeactivateCouponService::DeactivateCouponServiceError, 'some error'
+      )
+
+      expect do
+        post :deactivate_coupon, params: { coupon_code: 'YOLO_90' }, format: :html
+      end.to raise_error('some error')
+
+      expect(response).to have_http_status(:found)
+      expect(response.location).to include('/checkout')
     end
   end
 end
