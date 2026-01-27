@@ -9,7 +9,7 @@ class PromotionSwitcherService
     @order = order
   end
 
-  def call # rubocop:disable Metrics/AbcSize
+  def call
     apply_sparta_discount(order, check_only)
   rescue StandardError => e
     Rails.logger.error("[PromotionSwitcher] Failed for Order #{order.id}: #{e.message}")
