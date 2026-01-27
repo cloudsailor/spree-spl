@@ -16,12 +16,14 @@ module Spl
     end
 
     def call
-      return if @user&.public_metadata.blank?
+      return if @user&.public_metadata&.[]('spl_no_card').nil?
 
+      spl_card_active = @user.public_metadata['spl_card_active']
       @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
       check_for_errors(response_body)
+      update_user_after_check(spl_card_active)
       true
     rescue StandardError
       @user.save
@@ -97,6 +99,11 @@ module Spl
       return if @user&.public_metadata.blank?
 
       @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
+    end
+
+    def update_user_after_check(spl_card_active)
+      @user.public_metadata['spl_card_active'] = spl_card_active.nil? || spl_card_active
+      @user.save if @user.changed?
     end
   end
 end

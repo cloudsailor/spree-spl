@@ -31,7 +31,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:payment_state) { 'paid' }
 
       it "calls UpdateSpartaStateJob with 'D'" do
-        updater.send(:preform_update_sparta_state_job)
+        updater.send(:perform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token,
@@ -46,7 +46,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state) { 'canceled' }
 
       it "calls UpdateSpartaStateJob with 'C'" do
-        updater.send(:preform_update_sparta_state_job)
+        updater.send(:perform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token,
@@ -62,7 +62,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state)   { 'canceled' }
 
       it 'calls the job twice with both states' do
-        updater.send(:preform_update_sparta_state_job)
+        updater.send(:perform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).to have_received(:perform_later).with(
           order.token, 'D', order.number, order.store
@@ -79,7 +79,7 @@ RSpec.describe Spree::OrderUpdater, type: :model do
       let(:order_state)   { 'complete' }
 
       it 'does not call UpdateSpartaStateJob' do
-        updater.send(:preform_update_sparta_state_job)
+        updater.send(:perform_update_sparta_state_job)
 
         expect(UpdateSpartaStateJob).not_to have_received(:perform_later)
       end
