@@ -5,10 +5,12 @@ module Spl
     module Storefront
       module CheckoutControllerDecorator
         include ErrorHandlingHelper
+        include BooleanHelper
 
         def self.prepended(base)
           base.before_action :promotion_switcher
           base.before_action :load_user_coupons, except: %i[activate_coupon deactivate_coupon]
+          base.after_action :perform_update_sparta_state_job, only: %i[confirm complete]
         end
 
         def activate_coupon
@@ -42,7 +44,20 @@ module Spl
         private
 
         def promotion_switcher
-          PromotionSwitcherService.new(@order, request.url.include?('confirm')).call
+          PromotionSwitcherService.new(@order, checkout_state_allowed?).call
+        end
+
+        def checkout_state_allowed?
+          %w[cart address delivery payment].include?(request.path.split('/').last)
+        end
+
+        def perform_update_sparta_state_job
+          if @order.payment_state == 'paid'
+            UpdateSpartaStateJob.perform_later(@order.token, 'D', @order.number, @order.store)
+          end
+          if @order.state == 'canceled'
+            UpdateSpartaStateJob.perform_later(@order.token, 'C', @order.number, @order.store)
+          end
         end
 
         def load_user_coupons

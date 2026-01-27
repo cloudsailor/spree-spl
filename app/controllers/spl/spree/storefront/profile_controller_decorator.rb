@@ -5,20 +5,21 @@ module Spl
     module Storefront
       module ProfileControllerDecorator
         include BooleanHelper
+        include ProfileControllerHelper
         include ErrorHandlingHelper
 
         def self.prepended(base)
           base.before_action :validate_spl_no_card, only: :update
-          base.before_action :validate_login_code_request, only: :login_code
+          base.before_action :validate_login_code_request, only: %i[login_code registration_code]
         end
 
         def login_code
           send_otp(phone_parser, current_store)
           update_user_after_otp_request
-          render_login_code_success(phone_parser)
+          render_login_code_success(try_spree_current_user, phone_parser, 'otp_code_form')
         rescue Spl::SendOtpService::SplSendOtpError => e
           handle_spl_error(e)
-          render_login_code_error
+          render_login_code_error(try_spree_current_user)
         end
 
         def connect_loyalty_account
@@ -28,15 +29,29 @@ module Spl
         rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
                Spl::MeService::SplMeError => e
           handle_spl_error(e)
-          render_connect_loyalty_account_error(try_spree_current_user.phone)
+          render_connect_loyalty_account_error(try_spree_current_user, try_spree_current_user.phone, 'otp_code_form')
+        end
+
+        def registration_code
+          request_otp(phone_parser, current_store, params['user'])
+          update_user_after_otp_request
+          render_login_code_success(try_spree_current_user, phone_parser, 'otp_registration_form')
+        rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
+          handle_spl_error(e)
+          render_login_code_error(try_spree_current_user)
+        end
+
+        def register_loyalty_account
+          Spl::RegisterAccountService.new(try_spree_current_user, current_store, params['user']['spl_auth_code']).call
+          redirect_to spree.edit_account_profile_path,
+                      notice: ::Spree.t(:successfully_updated, resource: ::Spree.t(:account))
+        rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
+          handle_spl_error(e)
+          user = try_spree_current_user
+          render_connect_loyalty_account_error(user, user.phone, 'otp_registration_form')
         end
 
         private
-
-        def user_params
-          params.require(:user).permit(:first_name, :last_name, :phone, :email,
-                                       public_metadata: %i[spl_card_active spl_no_card])
-        end
 
         def validate_spl_no_card
           metadata = user_params[:public_metadata]
@@ -48,19 +63,31 @@ module Spl
           handle_validation_error(e)
         end
 
+        def validate_login_code_request
+          clear_errors
+          validate_yc_terms
+          validate_phone
+
+          render_login_code_error(try_spree_current_user) if try_spree_current_user.errors.any?
+        end
+
+        def request_otp(phone, store, params)
+          params.merge!(mobile_country: phone.country_code, phone_number: phone.national_number)
+          Spl::RequestOtpService.new(DateTime.current, store, params).call
+        end
+
         def validate_card(metadata)
           return unless disactivated_card?
 
-          ::Spl::ValidateCardService.new(metadata[:spl_no_card], spree_current_user, current_store).call
+          ::Spl::ValidateCardService.new(metadata[:spl_no_card], try_spree_current_user, current_store).call
         end
 
         def handle_validation_error(error)
           flash[:error] = error.message
-          render :edit, status: :unprocessable_content
         end
 
         def update_order(spl_card, active)
-          current_order = spree_current_user.orders.last
+          current_order = try_spree_current_user.orders.last
           return unless %w[cart address delivery payment].include?(current_order.state)
 
           current_order.update(
@@ -76,14 +103,6 @@ module Spl
         def disactivated_card?
           value = user_params.dig(:public_metadata, :spl_card_active)
           cast_boolean(value)
-        end
-
-        def validate_login_code_request
-          clear_errors
-          validate_yc_terms
-          validate_phone
-
-          render_login_code_error if try_spree_current_user.errors.any?
         end
 
         def validate_yc_terms
@@ -104,6 +123,10 @@ module Spl
 
         def phone_parser
           @phone_parser ||= PhoneParserService.new(login_code_params[:phone])
+        end
+
+        def clear_errors
+          try_spree_current_user.errors.clear
         end
 
         def render_login_code_error
@@ -150,6 +173,14 @@ module Spl
           )
         end
 
+        def handle_spl_error(error)
+          payload = Spl::ErrorPayloadParser.parse(error.message) || error
+          msg = Spl::ErrorTranslator.translate(payload || { errorCode: I18n.t('spl.errors.unknow_error') })
+
+          clear_errors
+          try_spree_current_user.errors.add(:base, msg)
+        end
+
         def assign_card_number(user, store, params)
           Spl::LoginAccountService.new(user, store, params).call
           AssignSpartaCardNumberService.new(user, store).call
@@ -157,6 +188,11 @@ module Spl
 
         def login_code_params
           params.require(:user).permit(:phone, :accept_yc_terms)
+        end
+
+        def user_params
+          params.require(:user).permit(:first_name, :last_name, :phone, :email,
+                                       public_metadata: %i[spl_card_active spl_no_card])
         end
       end
     end

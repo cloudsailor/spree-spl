@@ -104,11 +104,11 @@ class UpdateSpartaStateJob < ActiveJob::Base # rubocop:disable Metrics/ClassLeng
     date_in_ms = date.to_i * 1000
     new_number = SecureRandom.uuid
     {
-      ver: 3,
+      ver: 4,
       prgCode: store.private_metadata['spl_prg_code'],
       apiUser: store.private_metadata['spl_api_user'],
       apiToken: store.private_metadata['spl_api_token'],
-      mode: store.private_metadata['spl_mode'],
+      mode: store.private_metadata['spl_refund_mode'],
       partnerCode: store.private_metadata['spl_partner_code'],
       placeCode: store.private_metadata['spl_place_code'],
       relPartnerCode: store.private_metadata['spl_partner_code'],

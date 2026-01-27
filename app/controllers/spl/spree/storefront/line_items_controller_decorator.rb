@@ -14,7 +14,7 @@ module Spl
 
         def add_spl_discount_params_to_order
           user = spree_current_user
-          return if user.blank?
+          return if user&.public_metadata.blank?
           return unless user.public_metadata.key?('spl_no_card') && user.public_metadata.key?('spl_card_active')
 
           spl_card_active = cast_boolean(user.public_metadata['spl_card_active'])

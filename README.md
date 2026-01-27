@@ -14,6 +14,13 @@ _______
 _______
 _______
 
+To add JavaScript to your application, enter the following in the terminal:
+
+```sh
+bin/rails g spl:install
+```
+
+
 After installation, add the following line to `Spree::Adjustable::AdjustmentsUpdaterDecorator#persist_totals`:
 
 ```sh
