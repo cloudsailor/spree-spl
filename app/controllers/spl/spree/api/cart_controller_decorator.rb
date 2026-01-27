@@ -47,8 +47,8 @@ module Spl
         end
 
         def add_spl_discount_params_to_order(user)
-          return if user.blank?
-          return unless user.public_metadata.key?(:spl_no_card) && user.public_metadata.key?(:spl_card_active)
+          return if user&.public_metadata.blank?
+          return unless user.public_metadata.key?('spl_no_card') && user.public_metadata.key?('spl_card_active')
 
           spl_card_active = cast_boolean(user.public_metadata['spl_card_active'])
           params[:public_metadata].merge!(spl_card_active: spl_card_active,
@@ -56,7 +56,8 @@ module Spl
         end
 
         def switch_spl_active_param(order, check_only)
-          return unless order.public_metadata.key?(:spl_card_active)
+          return if user&.public_metadata.blank?
+          return unless order.public_metadata.key?('spl_card_active')
 
           if order.public_metadata[:spl_card_active] == true
             order.update(public_metadata: order.public_metadata.merge(spl_card_active: false))
@@ -68,6 +69,7 @@ module Spl
         end
 
         def assign_spl_active_param(order, user)
+          return if user&.public_metadata.blank?
           return unless user.public_metadata.key?(:spl_card_active)
 
           active_param = cast_boolean(user.public_metadata[:spl_card_active])

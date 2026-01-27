@@ -4,8 +4,9 @@ module CartDecorator
   private
 
   def order_spl?
-    if order.public_metadata.key?(:spl_no_card) && order.public_metadata.key?(:spl_card_active)
-      order.public_metadata['spl_card_active']
+    symbolized_keys = order.public_metadata.to_h.deep_symbolize_keys
+    if symbolized_keys.key?(:spl_no_card) && symbolized_keys.key?(:spl_card_active)
+      symbolized_keys[:spl_card_active]
     else
       false
     end

@@ -78,7 +78,7 @@ module Spl
         end
 
         def disactivated_card?
-          user_update_params[:public_metadata][:spl_card_active].present? &&
+          !user_update_params.dig(:public_metadata, :spl_card_active).nil? &&
             !user_update_params[:public_metadata][:spl_card_active]
         end
       end

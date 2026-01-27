@@ -21,3 +21,4 @@ Metrics/ParameterLists:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+    - spree-spl.gemspec
