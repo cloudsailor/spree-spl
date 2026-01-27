@@ -5,6 +5,8 @@ module Spl
     module Api
       # Account decorator to validate spl card no
       module AccountControllerDecorator
+        include ErrorHandlingHelper
+
         def self.prepended(base)
           base.before_action :validate_spl_no_card, only: :update
         end
@@ -16,7 +18,8 @@ module Spl
           render_serialized_payload { serialize_resource(spree_current_user) }
         rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
                Spl::MeService::SplMeError => e
-          render json: { error: e }, status: :bad_request
+          handle_spl_error(e, spree_current_user)
+          render json: { error: spree_current_user.errors }, status: :bad_request
         end
 
         def register_loyalty_account
@@ -25,14 +28,16 @@ module Spl
           spree_current_user.reload
           render_serialized_payload { serialize_resource(spree_current_user) }
         rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
-          render json: { error: e }, status: :bad_request
+          handle_spl_error(e, spree_current_user)
+          render json: { error: spree_current_user.errors }, status: :bad_request
         end
 
         def registration_code
           Spl::RequestOtpService.new(DateTime.current, current_store, params).call
           head :no_content
         rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
-          render json: { error: e }, status: :bad_request
+          handle_spl_error(e, spree_current_user)
+          render json: { error: spree_current_user.errors }, status: :bad_request
         end
 
         def login_code
@@ -40,7 +45,8 @@ module Spl
           Spl::SendOtpService.new(DateTime.current, params[:mobile_country], params[:phone_number], current_store).call
           head :no_content
         rescue Spl::SendOtpService::SplSendOtpError => e
-          render json: { error: e }, status: :bad_request
+          handle_spl_error(e, spree_current_user)
+          render json: { error: spree_current_user.errors }, status: :bad_request
         end
 
         private

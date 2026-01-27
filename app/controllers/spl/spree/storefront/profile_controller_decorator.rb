@@ -18,7 +18,7 @@ module Spl
           update_user_after_otp_request
           render_login_code_success(try_spree_current_user, phone_parser, 'otp_code_form')
         rescue Spl::SendOtpService::SplSendOtpError => e
-          handle_spl_error(e)
+          handle_spl_error(e, try_spree_current_user)
           render_login_code_error(try_spree_current_user)
         end
 
@@ -28,7 +28,7 @@ module Spl
                       notice: ::Spree.t(:successfully_updated, resource: ::Spree.t(:account))
         rescue Spl::LoginAccountService::SplLoginAccountError, AssignSpartaCardNumberService::AssignSpartaCardNumberError,
                Spl::MeService::SplMeError => e
-          handle_spl_error(e)
+          handle_spl_error(e, try_spree_current_user)
           render_connect_loyalty_account_error(try_spree_current_user, try_spree_current_user.phone, 'otp_code_form')
         end
 
@@ -37,7 +37,7 @@ module Spl
           update_user_after_otp_request
           render_login_code_success(try_spree_current_user, phone_parser, 'otp_registration_form')
         rescue Spl::RequestOtpService::SplRequestOtpError, Spl::OauthTokenService::OauthTokenError => e
-          handle_spl_error(e)
+          handle_spl_error(e, try_spree_current_user)
           render_login_code_error(try_spree_current_user)
         end
 
@@ -46,7 +46,7 @@ module Spl
           redirect_to spree.edit_account_profile_path,
                       notice: ::Spree.t(:successfully_updated, resource: ::Spree.t(:account))
         rescue Spl::RegisterAccountService::SplRegisterAccountError, Spl::OauthTokenService::OauthTokenError => e
-          handle_spl_error(e)
+          handle_spl_error(e, try_spree_current_user)
           user = try_spree_current_user
           render_connect_loyalty_account_error(user, user.phone, 'otp_registration_form')
         end
@@ -64,7 +64,7 @@ module Spl
         end
 
         def validate_login_code_request
-          clear_errors
+          clear_errors(try_spree_current_user)
           validate_yc_terms
           validate_phone
 
@@ -124,10 +124,6 @@ module Spl
 
         def phone_parser
           @phone_parser ||= PhoneParserService.new(login_code_params[:phone])
-        end
-
-        def clear_errors
-          try_spree_current_user.errors.clear
         end
 
         def send_otp(phone, store)

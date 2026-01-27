@@ -26,7 +26,7 @@ pl:
       activate: Aktywuj
       deactivate: Dezaktywuj
     errors:
-      generic: Nie udało się połączyć konta lojalnościowego. Spróbuj ponownie.
+      generic: Nie udało się wykonać akcji. Spróbuj ponownie.
       auth_temporary_blocked: Zbyt wiele nieudanych prób. Spróbuj ponownie później.
       auth_failed: Uwierzytelnienie nie powiodło się.
       token_expired: Twoja sesja wygasła. Zaloguj się ponownie.

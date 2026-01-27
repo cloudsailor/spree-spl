@@ -4,16 +4,16 @@ module ErrorHandlingHelper
   # Parses and translate occurred error, then adds it to user errors.
   # Dedicated for storefront controllers.
   # @param [StandardError]
-  def handle_spl_error(error)
+  def handle_spl_error(error, model)
     payload = Spl::ErrorPayloadParser.parse(error.message) || error
     msg = Spl::ErrorTranslator.translate(payload)
 
-    clear_errors
-    try_spree_current_user.errors.add(:base, msg)
+    clear_errors(model)
+    model.errors.add(:base, msg)
   end
 
-  def clear_errors
-    try_spree_current_user.errors.clear
+  def clear_errors(model)
+    model.errors.clear
   end
 
   def token_expired?(err_msg)
