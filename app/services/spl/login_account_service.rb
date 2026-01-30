@@ -33,7 +33,7 @@ module Spl
       Spl::SendRequestService.new(url, body).call
     end
 
-    def prepare_login_body # rubocop:disable Metrics/MethodLength
+    def prepare_login_body
       {
         context: {
           prgCode: @store.private_metadata['spl_prg_code']
