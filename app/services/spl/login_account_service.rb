@@ -5,15 +5,16 @@ require 'json'
 module Spl
   class LoginAccountService
     class SplLoginAccountError < StandardError; end
+    include SplServiceHelper
 
     def initialize(user, store, params)
       @login_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).login)
       @user = user
       @store = store
-      @mobile_country = params.dig('user', 'public_metadata', 'mobile_country')
-      @phone_number = params.dig('user', 'public_metadata', 'phone_number')
-      @card_number = params.dig('user', 'public_metadata', 'card_number')
-      @otp_code = params.dig('user', 'public_metadata', 'spl_auth_code')
+      @phone_number = user.phone
+      @card_number = params.dig('user', 'card_number')
+      @otp_code = params.dig('user', 'spl_auth_code')
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
@@ -21,7 +22,7 @@ module Spl
       response = send_request(@login_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplLoginAccountError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplLoginAccountError, response_body if response_body['errorCode'] != '0'
 
       access_token = response_body.dig('response', 'oauthCode')
       get_access_token(access_token)
@@ -29,16 +30,12 @@ module Spl
 
     private
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
-
     def prepare_login_body
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
+        apiUser: @env['spl_api_user'],
         scope: ['spl_cwp'],
         responseType: 'code',
         login: generate_login,
@@ -52,18 +49,18 @@ module Spl
     end
 
     def generate_login
-      login = "#{@mobile_country}#{@phone_number}" if @card_number.nil?
-      login = @card_number if @mobile_country.nil? || @phone_number.nil?
+      login = @phone_number if @card_number.nil?
+      login = @card_number if @phone_number.nil?
 
       login
     end
 
     def get_access_token(access_token)
       token_body = Spl::OauthTokenService.new(DateTime.current, @store).authorization_code_token(access_token)
-      add_loyalty_tokents_to_user(token_body['accessToken'], token_body['refreshToken'])
+      add_loyalty_tokens_to_user(token_body['accessToken'], token_body['refreshToken'])
     end
 
-    def add_loyalty_tokents_to_user(access_token, refresh_token)
+    def add_loyalty_tokens_to_user(access_token, refresh_token)
       @user.update!(private_metadata: { spl_access_token: access_token,
                                         spl_refresh_token: refresh_token })
     end

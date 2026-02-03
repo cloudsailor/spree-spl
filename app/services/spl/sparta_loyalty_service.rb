@@ -7,6 +7,7 @@ require 'json'
 module Spl
   class SpartaLoyaltyService
     class SplSendRequestError < StandardError; end
+    include SplServiceHelper
 
     def initialize(order_token, card_number, line_items, date, products, check_only, store)
       @order_token = order_token
@@ -22,7 +23,7 @@ module Spl
     def call
       Rails.logger.debug 'SPL LOYALTY SERVICE START'
       basket_body = prepare_basket_body
-      response = send_request(basket_body)
+      response = send_request(@url, basket_body)
       return unless response.is_a?(Net::HTTPSuccess)
 
       response_body = JSON.parse(response.body)
@@ -35,10 +36,6 @@ module Spl
 
     private
 
-    def send_request(body)
-      Spl::SendRequestService.new(@url, body).call
-    end
-
     def prepare_basket_body # rubocop:disable Metrics/MethodLength
       {
         ver: 4,
@@ -46,7 +43,7 @@ module Spl
         apiToken: @store.private_metadata['spl_api_token'],
         partnerCode: @store.private_metadata['spl_partner_code'],
         placeCode: @store.private_metadata['spl_place_code'],
-        mode: @store.private_metadata['spl_mode'],
+        # mode: @store.private_metadata['spl_mode'],
         date: @date,
         no: @order_token,
         orderNo: @order_token,

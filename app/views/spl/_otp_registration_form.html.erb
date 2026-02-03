@@ -1,0 +1,18 @@
+<%= turbo_frame_tag "otp_registration_form" do %>
+  <%= render partial: "spree/shared/error_messages", locals: { target: user } %>
+  <%= form_with scope: :user, url: register_loyalty_account_account_profile_path, method: :post, data: { turbo_frame: "otp_registration_form" } do |f| %>
+
+    <div class="mb-4 text-sm text-neutral-700">
+      <%= I18n.t("spl.user.sent_to", phone: phone_e164) if phone_e164.present? %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :spl_auth_code, I18n.t("spl.user.code_label"), class: "text-xs text-neutral-600 block mb-2" %>
+      <%= f.text_field :spl_auth_code, class: "text-input w-full" %>
+    </div>
+
+    <%= hidden_field_tag user.phone %>
+
+    <%= f.submit I18n.t("buttons.verify_button"), class: "btn-primary w-full" %>
+  <% end %>
+<% end %>

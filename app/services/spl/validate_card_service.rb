@@ -47,6 +47,7 @@ module Spl
                                                                                                  'status') != 'A'
     end
 
+    # @todo: refactor this and build_post_request method usages to use Spl::SendRequestService instead
     def verify_card_request
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
       http = Net::HTTP.new(url.host, url.port)
@@ -63,7 +64,7 @@ module Spl
       request
     end
 
-    def body(card_number, date) # rubocop: disable Metrics/MethodLength
+    def body(card_number, date)
       date_in_ms = date.to_i * 1000
       uuid = SecureRandom.uuid
       {
@@ -81,7 +82,7 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
+      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + @store.private_metadata['spl_pos_key'])

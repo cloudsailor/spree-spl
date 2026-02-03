@@ -5,10 +5,11 @@ require 'json'
 module Spl
   class OauthTokenService
     class OauthTokenError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, store)
       @date = date.to_i * 1000
-      @store = store
+      @env = Spl::StorePrivateMetadataService.all(store)
       @token_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).oauth_token)
     end
 
@@ -17,7 +18,7 @@ module Spl
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
 
       response_body
     end
@@ -27,24 +28,30 @@ module Spl
       response = send_request(@token_url, body)
       response_body = JSON.parse(response.body)
 
-      raise OauthTokenError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
+
+      response_body['response']
+    end
+
+    def refresh_token(token)
+      body = prepare_refresh_token_body(token)
+      response = send_request(@token_url, body)
+      response_body = JSON.parse(response.body)
+
+      raise OauthTokenError, response_body if response_body['errorCode'] != '0'
 
       response_body['response']
     end
 
     private
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
-
     def prepare_oauth_token_body_with_signature
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
-        apiToken: @store.private_metadata['spl_api_token'],
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
         signature: generate_signature,
         date: @date,
         grantType: 'signature'
@@ -54,19 +61,31 @@ module Spl
     def prepare_oauth_token_body_with_oauth_code(auth_code)
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
-        apiToken: @store.private_metadata['spl_api_token'],
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
         oauthCode: auth_code,
         grantType: 'authorization_code'
       }
     end
 
+    def prepare_refresh_token_body(token)
+      {
+        context: {
+          prgCode: @env['spl_prg_code']
+        },
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
+        refreshToken: token,
+        grantType: 'refresh_token'
+      }
+    end
+
     def generate_signature
       Spl::ClientSignatureService.new(@date,
-                                      @store.private_metadata['spl_api_token'],
-                                      @store.private_metadata['spl_signature_seed']).call
+                                      @env['spl_api_token'],
+                                      @env['spl_signature_seed']).call
     end
   end
 end

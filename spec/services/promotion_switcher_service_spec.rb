@@ -2,7 +2,90 @@
 
 require 'rails_helper'
 
-RSpec.describe PromotionSwitcherService do
+RSpec.describe PromotionSwitcherService, type: :service do
+  let(:country) { create(:country) }
+  let(:store) { create(:store, default_country: country) }
+  let(:order) do
+    create(
+      :order,
+      store:,
+      public_metadata: public_metadata
+    )
+  end
+
+  let(:check_only) { true }
+
+  let(:service) { described_class.new(order, check_only) }
+
+  let(:variant1) { create(:variant, sku: 'BS49252-BZ020-PSA000-000', price: 6.75) }
+  let(:variant2) { create(:variant, sku: 'BS49252-BZ020-PSA000-001', price: 7.73) }
+
+  let!(:line_item1) { create(:line_item, order:, variant: variant1, quantity: 1, price: 6.75) }
+  let!(:line_item2) { create(:line_item, order:, variant: variant2, quantity: 3, price: 7.73) }
+
+  let(:exemple_sparta_response) do
+    {
+      'errorCode' => '0',
+      'balanceBurn' => 0.0,
+      'balanceEarn' => 0.0,
+      'balanceAfter' => 0.12,
+      'bookedEarn' => false,
+      'processId' => '663c92b05012e0b396ac632b',
+      'messages' => [],
+      'basket' => [
+        {
+          'productCode' => 'TESTPRD1',
+          'productCode2' => nil,
+          'quantity' => 1.0,
+          'amountGross' => 6.75,
+          'discountGross' => 0.0,
+          'discountPercent' => nil,
+          'unitPriceGross' => 6.75,
+          'discounts' => nil,
+          'isAward' => nil,
+          'notPromoted' => nil,
+          'skipCB' => nil,
+          'skipDD' => nil,
+          'skipRD' => nil,
+          'pos' => 1
+        },
+        {
+          'productCode' => 'TESTPRD4',
+          'productCode2' => nil,
+          'quantity' => 3.0,
+          'amountGross' => 23.2,
+          'discountGross' => 0.8,
+          'discountPercent' => nil,
+          'unitPriceGross' => 7.73,
+          'discounts' => [
+            {
+              'source' => 'LP',
+              'amount' => 0.8,
+              'percent' => 5.0,
+              'code' => '663c926e5012e0b396ac6328',
+              'name' => '5% discount for TESTPRD4',
+              'order' => 1,
+              'quantity' => 2.0,
+              'unitPriceGrossDiscounted' => nil
+            }
+          ],
+          'isAward' => nil,
+          'notPromoted' => nil,
+          'skipCB' => nil,
+          'skipDD' => nil,
+          'skipRD' => nil,
+          'pos' => 2
+        }
+      ],
+      'basketChanged' => true,
+      'amountGross' => 29.95,
+      'discountGross' => 0.8,
+      'coupons' => [],
+      'cardType' => { 'code' => 'DV' },
+      'requestId' => '00003_LSHRV'
+    }
+  end
+
   describe '#call' do
     let(:country) { create(:country) }
     let(:store) { create(:store, default_country: country) }
@@ -11,36 +94,6 @@ RSpec.describe PromotionSwitcherService do
       {
         'spl_card_active' => 'true',
         'spl_no_card' => '5100179585157'
-      }
-    end
-
-    let(:order) { create(:order, store: store, public_metadata: public_metadata) }
-    let(:check_only) { true }
-    let(:service) { described_class.new(order, check_only) }
-
-    let(:variant1) { create(:variant, sku: 'TESTPRD1', price: 6.75) }
-    let(:variant2) { create(:variant, sku: 'TESTPRD4', price: 7.73) }
-
-    let!(:line_item1) { create(:line_item, order: order, variant: variant1, quantity: 1, price: 6.75) }
-    let!(:line_item2) { create(:line_item, order: order, variant: variant2, quantity: 3, price: 7.73) }
-
-    let(:example_sparta_response) do
-      {
-        'errorCode' => '0',
-        'basket' => [
-          { 'productCode' => 'TESTPRD1', 'quantity' => 1.0, 'amountGross' => 6.75, 'discountGross' => 0.0, 'pos' => 1 },
-          {
-            'productCode' => 'TESTPRD4',
-            'quantity' => 3.0,
-            'amountGross' => 23.2,
-            'discountGross' => 0.8,
-            'discounts' => [
-              { 'source' => 'LP', 'amount' => 0.8, 'percent' => 5.0, 'name' => '5% discount for TESTPRD4' }
-            ],
-            'pos' => 2
-          }
-        ],
-        'discountGross' => 0.8
       }
     end
 

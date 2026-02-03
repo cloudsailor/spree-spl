@@ -2,11 +2,45 @@ pl:
   order:
     loyalty_card_missing: Do zamówienia nie przypisano karty lojalnościowej
   spl:
+    user:
+      card_number: Numer karty klubowej został przypisany do konta
+      card_active: Aktywacja karty SPL
+      have_account: Czy masz konto w klubie lojalnościowym?
+      accept_yc_terms_label: Akceptuje regulamin
+      sent_to: Wysłano kod na numer %{phone}
+      code_label: Jednorazowy kod
+      errors:
+        must_accept_yc_terms: Musisz zaakceptować regulamin klubu lojalnościowego
+        invalid_phone: Podaj poprawny numer telefonu
+      coupons:
+        find:
+          checkout_list: Twoje kupony lojalnościowe
     card_validation:
       errors:
         card_not_active: Karta nie jest aktywna
         card_not_match: Karta nie jest zgodna z numerem karty użytkownika
         wrong_owner: Karta przypisana innemu użytkownikowi
-    user:
-      card_number: Numer karty klubowej został przypisany do konta
-      card_active: Aktywacja karty SPL
+    coupons:
+      find:
+        checkout_list: Twoje kupony lojalnościowe
+      activate: Aktywuj
+      deactivate: Dezaktywuj
+    errors:
+      generic: Nie udało się wykonać akcji. Spróbuj ponownie.
+      auth_temporary_blocked: Zbyt wiele nieudanych prób. Spróbuj ponownie później.
+      auth_failed: Uwierzytelnienie nie powiodło się.
+      token_expired: Twoja sesja wygasła. Zaloguj się ponownie.
+      not_authorized: Nie masz uprawnień do wykonania tej operacji.
+      coupon_cannot_be_modified: Ten kupon nie może zostać zmodyfikowany.
+      coupon_expired: Ten kupon wygasł.
+      coupon_is_not_valid: Ten kupon jest nieprawidłowy.
+      coupon_already_used: Ten kupon został już wykorzystany.
+      temporary_blocked: Tymczasowo zablokowano z powodu zbyt wielu prób. Spróbuj ponownie później.
+      person_not_found: Nie znaleziono użytkownika
+      unknow_error: NIEZNANY_BŁĄD
+  buttons:
+    connect_account: Połącz z kontem lojalnościowym
+    send_log_in_code: Wyślij jednorazowy kod do logowania
+    send_registration_code: Wyślij jednorazowy kod do rejestracji
+    verify_button: Zweryfikuj numer telefonu
+
