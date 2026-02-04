@@ -25,6 +25,10 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     Spree::Adjustable::AdjustmentsUpdaterDecorator
   )
 
+  ::Spree::Adjustment.prepend(
+    Spree::AdjustmentDecorator
+  )
+
   ::Spree::PromotionHandler::Cart.prepend(
     CartDecorator
   )

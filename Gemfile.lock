@@ -788,6 +788,7 @@ DEPENDENCIES
   ffaker
   observer
   rails-controller-testing
+  railties
   rake (~> 13.0)
   rubocop (~> 1.79, >= 1.79.2)
   rubocop-rails (~> 2.33, >= 2.33.3)

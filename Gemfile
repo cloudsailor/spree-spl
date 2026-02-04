@@ -13,6 +13,7 @@ group :development, :test do
   gem 'rubocop-rails', '~> 2.33', '>= 2.33.3'
   gem 'rubocop-rails-omakase'
   gem 'sqlite3', '>= 2.0'
+  gem 'railties'
 end
 
 group :test do
