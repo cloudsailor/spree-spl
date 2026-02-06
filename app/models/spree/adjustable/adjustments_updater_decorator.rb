@@ -6,6 +6,7 @@ module Spree
       SPL_SOURCE_TYPE = 'SPL'
 
       private
+
       def set_spree_adjustments
         @adjustable.is_a?(::Spree::Order) ? @adjustable : @adjustable.order
       end

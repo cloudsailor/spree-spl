@@ -18,7 +18,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       let(:adjustable) { line_item }
 
       before do
-        create(:adjustment, order: order, adjustable: line_item,  eligible: true, amount: -2.to_d, external_source_type: 'SPL')
+        create(:adjustment, order: order, adjustable: line_item, eligible: true, amount: -2.to_d, external_source_type: 'SPL')
       end
 
       it 'returns true' do

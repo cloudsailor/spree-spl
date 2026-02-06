@@ -63,9 +63,9 @@ RSpec.describe RemoveSpartaDiscountService, type: :service do
       line_item1.reload
       line_item2.reload
 
-      expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%")).to be_empty
-      expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
-      expect(line_item2.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
+      expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%')).to be_empty
+      expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
+      expect(line_item2.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
     end
 
     it 'does nothing when there are no SPL adjustments' do
@@ -76,8 +76,8 @@ RSpec.describe RemoveSpartaDiscountService, type: :service do
 
       described_class.destroy_all_sparta_adjustments(order)
 
-      expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
-      expect(line_item2.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
+      expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
+      expect(line_item2.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
     end
   end
 
@@ -104,20 +104,20 @@ RSpec.describe RemoveSpartaDiscountService, type: :service do
       )
     end
 
-    let(:relation) { line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%") }
+    let(:relation) { line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%') }
 
     it 'marks eligible SPL adjustments as ineligible & closed, recalculates cart, then destroys all given adjustments' do
-      expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%").count).to eq(2)
+      expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%').count).to eq(2)
       expect(FakeCartRecalculateService).to receive(:call).with(order: order, line_item: line_item1).twice
 
       described_class.destroy_inactive_adjustments(relation, line_item1, order)
       line_item1.reload
 
-      expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%")).to be_empty
+      expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%')).to be_empty
     end
 
     it 'is safe when relation is empty' do
-      empty_relation = line_item2.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%")
+      empty_relation = line_item2.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%')
 
       expect do
         described_class.destroy_inactive_adjustments(empty_relation, line_item2, order)
@@ -169,8 +169,8 @@ RSpec.describe RemoveSpartaDiscountService, type: :service do
         line_item1.reload
         line_item2.reload
 
-        expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: SPL%").count).to eq(1)
-        expect(line_item1.adjustments.where.not("preferences LIKE ?", "%:external_source_type: SPL%")).to be_empty
+        expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: SPL%').count).to eq(1)
+        expect(line_item1.adjustments.where.not('preferences LIKE ?', '%:external_source_type: SPL%')).to be_empty
         expect(line_item2.adjustments).to be_empty
       end
     end
@@ -186,8 +186,8 @@ RSpec.describe RemoveSpartaDiscountService, type: :service do
           described_class.destroy_not_spl_adjustments(order)
         end.not_to(change { Spree::Adjustment.count })
 
-        expect(line_item1.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
-        expect(line_item2.adjustments.where("preferences LIKE ?", "%:external_source_type: Promotion%").count).to eq(1)
+        expect(line_item1.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
+        expect(line_item2.adjustments.where('preferences LIKE ?', '%:external_source_type: Promotion%').count).to eq(1)
       end
     end
   end

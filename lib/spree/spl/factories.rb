@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.modify do
   factory :adjustment do
     transient do

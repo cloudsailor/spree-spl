@@ -37,10 +37,9 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.any? { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
-    # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
-
-    adjustments = line_item.adjustments.where("preferences LIKE ?", "%:external_source_type: #{SPL_SOURCE_TYPE}%")
+    return false unless sparta_item['discounts'].nil? && line_item.adjustments.any? { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
+    
+    adjustments = line_item.adjustments.where('preferences LIKE ?', "%:external_source_type: #{SPL_SOURCE_TYPE}%")
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
@@ -56,6 +55,7 @@ class ApplySpartaDiscountService
 
   def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
+
     line_item.adjustments.create(
       adjustable: line_item,
       amount: amount,

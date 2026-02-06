@@ -127,7 +127,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
 
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-
         service.call
       end
     end
@@ -151,7 +150,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-
         service.call
       end
     end
@@ -171,7 +169,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
       it 'does not call Sparta loyalty service or apply discounts' do
         expect(Spl::SpartaLoyaltyService).not_to receive(:new)
         expect(ApplySpartaDiscountService).not_to receive(:new)
-
 
         service.call
       end
@@ -195,7 +192,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-
         service.call
       end
     end
@@ -213,7 +209,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
 
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
-
 
         service.call
       end

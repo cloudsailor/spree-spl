@@ -67,7 +67,6 @@ RSpec.describe Spl::RequestOtpService do
         expect do
           service.call
         end.to raise_error(Spl::RequestOtpService::SplRequestOtpError, error_response_body.to_s)
-
       end
     end
   end
