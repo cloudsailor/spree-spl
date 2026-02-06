@@ -18,7 +18,8 @@ class ApplySpartaDiscountService
       spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
       next if sparta_item['discounts'].nil?
 
-      label = "SPARTA_#{sparta_item&.fetch('discounts')&.first&.fetch('name')}_#{line_item.id}" # rubocop:disable Style/SafeNavigationChainLength
+      label = sparta_item&.fetch('discounts')&.first&.fetch('name')&.split('. ')&.last
+      preferences(sparta_item:)
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
       discounts_present?(line_item, label)
       update_sparta_adjustment(line_item, label, amount)
@@ -36,14 +37,15 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: SPL_SOURCE_TYPE).present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
+    return unless sparta_item['discounts'].nil? && line_item.adjustments.any? { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
+    # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
-    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
+    adjustments = line_item.adjustments.where("preferences LIKE ?", "%:external_source_type: #{SPL_SOURCE_TYPE}%")
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def discounts_present?(line_item, label)
-    adjustments = line_item.adjustments.where(source_type: SPL_SOURCE_TYPE)
+    adjustments = line_item.adjustments.select { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
     return if adjustments.blank? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     existing_labels = adjustments.pluck(:label)
@@ -54,14 +56,13 @@ class ApplySpartaDiscountService
 
   def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
-
     line_item.adjustments.create(
-      source_type: SPL_SOURCE_TYPE,
       adjustable: line_item,
       amount: amount,
       included: false,
       label: label,
-      order: order
+      order: order,
+      **preferences
     )
 
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
@@ -73,5 +74,16 @@ class ApplySpartaDiscountService
     return if adjustments.find_by(label: label, amount: amount).present?
 
     adjustments.find_by(label: label).update(amount: amount)
+  end
+
+  def preferences(sparta_item: nil)
+    external_name = sparta_item&.fetch('discounts')&.first&.fetch('name')
+    trade_agreement_number = external_name&.split('.')&.first
+
+    @preferences ||= {
+      preferred_external_source_type: SPL_SOURCE_TYPE,
+      preferred_trade_agreement_number: trade_agreement_number,
+      preferred_external_name: external_name
+    }
   end
 end

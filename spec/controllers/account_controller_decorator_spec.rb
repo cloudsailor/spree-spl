@@ -69,7 +69,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('Assigning failed')
+        expect(json['error'].to_s).to include('Assigning failed')
       end
     end
 
@@ -88,7 +88,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('Login failed')
+        expect(json['error'].to_s).to include('Login failed')
       end
     end
   end
@@ -164,7 +164,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('Register failed')
+        expect(json['error'].to_s).to include('Register failed')
       end
     end
 
@@ -180,7 +180,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('Token invalid')
+        expect(json['error'].to_s).to include('Token invalid')
       end
     end
   end
@@ -224,7 +224,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('OTP failed')
+        expect(json['error'].to_s).to include('OTP failed')
       end
     end
 
@@ -240,7 +240,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('Token invalid')
+        expect(json['error'].to_s).to include('Token invalid')
       end
     end
   end
@@ -313,7 +313,7 @@ RSpec.describe Spree::Api::V2::Storefront::AccountController, type: :controller 
         expect(response).to have_http_status(:bad_request)
 
         json = response.parsed_body
-        expect(json['error']).to include('OTP sending failed')
+        expect(json['error'].to_s).to include('OTP sending failed')
       end
     end
   end

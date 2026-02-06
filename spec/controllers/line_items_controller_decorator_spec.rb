@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spree::LineItemsController, type: :controller do
-  let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
+  let(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
   let(:store) { create(:store) }
   let(:variant) { create(:variant, product: create(:product, stores: [store])) }
   let(:user)  { create(:user, public_metadata: user_metadata) }

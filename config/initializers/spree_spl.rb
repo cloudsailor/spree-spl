@@ -37,10 +37,6 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     OrderUpdaterDecorator
   )
 
-  ::Spree::CheckoutController.prepend(
-    Spl::Spree::Storefront::CheckoutControllerDecorator
-  )
-
   ::Spree::LineItemsController.prepend(
     Spl::Spree::Storefront::LineItemsControllerDecorator
   )
