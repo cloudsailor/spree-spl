@@ -34,6 +34,8 @@ require "#{Gem.loaded_specs['spree_core'].full_gem_path}/lib/spree/testing_suppo
 
 require 'spree/core/controller_helpers/strong_parameters'
 require 'database_cleaner'
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true)
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -59,6 +61,9 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   config.before(:suite) do
+    Money.default_currency = Money::Currency.new(
+      ENV.fetch('DEFAULT_CURRENCY', Spree::Config[:currency] || 'PLN')
+    )
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end
@@ -97,4 +102,6 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+  Rails.application.reload_routes!
+  Money.default_currency = 'PLN'
 end

@@ -17,3 +17,12 @@ Style/Documentation:
 
 Metrics/ParameterLists:
   Max: 8
+
+Lint/MissingSuper:
+  Exclude:
+    - app/services/**/*
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - spree-spl.gemspec

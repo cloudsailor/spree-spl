@@ -1,0 +1,4 @@
+<%= turbo_stream.replace "checkout_coupons" do %>
+  <%= render partial: "spree/checkout/spl_coupons",
+             locals: { coupons: @coupons, order: @order } %>
+<% end %>

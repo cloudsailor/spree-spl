@@ -5,33 +5,40 @@ require 'json'
 module Spl
   class MeService
     class SplMeError < StandardError; end
+    include SplServiceHelper
+    include ErrorHandlingHelper
+    include LoginCheckHelper
 
     def initialize(user, store)
       @me_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).me)
       @user = user
-      @store = store
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
-      body = prepare_me_body
+      return unless @user.present? && @user.private_metadata.present?
+      return unless logged_user?(@user)
+
+      retry_counter ||= 0
       response = send_request(@me_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplMeError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplMeError, response_body if response_body['errorCode'] != '0'
 
       response_body
+    rescue SplMeError => e
+      raise e unless token_refresh_needed(response_body, @retry_counter, @user, @store)
+
+      retry_counter += 1
+      retry
     end
 
     private
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
-
-    def prepare_me_body
+    def body
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code'],
+          prgCode: @env['spl_prg_code'],
           oauthToken: @user.private_metadata['spl_access_token']
         }
       }

@@ -29,9 +29,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency('faraday')
   spec.add_dependency('openssl')
 
-  spree_version = ['~> 5.1', '>= 5.1.4']
+  spree_version = ['~> 5.2']
   spec.add_dependency 'bigdecimal'
-  spec.add_dependency 'rails', '~> 7.0'
+  spec.add_dependency 'rails', '>= 7.0', '< 8.3'
   spec.add_dependency 'spree', spree_version
   spec.add_dependency 'spree_api', spree_version
   spec.add_dependency 'spree_auth_devise'

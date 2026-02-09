@@ -9,6 +9,7 @@ gem 'rake', '~> 13.0'
 group :development, :test do
   gem 'brakeman'
   gem 'byebug'
+  gem 'railties'
   gem 'rubocop', '~> 1.79', '>= 1.79.2'
   gem 'rubocop-rails', '~> 2.33', '>= 2.33.3'
   gem 'rubocop-rails-omakase'
@@ -16,11 +17,17 @@ group :development, :test do
 end
 
 group :test do
+  spree_opts = '< 5.3'
   gem 'abbrev'
   gem 'factory_bot_rails'
   gem 'ffaker'
   gem 'observer'
-  gem 'spree', '> 5.0'
+  gem 'rails-controller-testing'
+  gem 'spree', spree_opts
+  gem 'spree_admin', spree_opts
+  gem 'spree_emails', spree_opts
+  gem 'spree_storefront', spree_opts
+  gem 'webmock'
 end
 
 gem 'sprockets-rails', '~> 3.5'

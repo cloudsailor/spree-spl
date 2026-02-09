@@ -16,10 +16,14 @@ module Spl
     end
 
     def call
+      return if @user&.public_metadata&.[]('spl_no_card').nil?
+
+      spl_card_active = @user.public_metadata['spl_card_active']
       @user.public_metadata['spl_card_active'] = false
 
       response_body = JSON.parse(verify_card_request)
       check_for_errors(response_body)
+      update_user_after_check(spl_card_active)
       true
     rescue StandardError
       @user.save
@@ -43,18 +47,24 @@ module Spl
                                                                                                  'status') != 'A'
     end
 
+    # @todo: refactor this and build_post_request method usages to use Spl::SendRequestService instead
     def verify_card_request
       url = URI.parse(Spl::UrlCreatorService.new(@store.private_metadata['spl_url']).check_card)
-      body = {}
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
 
-      Spl::SendRequestService.new(url, body).call
+      request = build_post_request(url, body(@card_number, DateTime.current))
+      http.request(request).body
     end
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
+    def build_post_request(url, body)
+      request = Net::HTTP::Post.new(url)
+      request['Content-Type'] = 'application/json'
+      request.body = body.to_json
+      request
     end
 
-    def body(card_number, date) # rubocop: disable Metrics/MethodLength
+    def body(card_number, date)
       date_in_ms = date.to_i * 1000
       uuid = SecureRandom.uuid
       {
@@ -72,14 +82,14 @@ module Spl
     end
 
     def signature(date, card_number)
-      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}" # rubocop:disable Layout/LineLength
+      data = "#{@store.private_metadata['spl_partner_code']}#{@store.private_metadata['spl_place_code']}#{date}#{card_number}"
       Rails.logger.debug data.inspect
       signature_base = Digest::SHA256.hexdigest(data)
       Digest::SHA256.hexdigest(signature_base + @store.private_metadata['spl_pos_key'])
     end
 
     def cards_assigned_user(card_number)
-      Spree::User.find { |u| u.public_metadata['spl_no_card'] == card_number }
+      ::Spree::User.find { |u| u.public_metadata&.dig('spl_no_card') == card_number }
     end
 
     def card_assigned_to_different_user(card_assignment)
@@ -87,7 +97,14 @@ module Spl
     end
 
     def user_have_different_card
+      return if @user&.public_metadata.blank?
+
       @user.public_metadata['spl_no_card'] && @user.public_metadata['spl_no_card'] != @card_number
+    end
+
+    def update_user_after_check(spl_card_active)
+      @user.public_metadata['spl_card_active'] = spl_card_active.nil? || spl_card_active
+      @user.save if @user.changed?
     end
   end
 end
