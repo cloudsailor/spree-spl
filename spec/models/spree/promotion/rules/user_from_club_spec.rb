@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spree::Promotion::Rules::UserFromClub, type: :model do
-  let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
+  let(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
   let(:store) { create(:store) }
   let(:user) { create(:user, public_metadata: { 'spl_no_card' => '1234567890123', 'spl_card_active' => 'true' }) }
   let(:order) { create(:order_with_totals, store: store, user: user) }

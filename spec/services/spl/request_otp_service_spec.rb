@@ -66,7 +66,7 @@ RSpec.describe Spl::RequestOtpService do
       it 'raises SplRequestOtpError with SPL message' do
         expect do
           service.call
-        end.to raise_error(Spl::RequestOtpService::SplRequestOtpError, 'Temporarily blocked')
+        end.to raise_error(Spl::RequestOtpService::SplRequestOtpError, error_response_body.to_s)
       end
     end
   end

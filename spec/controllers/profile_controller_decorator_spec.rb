@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Spree::Account::ProfileController, type: :controller do
-  let!(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
+  let(:state) { create(:state, country: create(:country_us), name: 'Gdansk', abbr: 'GDA') }
   let(:store) { create(:store) }
   let(:user) { create(:user) }
   let(:service_double) { instance_double(Spl::ValidateCardService, call: true) }

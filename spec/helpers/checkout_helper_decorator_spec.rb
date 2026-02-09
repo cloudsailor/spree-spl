@@ -13,7 +13,7 @@ RSpec.describe CheckoutHelperDecorator, type: :helper do
     context 'when SPL adjustment exists' do
       let!(:spl_adjustment) do
         line_item.adjustments.create!(
-          source_type: 'SPL',
+          preferred_external_source_type: 'SPL',
           amount: -5,
           label: 'SPARTA_V777.90CRAZY_347',
           eligible: true,
@@ -24,7 +24,7 @@ RSpec.describe CheckoutHelperDecorator, type: :helper do
 
       let!(:other_adjustment) do
         line_item.adjustments.create!(
-          source_type: 'Promotion',
+          preferred_external_source_type: 'Promotion',
           amount: -3,
           label: 'Promotion',
           eligible: true,
@@ -41,7 +41,7 @@ RSpec.describe CheckoutHelperDecorator, type: :helper do
     context 'when SPL adjustment does not exist' do
       let!(:promotion_adjustment) do
         line_item.adjustments.create!(
-          source_type: 'Promotion',
+          preferred_external_source_type: 'Promotion',
           amount: -3,
           label: 'Promotion',
           eligible: true,

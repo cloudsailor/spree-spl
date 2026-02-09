@@ -39,7 +39,7 @@ RSpec.describe ApplySpartaDiscountService, type: :service do
         'discountGross' => 0.8,
         'discounts' => [
           {
-            'name' => '5% discount for TESTPRD4',
+            'name' => 'K2555L. Choose your benefit 2025 -600 Kč při nákupu od 3 000 Kč',
             'amount' => 0.8
           }
         ],
@@ -62,38 +62,45 @@ RSpec.describe ApplySpartaDiscountService, type: :service do
     it 'creates SPL adjustment for discounted items' do
       service.call
 
-      adj = line_item2.adjustments.find_by(source_type: 'SPL')
+      adj = line_item2.adjustments.select { |a| a.preferred_external_source_type == 'SPL' }.first
 
       expect(adj).not_to be_nil
       expect(adj.amount).to eq(-0.8)
-      expect(adj.label).to eq("SPARTA_5% discount for TESTPRD4_#{line_item2.id}")
+      expect(adj.label).to eq('Choose your benefit 2025 -600 Kč při nákupu od 3 000 Kč')
+      expect(adj.preferred_external_source_type).to eq('SPL')
+      expect(adj.preferred_trade_agreement_number).to eq('K2555L')
+      expect(adj.preferred_external_name).to eq('K2555L. Choose your benefit 2025 -600 Kč při nákupu od 3 000 Kč')
     end
 
     it 'does NOT create adjustment for items with no discounts' do
       service.call
 
-      expect(line_item1.adjustments.where(source_type: 'SPL')).to be_empty
+      expect(line_item1.adjustments.select { |a| a.preferred_external_source_type == 'SPL' }).to be_empty
     end
 
-    it 'removes non-SPL promotion adjustments before creating SPL discount' do
-      line_item2.adjustments.create!(
-        source_type: 'Promotion',
-        amount: -5,
-        label: 'OLD_PROMO',
-        order: order
-      )
-
-      expect do
-        service.call
-      end.to change { line_item2.adjustments.where(source_type: 'SPL').count }.by(1)
-      expect(line_item2.adjustments.where(label: 'OLD_PROMO')).to be_empty
+    context 'with extra adjustment' do
+      before do
+        adj = create(:adjustment,
+                     external_source_type: 'Promotion',
+                     amount: -5,
+                     label: 'OLD_PROMO',
+                     order: order,
+                     adjustable: line_item2)
+        line_item2.update(adjustments: [adj])
+      end
+      it 'removes non-SPL promotion adjustments before creating SPL discount' do
+        expect do
+          service.call
+        end.to change { line_item2.adjustments.reload.select { |a| a.preferred_external_source_type == 'SPL' }.count }.by(1)
+        expect(line_item2.adjustments.where(label: 'OLD_PROMO')).to be_empty
+      end
     end
 
     it 'updates existing SPL adjustment instead of creating a new one' do
       existing = line_item2.adjustments.create!(
-        source_type: 'SPL',
+        preferred_external_source_type: 'SPL',
         amount: -0.5,
-        label: "SPARTA_5% discount for TESTPRD4_#{line_item2.id}",
+        label: 'Choose your benefit 2025 -600 Kč při nákupu od 3 000 Kč',
         order: order
       )
 
@@ -101,14 +108,14 @@ RSpec.describe ApplySpartaDiscountService, type: :service do
 
       existing.reload
       expect(existing.amount).to eq(-0.8)
-      expect(line_item2.adjustments.where(source_type: 'SPL').count).to eq(1)
+      expect(line_item2.adjustments.select { |a| a.preferred_external_source_type == 'SPL' }.count).to eq(1)
     end
 
     it 'removes SPL adjustments if Sparta discount becomes nil' do
       line_item2.adjustments.create!(
-        source_type: 'SPL',
+        preferred_external_source_type: 'SPL',
         amount: -0.8,
-        label: "SPARTA_5% discount for TESTPRD4_#{line_item2.id}",
+        label: 'Choose your benefit 2025 -600 Kč při nákupu od 3 000 Kč',
         order: order
       )
 

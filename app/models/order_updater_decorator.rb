@@ -12,7 +12,7 @@ module OrderUpdaterDecorator
     if order.public_metadata['spl_card_active'] == true
       updated_any_adjustment = false
       order.adjustments.each do |adjustment|
-        if adjustment.source_type != 'SPL' && adjustment.eligible?
+        if adjustment.preferred_external_source_type != 'SPL' && adjustment.eligible?
           adjustment.update(eligible: false)
           updated_any_adjustment = true
         end

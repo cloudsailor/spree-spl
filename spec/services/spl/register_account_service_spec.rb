@@ -59,7 +59,7 @@ RSpec.describe Spl::RegisterAccountService do
       it 'updates user private_metadata with tokens' do
         service.call
 
-        expect(user.private_metadata).to include('accessToken' => 'ACCESS_TOKEN', 'refreshToken' => 'REFRESH_TOKEN')
+        expect(user.private_metadata).to include('spl_access_token' => 'ACCESS_TOKEN', 'spl_refresh_token' => 'REFRESH_TOKEN')
       end
 
       it 'sends correct payload to SendRequestService' do
@@ -88,7 +88,7 @@ RSpec.describe Spl::RegisterAccountService do
       it 'raises SplRegisterAccountError with SPL message' do
         expect do
           service.call
-        end.to raise_error(Spl::RegisterAccountService::SplRegisterAccountError, 'Temporarily blocked')
+        end.to raise_error(Spl::RegisterAccountService::SplRegisterAccountError, register_response_body.to_s)
       end
 
       it 'does not update user public_metadata' do

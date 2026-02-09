@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
   # Use the upstream Spree approach to avoid store/product validation issues
   let(:order) { create(:order_with_line_items, line_items_count: 1) }
-  let(:line_item) { order.line_items.first }
+  let!(:line_item) { order.line_items.first }
 
   subject(:updater) { described_class.new(adjustable) }
 
@@ -18,7 +18,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       let(:adjustable) { line_item }
 
       before do
-        create(:adjustment, order: order, adjustable: line_item, source_type: 'SPL', eligible: true, amount: -2.to_d)
+        create(:adjustment, order: order, adjustable: line_item, eligible: true, amount: -2.to_d, external_source_type: 'SPL')
       end
 
       it 'returns true' do
@@ -30,7 +30,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       let(:adjustable) { line_item }
 
       before do
-        create(:adjustment, order: order, adjustable: line_item, source_type: 'Promo', eligible: true, amount: -2.to_d)
+        create(:adjustment, order: order, adjustable: line_item, eligible: true, amount: -2.to_d, external_source_type: 'Promo')
       end
 
       it 'returns false' do
@@ -42,7 +42,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       let(:adjustable) { order }
 
       before do
-        create(:adjustment, order: order, adjustable: order, source_type: 'SPL', eligible: true, amount: -2.to_d)
+        create(:adjustment, order: order, adjustable: order, eligible: true, amount: -2.to_d, external_source_type: 'SPL')
       end
 
       it 'returns false' do
@@ -62,36 +62,36 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       create(:adjustment,
              order: order,
              adjustable: line_item,
-             source_type: 'SPL',
              eligible: true,
-             amount: 10.to_d)
+             amount: 10.to_d,
+             external_source_type: 'SPL')
     end
 
     let!(:spl_adj2) do
       create(:adjustment,
              order: order,
              adjustable: line_item,
-             source_type: 'SPL',
              eligible: true,
-             amount: -5.to_d)
+             amount: -5.to_d,
+             external_source_type: 'SPL')
     end
 
     let!(:spl_ineligible) do
       create(:adjustment,
              order: order,
              adjustable: line_item,
-             source_type: 'SPL',
              eligible: false,
-             amount: 100.to_d)
+             amount: 100.to_d,
+             external_source_type: 'SPL')
     end
 
     let!(:other_adj) do
       create(:adjustment,
              order: order,
              adjustable: line_item,
-             source_type: 'Promo',
              eligible: true,
-             amount: 50.to_d)
+             amount: 50.to_d,
+             external_source_type: 'Promo')
     end
 
     let(:attributes) { {} }
@@ -103,6 +103,7 @@ RSpec.describe Spree::Adjustable::AdjustmentsUpdater, type: :model do
       allow(Time).to receive(:current).and_return(fixed_time)
       allow(line_item).to receive(:update_columns)
       allow(updater).to receive(:assign_spl_totals).and_call_original
+      line_item.update(adjustments: [spl_adj1, spl_adj2, spl_ineligible, other_adj])
     end
 
     it 'sums only eligible SPL adjustments and passes the sum to assign_spl_totals' do

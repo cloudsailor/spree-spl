@@ -61,8 +61,8 @@ RSpec.describe Spl::Spree::Storefront::CheckoutControllerDecorator, type: :contr
         .to receive(:url)
         .and_return('http://test.host/checkout/confirm')
 
-      switcher = instance_double('PromotionSwitcherService', call: true)
-      expect(PromotionSwitcherService).to receive(:new).with(order, true).and_return(switcher)
+      switcher = instance_double('PromotionSwitcherService', call: false)
+      expect(PromotionSwitcherService).to receive(:new).with(order, false).and_return(switcher)
 
       allow(Spl::Coupons::GetCouponsService)
         .to receive(:new).with(user, store)

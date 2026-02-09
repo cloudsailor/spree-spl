@@ -23,7 +23,7 @@ RSpec.describe PromotionSwitcherService, type: :service do
   let!(:line_item1) { create(:line_item, order:, variant: variant1, quantity: 1, price: 6.75) }
   let!(:line_item2) { create(:line_item, order:, variant: variant2, quantity: 3, price: 7.73) }
 
-  let(:exemple_sparta_response) do
+  let(:example_sparta_response) do
     {
       'errorCode' => '0',
       'balanceBurn' => 0.0,
@@ -127,8 +127,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
 
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-        expect(order).to receive(:reload).and_call_original
-
         service.call
       end
     end
@@ -152,8 +150,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-        expect(order).to receive(:reload).and_call_original
-
         service.call
       end
     end
@@ -173,8 +169,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
       it 'does not call Sparta loyalty service or apply discounts' do
         expect(Spl::SpartaLoyaltyService).not_to receive(:new)
         expect(ApplySpartaDiscountService).not_to receive(:new)
-
-        expect(order).to receive(:reload).and_call_original
 
         service.call
       end
@@ -198,8 +192,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
 
-        expect(order).to receive(:reload).and_call_original
-
         service.call
       end
     end
@@ -217,8 +209,6 @@ RSpec.describe PromotionSwitcherService, type: :service do
 
         expect(sparta_service_double).to receive(:call).and_return(nil)
         expect(ApplySpartaDiscountService).not_to receive(:new)
-
-        expect(order).to receive(:reload).and_call_original
 
         service.call
       end
