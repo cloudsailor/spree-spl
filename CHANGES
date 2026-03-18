@@ -1,3 +1,206 @@
+Version 2.1.0:
+ - Merge pull request #37 from cloudsailor/EK-1119
+ - Rubocop offences
+ - Refactor everything to remove source_type and add preferences
+ - Add preferences for Adjustment
+ - Fixed spl mode
+ - Merge pull request #36 from cloudsailor/EK-685
+ - Merge branch 'develop' into EK-685
+ - Merge pull request #31 from cloudsailor/EK-963
+ - Improve message when response error code != 0
+ - Improve error handling helper
+ - EK-685 Fix RegisterAccountService update user
+ - Fix rubocop offense
+ - Merge branch 'develop' into EK-963
+ - Remove redundant methods from profile controller decorator
+ - Merge pull request #27 from cloudsailor/EK-964
+ - regenerate rubocop
+ - update gemfile.lock
+ - Merge EK-685 into EK-964
+ - Merge pull request #26 from cloudsailor/EK-683
+ - Merge branch 'EK-685' into EK-683
+ - Merge branch 'develop' into EK-685
+ - Merge pull request #35 from cloudsailor/EK-681
+ - Add refactor comment, remove unused helper usage
+ - EK-681 Add save user if changed
+ - EK-681 Add logic for save spl_card_active in ValidateCardService
+ - EK-681 Change spl_card_active to true after check
+ - EK-681 Add tests
+ - EK-681 Fix ValidateCardService#call to restore spl_card_active
+ - Uncomment necessery line
+ - Merge pull request #34 from cloudsailor/EK-684
+ - Changes after cr
+ - Refactor, fix bug with wrong invoke of refresh token action
+ - rubocop offences
+ - Merge EK-685 into EK-964
+ - Bump spree version to ~>5.2, fulfill missing locales
+ - EK-683 Change spree_current_user to try_spree_current_user
+ - Merge branch 'develop' into EK-963
+ - Fix rubocop offenses
+ - Fix refund method in update sparta state job
+ - Fix rubocop and specs
+ - Fix user_params in profile controller decorator
+ - Remove redundant line
+ - Merge pull request #30 from cloudsailor/EK-681
+ - rubocop
+ - Fix tests
+ - EK-683 Add check if file exist to InstallGenerator
+ - Improve prepare_card_number_if_exist method
+ - EK-683 Add Generators::InstallGenerator for JS
+ - rubocop offences
+ - rubocop offences
+ - Add token refreshing mechanism and safety clauses for expired token
+ - Create ProfileControllerHelper, fix handle_spl_error, rebase JS
+ - Merge branch 'EK-685' into EK-683
+ - EK-681 Restore changes, change promotion_switcher to after_action
+ - Merge pull request #24 from cloudsailor/EK-965
+ - Merge ek-685 into ek-964
+ - Add translations
+ - rubocop
+ - Merge branch 'EK-685' into EK-965
+ - EK-681 Fix boolean for CheckoutControllerDecorator#promotion_switcher
+ - Fix rubocop offenses
+ - Merge branch 'develop' into EK-963
+ - Remove redundant lines and improve test throughout the app
+ - Merge branch 'develop' into EK-681
+ - [EK-680] Fix uptade user method in profile controller decorator
+ - [EK-680] Fix pl translations
+ - Merge pull request #33 from cloudsailor/EK-684
+ - Merge branch 'develop' into EK-684
+ - Improve gemspec
+ - Merge pull request #32 from cloudsailor/EK-684
+ - Change method name in payment decorator
+ - Merge branch 'develop' into EK-681
+ - Fixed rescue error
+ - Merge pull request #29 from cloudsailor/EK-1017
+ - EK-681 Add more states to add_spl_discount_params_to_order
+ - EK-681 Add one more test
+ - EK-681 Restore handle_validation_error method without render
+ - EK-681 Add tests, remove handle_validation_error method
+ - EK-967 Changes ensure to rescue
+ - EK-681 Fix swich to inactive, add order.public_metadata
+ - Remove card checks throughout the app
+ - Merge branch 'EK-1039' into develop
+ - FIxed \ (undefined method 'key?' for nil\ in user publi_metadata key
+ - EK-683 Remove msg from register_response_body for pl translations
+ - Merge branch 'develop' into EK-964
+ - Refactor, fix datetime parsing bug
+ - Fix rubocop offenses
+ - Update rails version
+ - Update rails version
+ - EK-683 Fix translations
+ - Merge pull request #23 from cloudsailor/EK-994-2
+ - Fix tests after merge
+ - Merge branch 'develop' into EK-685
+ - Merge pull request #28 from cloudsailor/EK-681
+ - Merge develop into EK-994-2
+ - rubocop offences
+ - Merge develop into EK-965
+ - rubocop offences
+ - Refactor + unit tests
+ - EK-681 Fix unitialized constant Spl::Spree::User
+ - EK-683 Remove ProfileControllerDecorator methods and xits
+ - Merge develop into EK-964
+ - Merge branch 'EK-685' into EK-683
+ - Merge pull request #25 from cloudsailor/EK-680
+ - Fix rubocop offenses
+ - Merge branch 'develop' into EK-680
+ - EK-683 Remove phone from user public_metadata
+ - EK-683 Update after merge and services params
+ - Merge branch 'develop' into EK-683
+ - Merge pull request #21 from cloudsailor/EK-684
+ - Merge pull request #20 from cloudsailor/EK-910
+ - Merge branch 'develop' into EK-910
+ - Merge branch 'develop' into EK-684
+ - Merge pull request #18 from cloudsailor/EK-681
+ - EK-681 Change controllers paths
+ - Fix rubocop offenses
+ - Rubocop offences
+ - Add coupon deactivation, refactor
+ - small refactor, activate coupon mechanism
+ - EK-683 Add tests
+ - EK-683 Rejestracja konta loyalty przez nr telefonu
+ - Add translations, checks for logged in user
+ - EK-681 Update ProfileControllerDecorator
+ - Changes after review
+ - part 1
+ - Fix rubocop offenses
+ - Add tests troughout the app
+ - Add translations
+ - Improve of nesting profile controller decorator
+ - Add error translator to handle errors comes from spl
+ - Add connect loyalty account method
+ - Replace spree.t with i18n.t
+ - Correct tests
+ - Add translations, little refactoring
+ - Fix rubocop offenses
+ - Changes after cr
+ - Add test for send otp service and send request service
+ - Delete app/services/spl/.DS_Store
+ - Rubocop corrections
+ - Merge branch 'develop' into EK-965
+ - Add GetCoupons service and related elements, refactor controllers namespace for clarity
+ - EK-681 Add more tests
+ - Add profile controller decorator spec
+ - Add store private metadata service to app
+ - Update gemfile
+ - Add test for phone parser service
+ - Merge branch 'develop' into EK-680
+ - Improve login code method
+ - Rubocop corrections
+ - Unit tests for account_controller_decorator, cart_controller_decorator, checkout_controller_decorator, adjustments_updated_decorator, cart_decorator, order_updater decorator, payment_decorator
+ - Add loyalty connect form
+ - Merge branch 'develop' into EK-681
+ - Merge pull request #22 from cloudsailor/EK-994-1
+ - Changes after cr
+ - Improve mock country throughout the app
+ - Add proper translation to test
+ - Fix sku throughout the tests
+ - Improve cards assigned user method
+ - EK-910 Change spl_no_card values in tests
+ - Fix rubocop offenses
+ - Add remove sparta discount service spec
+ - Add apply sparta discount service spec
+ - Add assign sparta card number service spec
+ - Fix rubocop offenses
+ - Add promotion switcher service spec
+ - Add sparta loyalty service spec
+ - EK-681 Add unhappy tests, constant, change spl_no_card for tests
+ - Add partial for connect loyalty account button
+ - Merge branch 'EK-681' into EK-910
+ - EK-910 Add tests
+ - EK-681 Add tests, remove remove_spree_promotions_adjustments
+ - fix syntax
+ - EK-681 Fix ValidateCardService#verify_card_request, promotion_switcher, translations
+ - EK-910 Fix translations
+ - EK-681 Fix destroy_not_spl_adjustments for ApplySpartaDiscountService
+ - EK-910 Add UserFromClub PromotionRule
+ - Merge branch 'EK-681' into EK-910
+ - EK-681 Add promotion_name helper
+ - Merge branch 'develop' into EK-910
+ - EK-910 Add FreeShippingDecorator#perform
+ - Merge branch 'develop' into EK-681
+ - EK-681 Add BooleanHelper, RemoveSpartaDiscountService#destroy_not_spl_adjustments
+ - Test for update sparta state job
+ - Move update sparta state job to private method
+ - Merge develop into EK-965
+ - Merge branch 'release-2.0.0' into develop
+ - Merge branch 'release-2.0.0'
+ - Add coupon service
+ - EK-910 Change with_spl_adjustments to ValidateCardService
+ - EK-910 Darmowa dostawa z SPL
+ - EK-681 Restore apply_spl_adjustments method
+ - EK-681 Remove Verona spl methods, update README.md
+ - EK-681 Add more methods
+ - EK-681 SPL Przeliczanie znizek
+ - Merge branch 'release-1.6.0'
+ - Merge branch 'release-1.5.0'
+ - Merge branch 'release-1.4.0'
+ - Merge branch 'release-1.3.0'
+ - Merge branch 'release-1.2.0'
+ - Merge branch 'release-1.1.0'
+ - Merge branch release-1.0.0
+
 Version 2.0.0:
  - Merge pull request #17 from cloudsailor/EK-751
  - Fix rubocop offenses
