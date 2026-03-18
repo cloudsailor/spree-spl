@@ -2,6 +2,11 @@
 
 **Spree-spl** is a plugin that provides a promotion switcher for Spree, enabling enhanced loyalty program functionality.
 
+## Compatibility
+### Versions <= 1.7.x
+Are compatible with Spree ~> 4.x and Rails <= 7.2
+### Versions > 1.7 (current master branch, check current state)
+Is compatible with Spree ~> 5.2, and Rails >= 7.0, < 8.3
 ## Installation
 
 Add spree-spl to your Gemfile and run bundle install:
