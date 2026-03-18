@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplySpartaDiscountService
+  SPL_SOURCE_TYPE = 'SPL'
+
   def initialize(response, order)
     @basket = response['response']['basket']
     @line_items = order.line_items
@@ -8,7 +10,7 @@ class ApplySpartaDiscountService
     @response = response
   end
 
-  def call # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength
+  def call # rubocop:disable Metrics/AbcSize
     return unless response_valid?
 
     line_items.each do |line_item|
@@ -16,12 +18,14 @@ class ApplySpartaDiscountService
       spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
       next if sparta_item['discounts'].nil?
 
-      label = "SPARTA_#{sparta_item&.fetch('discounts')&.first&.fetch('name')}_#{line_item.id}" # rubocop:disable Style/SafeNavigationChainLength
+      label = sparta_item&.fetch('discounts')&.first&.fetch('name')&.split('. ')&.last
+      preferences(sparta_item:)
       amount = -sparta_item&.fetch('discountGross') # Negative value for discount
       discounts_present?(line_item, label)
       update_sparta_adjustment(line_item, label, amount)
       create_sparta_adjustment(order, amount, label, line_item)
     end
+    RemoveSpartaDiscountService.destroy_not_spl_adjustments(order)
   end
 
   private
@@ -33,14 +37,14 @@ class ApplySpartaDiscountService
   end
 
   def spl_adjustment_present_and_spl_discounts_nil?(sparta_item, line_item)
-    return unless sparta_item['discounts'].nil? && line_item.adjustments.where(source_type: 'SPL').present? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
-
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    return false unless sparta_item['discounts'].nil? && line_item.adjustments.any? { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
+    
+    adjustments = line_item.adjustments.where('preferences LIKE ?', "%:external_source_type: #{SPL_SOURCE_TYPE}%")
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
   def discounts_present?(line_item, label)
-    adjustments = line_item.adjustments.where(source_type: 'SPL')
+    adjustments = line_item.adjustments.select { |a| a.preferred_external_source_type == SPL_SOURCE_TYPE }
     return if adjustments.blank? # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
 
     existing_labels = adjustments.pluck(:label)
@@ -49,17 +53,16 @@ class ApplySpartaDiscountService
     RemoveSpartaDiscountService.destroy_inactive_adjustments(adjustments, line_item, order)
   end
 
-  def create_sparta_adjustment(order, amount, label, line_item) # rubocop:disable Metrics/MethodLength
+  def create_sparta_adjustment(order, amount, label, line_item)
     return if amount.zero? || line_item.adjustments.find_by(label: label, amount: amount).present?
 
-    remove_spree_promotions_adjustments(line_item)
     line_item.adjustments.create(
-      source_type: 'SPL',
       adjustable: line_item,
       amount: amount,
       included: false,
       label: label,
-      order: order
+      order: order,
+      **preferences
     )
 
     ::Spree::Dependencies.cart_recalculate_service.constantize.call(order: order, line_item: line_item)
@@ -70,13 +73,17 @@ class ApplySpartaDiscountService
     return if amount.zero? || adjustments.find_by(label: label).nil?
     return if adjustments.find_by(label: label, amount: amount).present?
 
-    remove_spree_promotions_adjustments(line_item)
     adjustments.find_by(label: label).update(amount: amount)
   end
 
-  def remove_spree_promotions_adjustments(line_item)
-    return unless line_item.adjustments.where.not(source_type: 'SPL').any?
+  def preferences(sparta_item: nil)
+    external_name = sparta_item&.fetch('discounts')&.first&.fetch('name')
+    trade_agreement_number = external_name&.split('.')&.first
 
-    line_item.adjustments.where.not(source_type: 'SPL').destroy_all
+    @preferences ||= {
+      preferred_external_source_type: SPL_SOURCE_TYPE,
+      preferred_trade_agreement_number: trade_agreement_number,
+      preferred_external_name: external_name
+    }
   end
 end

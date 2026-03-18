@@ -5,13 +5,14 @@ require 'json'
 module Spl
   class SendOtpService
     class SplSendOtpError < StandardError; end
+    include SplServiceHelper
 
     def initialize(date, mobile_country, phone_number, store)
       @date = date.to_i * 1000
       @send_otp_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).send_otp)
       @mobile_country = mobile_country
       @phone_number = phone_number
-      @store = store
+      @env = Spl::StorePrivateMetadataService.all(store)
     end
 
     def call
@@ -19,25 +20,21 @@ module Spl
       response = send_request(@send_otp_url, body)
       response_body = JSON.parse(response.body)
       Rails.logger.debug response_body
-      raise SplSendOtpError, response_body['msg'] if response_body['errorCode'] != '0'
+      raise SplSendOtpError, response_body if response_body['errorCode'] != '0'
 
       response_body
     end
 
     private
 
-    def send_request(url, body)
-      Spl::SendRequestService.new(url, body).call
-    end
-
-    def prepare_sms_otp_body # rubocop:disable Metrics/MethodLength
+    def prepare_sms_otp_body
       {
         context: {
-          prgCode: @store.private_metadata['spl_prg_code']
+          prgCode: @env['spl_prg_code']
         },
-        apiUser: @store.private_metadata['spl_api_user'],
-        apiToken: @store.private_metadata['spl_api_token'],
-        signatureSeed: @store.private_metadata['spl_signature_seed'],
+        apiUser: @env['spl_api_user'],
+        apiToken: @env['spl_api_token'],
+        signatureSeed: @env['spl_signature_seed'],
         date: @date,
         mobileCountry: @mobile_country,
         mobile: @phone_number,
@@ -47,8 +44,8 @@ module Spl
 
     def generate_signature
       Spl::ClientSignatureService.new(@date,
-                                      @store.private_metadata['spl_api_token'],
-                                      @store.private_metadata['spl_signature_seed']).call
+                                      @env['spl_api_token'],
+                                      @env['spl_signature_seed']).call
     end
   end
 end

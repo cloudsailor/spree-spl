@@ -2,7 +2,7 @@
 
 Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   ::Spree::Api::V2::Storefront::CartController.prepend(
-    CartControllerDecorator
+    Spl::Spree::Api::CartControllerDecorator
   )
 
   ::Spree::V2::Storefront::CartSerializer.prepend(
@@ -10,19 +10,23 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
   )
 
   ::Spree::Api::V2::Storefront::CheckoutController.prepend(
-    CheckoutControllerDecorator
+    Spl::Spree::Api::CheckoutControllerDecorator
   )
 
   ::Spree::Api::V2::Storefront::AccountController.prepend(
-    AccountControllerDecorator
+    Spl::Spree::Api::AccountControllerDecorator
+  )
+
+  ::Spree::CheckoutController.prepend(
+    Spl::Spree::Storefront::CheckoutControllerDecorator
   )
 
   ::Spree::Adjustable::AdjustmentsUpdater.prepend(
     Spree::Adjustable::AdjustmentsUpdaterDecorator
   )
 
-  ::Spree::Cart::Recalculate.prepend(
-    Spree::Cart::RecalculateDecorator
+  ::Spree::Adjustment.prepend(
+    Spree::AdjustmentDecorator
   )
 
   ::Spree::PromotionHandler::Cart.prepend(
@@ -33,7 +37,22 @@ Rails.application.config.to_prepare do # rubocop:disable Metrics/BlockLength
     OrderUpdaterDecorator
   )
 
-  ::Spree::Payment.prepend(
-    PaymentDecorator
+  ::Spree::LineItemsController.prepend(
+    Spl::Spree::Storefront::LineItemsControllerDecorator
   )
+
+  ::Spree::Account::ProfileController.prepend(
+    Spl::Spree::Storefront::ProfileControllerDecorator
+  )
+
+  ::Spree::Admin::PaymentsController.prepend(
+    Spl::Spree::Admin::PaymentsControllerDecorator
+  )
+
+  ::Spree::CheckoutHelper.prepend(
+    CheckoutHelperDecorator
+  )
+
+  ::Spree::Promotion::Rules::UserFromClub
+  Rails.application.config.spree.promotions.rules << Spree::Promotion::Rules::UserFromClub
 end
