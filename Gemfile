@@ -16,6 +16,10 @@ group :development, :test do
   gem 'sqlite3', '>= 2.0'
 end
 
+group :development do
+  gem 'rubycritic'
+end
+
 group :test do
   spree_opts = '< 5.3'
   gem 'abbrev'
@@ -31,3 +35,4 @@ group :test do
 end
 
 gem 'sprockets-rails', '~> 3.5'
+gem 'memery'
