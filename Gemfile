@@ -34,5 +34,5 @@ group :test do
   gem 'webmock'
 end
 
-gem 'sprockets-rails', '~> 3.5'
 gem 'memery'
+gem 'sprockets-rails', '~> 3.5'

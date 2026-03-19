@@ -6,6 +6,7 @@ module Spl
   module Coupons
     class GetCouponsService < BaseCouponService
       class SplGetCouponError < StandardError; end
+
       def initialize(user, store)
         @store = store
         @find_coupons_url = URI.parse(Spl::UrlCreatorService.new(store.private_metadata['spl_url']).coupon_find)
