@@ -4,11 +4,8 @@ require 'json'
 
 module Spl
   module Coupons
-    class GetCouponsService
+    class GetCouponsService < BaseCouponService
       class SplGetCouponError < StandardError; end
-      include SplServiceHelper
-      include ErrorHandlingHelper
-      include LoginCheckHelper
 
       def initialize(user, store)
         @store = store
@@ -18,8 +15,7 @@ module Spl
       end
 
       def call
-        return unless @user.present? && @user.private_metadata.present?
-        return unless logged_user?(@user)
+        return unless satisfied_preconditions?(@user.private_metadata)
 
         response = send_request(@find_coupons_url, body)
         response_body = JSON.parse(response.body)
